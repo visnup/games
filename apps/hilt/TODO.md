@@ -53,7 +53,7 @@
 - [x] Mined the mixed-table Hard model (2026-11-21): at 3 players it denies a winning chip with
       a 10 where the default waits or opens with a 1; adopted as `deny`, +6.4 against the
       default, +3.5 against the league. Holding Doves and Bait back a 1 while ahead are noise.
-- [ ] Rerun the README's tables for the default with `hold`, `deny` and the new `finish`.
+- [ ] Rerun the README's tables for the default with `hold`, `deny`, `keep`, `fury`, the new `doves` and the new `finish`.
 - [x] How much knowing the table is worth (README "Knowing the table", 2026-11-20): at a league
       table, 32-deal playouts that know each seat's default win 24 to 31 points more than ones
       that assume today's default; knowing only the league's makeup gets about half.
@@ -78,11 +78,18 @@
 - [ ] Why an outsider gains at a deal table: it isn't the battles deal players abandon (only
       holding off opening plays the same). Then a deal outsiders can't exploit, or punishment of
       whoever skipped their turn to deny.
-- [x] What Doves is for (2026-11-21, README "Playing the fate cards", `scripts/doves.ts`): a
+- [x] What Doves is for (2026-11-21, README "Playing the fate cards", `scripts/fates.ts`): a
       second chance at your own winning chip (+5.4 a chance), keeping the Favor (+4.2), and
       wiping out a battle the others have spent on (+2.7 to +3.4). Rule 2 now plays it for your
       winning chip, or theirs with nobody else in: +2.6 at 3 players. Adding the Favor or spent
       battles to the rule gained nothing more.
+- [x] Every fate card the same way (`scripts/fates.ts --card`, 2026-11-21, README "Playing the
+      fate cards"): Crows, Winter and Doves lose wherever the default doesn't play them. Bait back
+      while leading by more than 4 with others in, and a Fury before the weakest card while
+      leading, adopted into rules 1 and 4: +3.4 to +1.0 against the default, +2.4 to +0.6 against
+      the league.
+- [ ] Legend gains +3.8 where Winter's out and 1.8 to 2.2 a little behind, where the default plays
+      something else. Too thin and scattered for a rule yet.
 - [ ] Doves as an option to keep: playouts value a Doves held for a later winning chip? Check
       whether holding it when it would only gain 2 to 4 now pays later.
 - [ ] The default's waiting leaves stopping a rival to the others, and when everyone waits nobody

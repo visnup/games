@@ -67,13 +67,14 @@ in order. Each was found by playing out every legal move at the default's decisi
 (`scripts/decisions.ts`) and adopted when it beat the default head to head (`scripts/variants.ts`):
 
 1. Once everyone else has passed, Bait back the biggest force card that still leaves you ahead,
-   then pass to win.
+   then pass to win. With others still in, Bait back the biggest that leaves you more than 4
+   ahead.
 2. Crows when ahead with a card of your own played. Doves when you're behind and the chip would
    win you the game, or would win the leader the game with nobody else still in to stop them.
 3. With nothing played and others still in, play a Fury, or else your strongest card, if you're
    ahead, as the Favor holder is at first.
-4. Ahead with something played and others still in, play your weakest force card rather than
-   pass: passing is final, and leaves them to overtake with nobody to answer.
+4. Ahead with something played and others still in, play a Fury, or else your weakest force
+   card, rather than pass: passing is final, and leaves them to overtake with nobody to answer.
 5. Don't open a battle while 2 or more others are still in: let them spend their cards. Not
    when the chip would win you the game, or anyone else with fewer than 3 others in. At 3
    players, deny a chip that would win the other player the game with your strongest card, not
@@ -275,13 +276,15 @@ well: the default against the same player that plays as if the card weren't in i
 **Fury** is the card to play first. It doubles every force card in your row, including the ones
 played after it: as the Favor holder with nothing down, lead with it before
 your strongest card (rule 3, 4 to 5 points over the strongest card alone), and when you open
-behind, a Fury is as cheap as a 1 (rule 6). Under Winter it still makes your force cards 2 each.
+behind, a Fury is as cheap as a 1 (rule 6). Once you lead with something down and others still
+in, play it before your weakest card (rule 4). Under Winter it still makes your force cards 2 each.
 Played well it's worth more than any other card, most of all at 3 players.
 
 **Bait** is a poor card to be dealt, worse than a random one, and an essential one to use. It
 can only take back a force card from your own row, so it's never a way into a battle, only a way
-to spend less in one. Three uses: once everyone else has passed, Bait back the biggest card that
-still leaves you ahead (rule 1, 2 to 4 points), so a 10 that won the battle comes home; while
+to spend less in one. Four uses: once everyone else has passed, Bait back the biggest card that
+still leaves you ahead (rule 1, 2 to 4 points), so a 10 that won the battle comes home; leading
+by more than 4 with others still in, Bait back the biggest card that keeps that lead (rule 1); while
 behind with others still in, Bait back a 1 to stay in without spending anything (rule 8, 4.5 to 7
 points); and before giving up a battle, Bait back your biggest card (rule 11). It's worth two to
 three times as much against the league as against today's default.
@@ -305,7 +308,7 @@ again next battle, and the Favor stays where it is. It's the worst card to be de
 below a random one, and the default used to play it whenever someone else led with a chip that
 would win them the game, which was worth nothing measurable. So what is it for? At every chance
 to play it on someone else's lead in 16,000 default games, Doves against the move you'd make
-without it, played out on 64 deals each (`scripts/doves.ts`):
+without it, played out on 64 deals each (`scripts/fates.ts` as of 75b7650):
 
 | when you could play Doves | how often, a game | Doves gains, points | Doves better |
 | --- | --- | --- | --- |
@@ -329,6 +332,25 @@ once the leader is nearly out of cards. Adding either to the rule gains nothing 
 because a Doves spent there isn't in your hand when your own winning chip comes up (untested).
 Don't play it on someone else's winning chip while others are still in, nor when nobody else is
 in, where you can overtake with nobody to answer.
+
+The same playouts for every fate card, at every chance to play it in 16,000 default games
+(`scripts/fates.ts --card <fate>`), split by whether the default already plays it there. Where it
+doesn't, the gain over its move:
+
+| card | chances a game the default passes up | gain there, points | where it gains most |
+| --- | --- | --- | --- |
+| Bait | 8.2 | 2.2 | you lead by more than 10: 3.8 |
+| Legend | 4.1 | 0.8 | Winter's out: 3.8 |
+| Fury | 5.6 | −1.1 | you lead by 5 to 10: 5.8; by more: 8.2 |
+| Doves | 5.0 | −3.1 | you're more than 10 behind: 1.8 |
+| Winter | 5.8 | −2.7 | nowhere |
+| Crows | 4.1 | −16.4 | nowhere |
+
+Crows, Winter and Doves are played right: every other chance loses. Bait and Fury while leading
+became rules 1 and 4. Together, +3.4, +1.0, +1.3 and +1.1 points at 3–6 players against the
+default, +2.4, +0.9, +0.6 and +0.7 against the league (40,000 games), and a tie with the learned
+player; the Fury alone gains only at
+3 players (+2.7). Legend's gains are spread thin, with nothing yet to make a rule of.
 
 ## A learned player
 

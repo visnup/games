@@ -250,6 +250,7 @@ const VARIANTS: Record<string, (seed: number) => Policy> = {
   ),
   "Doves whenever the chip wins the leader the game (previous)": replace("doves", doveTheirs),
   "don't open with 1 other in at 5+ players": replace("open", (game, p) => (game.players.length >= 5 && oneIn(game, p) ? undefined : STEPS.open(game, p))),
+  "no Bait back or Fury while leading with others in (previous)": without("keep", "fury"),
 };
 
 /** Every default so far, each adopted as the best answer to the one before. */
@@ -262,10 +263,11 @@ export const LEAGUE: Policy[] = [
   heuristic("harvest", "stop", "crows", doveTheirs, "press", "wait", "open", "chase", "allIn", "bait"),
   heuristic("harvest", "stop", "crows", doveTheirs, "press", "wait", "open", finishIn(4), "chase", "allIn", "bait"),
   heuristic("harvest", "stop", "crows", doveTheirs, ahead(["top"], 0), "wait", "open", finishIn(4), "stall", "one", "chase", "allIn", "bait"),
-  past(["hold", "deny"], { finish: finishIn(4), doves: doveTheirs }),
-  past(["deny"], { finish: finishIn(4), doves: doveTheirs }),
-  past(["deny"], { doves: doveTheirs }),
-  past([], { doves: doveTheirs }),
+  past(["hold", "deny", "keep", "fury"], { finish: finishIn(4), doves: doveTheirs }),
+  past(["deny", "keep", "fury"], { finish: finishIn(4), doves: doveTheirs }),
+  past(["deny", "keep", "fury"], { doves: doveTheirs }),
+  past(["keep", "fury"], { doves: doveTheirs }),
+  past(["keep", "fury"], {}),
   defaultPolicy,
 ];
 

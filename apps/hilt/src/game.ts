@@ -341,6 +341,24 @@ export const STEPS = {
     return others(game, p).every((q) => q.passed) && game.leader() === p.seat ? null : undefined;
   },
   /**
+   * Leading with others still in, Bait back the biggest force card that still leaves a lead of more
+   * than 4. From `scripts/fates.ts`: with `fury`, +3.4, +1.0, +1.3 and +1.1 points at 3–6 players
+   * against the default, +2.4, +0.9, +0.6 and +0.7 against every default so far (40,000 games), and a tie with the learned
+   * player.
+   */
+  keep(game, p) {
+    const bait = p.hand.find((c) => c.kind === "bait");
+    if (!bait || game.leader() !== p.seat || others(game, p).every((q) => q.passed)) return undefined;
+    for (const take of p.row.filter((c) => c.kind === "force").sort((a, b) => b.value - a.value)) {
+      const i = p.row.indexOf(take);
+      p.row.splice(i, 1);
+      const keeps = game.leader() === p.seat && game.strength(p) - Math.max(...others(game, p).map((q) => game.strength(q))) > 4;
+      p.row.splice(i, 0, take);
+      if (keeps) return { card: bait, take };
+    }
+    return undefined;
+  },
+  /**
    * Crows while ahead ends the battle with a win before anyone can answer. Only with a card of
    * our own played, not on the Favor's 1 strength alone: +2 to +5 points over Crows whenever
    * ahead, and never playing it is +1 to +3.
@@ -354,7 +372,7 @@ export const STEPS = {
    * that would win the leader the game with nobody else still in to stop it. +2.6 points at 3
    * players against the default, +0.3 at 4–6; +0.7 to +0.1 against the league, +0.4 to +0.6
    * against the learned player (40,000 games). `doveTheirs`, at every chip that wins the leader the
-   * game, was worth nothing measurable. From `scripts/doves.ts`.
+   * game, was worth nothing measurable. From `scripts/fates.ts`.
    */
   doves(game, p) {
     const c = p.hand.find((c) => c.kind === "doves");
@@ -371,6 +389,11 @@ export const STEPS = {
     if (p.row.length || game.leader() !== p.seat || others(game, p).every((q) => q.passed)) return undefined;
     const card = p.hand.find((c) => c.kind === "fury") ?? p.hand.filter((c) => c.kind === "force" || c.kind === "legend").sort((a, b) => b.value - a.value)[0];
     return card ? { card } : undefined;
+  },
+  /** Ahead with something played and others still in, a Fury, which doubles what's down: +2.7 points at 3 players alone, nothing at 4–6 (`scripts/fates.ts`). */
+  fury(game, p) {
+    const card = p.hand.find((c) => c.kind === "fury");
+    return card && game.playable(p, card) && p.row.length && game.leader() === p.seat && others(game, p).some((q) => !q.passed) ? { card } : undefined;
   },
   /**
    * Ahead with something played and others still in, the weakest force card rather than a pass,
