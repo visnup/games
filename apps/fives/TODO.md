@@ -77,5 +77,6 @@
 
 - [x] Play online with bots, as in hilt (`replay.ts`, `convex/`, `src/components/`), at a round
       table.
-- [ ] The Hard bot on the learned model once one beats playouts, and in the review.
+- [x] The Hard bot on the learned model, and in the review, 2026-11-21: round 9 (`hard.ts`, the
+      review's Hard bots on its rollout version) ties 32-deal hand playouts.
 - [x] Deploy, 2026-11-20: fives.visnup.com, from `main`.
