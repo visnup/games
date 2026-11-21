@@ -1,5 +1,5 @@
 {
   "buildCommand": "pnpm build",
   "outputDirectory": "cheat/dist",
-  "ignoreCommand": "git diff ${VERCEL_GIT_PREVIOUS_SHA:-HEAD^} HEAD --quiet -- . ':/packages' ':/package.json' ':/pnpm-*'"
+  "ignoreCommand": "git diff --quiet ${VERCEL_GIT_PREVIOUS_SHA:-HEAD^} HEAD -- . ':/packages' ':/package.json' ':/pnpm-*' || exit 1"
 }
