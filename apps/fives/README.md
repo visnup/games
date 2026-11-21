@@ -1,10 +1,10 @@
 # Fives
 
 Fives is a trick-taking card game from CMYK's Magenta line, designed by Taiki Shinzawa, for 3 or 4
-players. You follow the led color if you can, silver is trump, and whoever wins a trick keeps the
-card they won it with. At the end of the hand, you want those winning cards to add up to 25, or as
-close as you can get without going over. And every card's back is a magenta 5, so any card can be
-played face down as one.
+players. You follow the led color if you can. Silver is trump. Whoever wins a trick keeps the card
+they won it with. At the end of the hand, you want those winning cards to add up to 25, or as close
+as you can get without going over. Every card's back is a magenta 5. So any card can be played face
+down as one.
 
 This is a strategy guide written by a simulator. It plays millions of games by the rules and
 measures what wins: when to take a trick and when to let it go, what to do with high cards, and
@@ -12,24 +12,24 @@ when to flip a card to its magenta 5. Every piece of advice below comes with the
 
 You can play against its bots, or with friends, at [fives.visnup.com](https://fives.visnup.com).
 
-The advice is only as good as the simulation. It follows the How to Play booklet, and where the
-booklet leaves a rule open, the appendix says how it was read. It hasn't been checked against real
+The advice is only as good as the simulation. The simulation follows the How to Play booklet.
+Where the booklet leaves a rule open, the appendix says how the simulator reads it. It hasn't been checked against real
 tables. The simulator and this guide were written with Claude Opus 5.5, working in Claude Code.
 
 ## The rules in a minute
 
 The deck is 52 cards: 1 to 13 in blue, green and silver, and 0 to 4 and 6 to 13 in magenta. At 3
-players the 10s to 13s come out, and everyone gets 12 cards; at 4, everyone gets 13.
+players the 10s to 13s come out. Everyone gets 12 cards at 3 players and 13 at 4.
 
 - Whoever holds the magenta 0 leads the first trick of each hand, with any card. Whoever wins a
   trick leads the next.
 - Follow the led color if you can. The highest silver wins, or else the highest of the led color.
-- Any card can be played face down as a magenta 5, but only one a trick, and only when you lead,
-  when magenta is led (even if you hold magenta), when you can't follow, or when your last card of
-  the led color is the one you flip.
-- Your total is the cards you won tricks with, a face-down card counting 5. Closest to 25 without
-  going over takes 3 chips at 4 players (2 at 3), second 2 (1), third 1, and exactly 25 one more.
-  A player who goes over, or busts, gives one of their chips to the closest player.
+- Any card can be played face down as a magenta 5. Only one card a trick can be face down. You can
+  flip only when you lead, when magenta is led (even if you hold magenta), when you can't follow,
+  or when your last card of the led color is the one you flip.
+- Your total is the sum of the cards you won tricks with. A face-down card counts 5. Closest to 25
+  without going over takes 3 chips at 4 players (2 at 3), second 2 (1) and third 1. Exactly 25
+  earns one more. A player who goes over, or busts, gives one of their chips to the closest player.
 - Everyone starts with 5 chips. After 4 hands, the most chips wins.
 
 ## Reading the numbers
@@ -46,12 +46,13 @@ played from different deals.
   smaller than that isn't a finding.
 - **The bots** are the ones you can play online. **Easy** never plays a card face down. **Medium**
   plays the three rules in the cheat sheet below, and nothing else. **Hard** is a model trained on
-  millions of games, the strongest player here; the appendix says how it was built.
+  millions of games. Hard is the strongest player here. The appendix says how it was built.
 - **What a rule is worth**: seat one player who breaks it at a table of Medium bots, and see how
   much less than a fair share they win.
 
-Situations, like what a hand looks like or how often to flip, are measured in games among Hard
-bots, since that's what good play looks like. What a rule is worth is measured against Medium.
+The simulator measures situations, like what a hand looks like or how often to flip, in games among
+Hard bots. Hard's games are what good play looks like. The simulator measures what a rule is worth
+against Medium.
 
 ## How to play well
 
@@ -78,10 +79,10 @@ Each one is worth a lot. One player breaking a rule at a table of Medium bots (4
 
 A player who never flips wins a third of a fair share at 3 players and a seventh at 4. Leading your
 lowest card face up, the obvious play, costs 12 and 14 points. Playing to win tricks with your
-biggest card that doesn't bust costs 8 and 14. The last row is the surprise, and it's how Medium
-used to play: take a trick whenever nobody can beat your card and it doesn't bust you. That costs
-5.5 points at 3 players and 1.4 at 4. A trick you didn't have to take only adds to your total, and
-you'll be handed plenty of tricks anyway.
+biggest card that doesn't bust costs 8 and 14. The last row is the surprise. Medium used to
+play this way: take a trick whenever nobody can beat your card and it doesn't bust you. That costs
+5.5 points at 3 players and 1.4 at 4. A trick you didn't have to take only adds to your total.
+You'll be handed plenty of tricks anyway.
 
 ### What a hand looks like
 
@@ -90,18 +91,17 @@ How often a hand ends on each total, among Hard bots (10,000 games a player coun
 ![How often a hand ends on each total](charts/totals.svg)
 
 Exactly 25 is the most common total of all, 16% of hands at 3 players and 14% at 4. Busting is
-common too: 26% and 29% of hands go over. Few end under 15, 6% and 3%. So the game isn't
-about collecting points; it's about getting rid of them, and steering the total that piles up on
-you anyway to land on 25 rather than past it.
+common too: 26% and 29% of hands go over. Few end under 15, 6% and 3%. So the game is about
+getting rid of points. The points you can't get rid of should land you on 25.
 
 And what each total earns that hand, on average:
 
 ![Chips a hand earns, by its total](charts/payoff.svg)
 
-From 20 to 24, each point is worth about a fifth of a chip at 3 players and a third at 4, and 25
-earns over a chip more than 24. A bust always costs a chip. A low total isn't a disaster: at 3
-players, under 13 still earns more than 15 to 19, because when you end that low, other players usually bust, and
-their chips go to the closest player.
+From 20 to 24, each point is worth about a fifth of a chip at 3 players and a third at 4. 25 earns
+over a chip more than 24. A bust always costs a chip. A low total isn't a disaster: at 3 players, a
+total under 13 still earns more than 15 to 19. When you end that low, other players usually bust.
+Their chips go to the closest player.
 
 <details>
 <summary>The table</summary>
@@ -172,14 +172,16 @@ How often Hard flips when it's allowed to and has a choice (8,000 games):
 | busted | 46–62% | 38–62% | |
 
 Where a row gives a range, it's the range over the four hands of a game. Leading is two thirds of
-the chances to flip. Close to 25, flip your biggest card when you can't follow: it counts 5 if it
-wins, so it's the safest way to shed it. Far from 25, flip a silver you'd rather not win a trick
-with.
+the chances to flip. Close to 25, flip your biggest card when you can't follow: a face-down card
+counts 5 if it wins. That makes flipping the safest way to shed a big card. Far from 25, flip a
+silver you'd rather not win a trick with.
 
-Hard flips less often than Medium, which flips every time in most of these rows. But none of its
-habits made a better rule for Medium (40,000 games each): leading face down only a card over 5
-loses 8 points at 3 players, dumping face up once you've busted changes nothing, and flipping your
-highest card when magenta is led gains under a point.
+Hard flips less often than Medium. Medium flips every time in most of these rows. But none of
+Hard's habits made a better rule for Medium (40,000 games each):
+
+- Leading face down only a card over 5 loses 8 points at 3 players.
+- Dumping face up once you've busted changes nothing.
+- Flipping your highest card when magenta is led gains under a point.
 
 ### Lead face down, silver first
 
@@ -196,19 +198,19 @@ Within 5 of 25, a face-down 5 could bust you, so lead your lowest card face up i
 ### Don't chase tricks; duck them
 
 When you follow, play the biggest card that still loses the trick. Ducking is how you shed high
-cards when you can't flip them, and the tricks you need come to you anyway: with everyone ducking,
+cards when you can't flip them. The tricks you need come to you anyway: with everyone ducking,
 someone still has to win each trick.
 
 That goes for tricks you're sure to win, too. Medium used to take any trick nobody could beat if
-it didn't bust, first of all one that made exactly 25. Dropping that gained 4.2 points at 3
-players, against Medium, against every earlier version of it, and 3.1 against Hard; at 4 players
-it's even. Taking a sure 25 on purpose was worth nothing at either count: the cards that make 25
+it didn't bust, first of all one that made exactly 25. At 3 players, dropping that gained 4.2
+points against Medium, 4.4 against every earlier Medium and 3.1 against Hard. At 4 players it
+gained nothing against Medium or Hard. Taking a sure 25 on purpose was worth nothing at either count: the cards that make 25
 find you without it.
 
 Ducking does mean busting more. Medium now busts 33% of hands at 3 players and 41% at 4, up from
-25% and 38% when it took sure tricks, and hits 25 in 5% of hands, down from 9% and 6% (100,000
-games). It wins more anyway: a bust costs one chip, and keeping your high cards out of tricks
-pays more often than that.
+25% and 38% when it took sure tricks. Medium now hits 25 in 5% of hands, down from 9% and 6%
+(100,000 games). Medium wins more anyway: a bust costs only one chip. Keeping your high cards out
+of tricks pays more often than that.
 
 ### Who leads the first trick
 
@@ -226,9 +228,10 @@ Whoever holds the magenta 0 leads each hand's first trick. To tell the lead and 
 | neither | 27.3% | 1.03 | 30.2% | 1.46 |
 
 At 4 players, the lead is what helps: the leader busts 4 points less often and gains an eighth of
-a chip more a hand, whether or not they hold the 0, and holding the 0 without leading is worth
-nothing. Leading picks the color and gets a high card flipped before anyone has won a trick. At 3
-players both help a little and add up: either alone cuts busts by about 3 points, both by 5.
+a chip more a hand, whether or not they hold the 0. The 0 is worth only the lead it gives you. The 0 as just
+another value card is worth nothing: in games where someone else leads, holding it does no better
+than not holding it. Leading picks the color and gets a high card flipped before anyone has won a
+trick. At 3 players both help a little and add up: either alone cuts busts by about 3 points, both by 5.
 
 ### Playing to the chips
 
@@ -251,9 +254,9 @@ best player (Hard bots, 10,000 games a player count; blank where under 500 cases
 | +5 |  | 84% | 98% |  | 73% | 89% |
 | +6 or more |  | 90% | 100% |  | 84% | 97% |
 
-A hand moves a lot of chips: 25 alone is worth 3 or 4, and every bust moves one. So with two or
-three hands left, a chip is worth only 5 to 10 points of win chance. In the last hand it's worth up
-to 20: 4 ahead with one hand to go wins 82–88% of the time, and 4 or more behind wins 2–3%. Tied
+A hand moves a lot of chips: 25 alone is worth 3 or 4. Every bust moves one more. So with two or
+three hands left, a chip is worth only 5 to 10 points of win chance. In the last hand a chip is
+worth up to 20: 4 ahead with one hand to go wins 82–88% of the time. 4 or more behind wins 2–3%. Tied
 for the lead is better than a fair share, about 40%, since only the leaders can win. But one chip
 ahead with a hand to go is worth only 3 or 4 points over a tie: a single hand swings more than that.
 
@@ -262,13 +265,13 @@ ahead with a hand to go is worth only 3 or 4 points over a tie: a single hand sw
 Hard wins 64.2% of games at 3 players and 54.8% at 4 against a table of Medium bots (20,000 games),
 so there's more to good play than three rules. Most of the difference is which card. Against
 Medium as it was when it still took sure tricks, Hard picked a different play in 59% of its
-decisions, and in half of those it does the same thing,
-ducking or taking, face up or down, with another card: it ducks with a lower card than Medium's
-biggest 87% of the time. It keeps its high cards for later, likely because it counts cards and
-knows when a high card is safe to hold.
+decisions. In half of those, Hard makes the same kind of play with another card: ducking or
+taking, face up or down. Hard ducks with a lower card than Medium's biggest 87% of the time. Hard
+keeps its high cards for later. Hard counts cards, so it likely knows when a high card is safe to
+hold.
 
 None of that makes a simple rule. Ducking with your lowest losing card instead costs 15 to 17
-points; ducking with your biggest but keeping your very highest, 2 to 4. Which card to keep
+points. Ducking with your biggest but keeping your very highest costs 2 to 4. Which card to keep
 depends on more than a rule of thumb can see.
 
 ## How the bots compare
@@ -293,16 +296,16 @@ within half a point of a fair share (100,000 games).
 
 ### The engine and how it reads the rules
 
-`src/game.ts` deals and plays a game by the How to Play booklet, and `src/game.test.ts` checks the
+`src/game.ts` deals and plays a game by the How to Play booklet. `src/game.test.ts` checks the
 booklet's rules and its scoring example. Where the booklet leaves a rule open:
 
 - Players tied for a place all take the lowest of the places they tie for, as the booklet says,
-  also when they tie for first. That decides 10% of hands' chips at 3 players and 14% at 4, but
-  taking the higher place instead moves no player's wins beyond the noise (`scripts/rules.ts`,
-  20,000 games).
+  also when they tie for first. That decides 10% of hands' chips at 3 players and 14% at 4. Taking
+  the higher place instead moves no player's wins beyond the noise (`scripts/rules.ts`, 20,000
+  games).
 - A bust with no chips gives nothing. When everyone busts, the chips go to a pot for the next
-  hand's closest; a pot no one wins in the last hand is lost.
-- Chips are unlimited; the box's 42 never run out in practice.
+  hand's closest. A pot no one wins in the last hand is lost.
+- Chips are unlimited. The box's 42 never run out in practice.
 
 A game among Medium bots takes about 0.1 ms, among Hard bots 26 ms.
 
@@ -319,11 +322,11 @@ A game among Medium bots takes about 0.1 ms, among Hard bots 26 ms.
 
 ### Where each rule came from
 
-Each rule was found where Hard's choices differ from Medium's (`scripts/overrules.ts`) or where
-playouts prefer another play (`scripts/decisions.ts`), written as a variant in
-`scripts/variants.ts`, and kept only if it beat Medium beyond the noise and also beat a table of
-every earlier Medium (the league), since rules cycle: the best answer to one Medium can be
-answered by the next.
+Each rule started where Hard's choices differ from Medium's (`scripts/overrules.ts`) or where
+playouts prefer another play (`scripts/decisions.ts`). A rule then became a variant in
+`scripts/variants.ts`. Medium kept a rule only if it beat Medium beyond the noise. The rule also had
+to beat a table of every earlier Medium (the league): rules cycle, so the best answer to one
+Medium can be answered by the next.
 
 | rule | against Medium | against earlier Mediums | against Hard |
 | --- | --- | --- | --- |
@@ -364,12 +367,13 @@ chance, and makes the play it scores highest.
   leaves, a learning rate of 0.1, at least 200 decisions a leaf, stopped early on held-out shards.
 - **Rounds** (`scripts/round.sh`, one command a round, after a smoke test of itself): play 4,000
   to 12,000 games a player count with the last round's model, label them, fit a new model to the
-  last few rounds' data, compare it against the last three models and Medium, and fit the small
-  version, 50 trees of 31 leaves, which plays inside the next round's playouts at about 8 times
-  Medium's cost where the full model is 200. `scripts/status.ts` serves a round's progress.
-- **Serving.** The trees are flattened into typed arrays (`src/trees.ts`), and `scoreAll` scores
-  all of a decision's plays at once, walking each tree's situation-only branches once. The model
-  is packed as base64 into `src/packed/model.ts` so Convex can bundle it for the online game. The
+  last few rounds' data, compare it against the last three models and Medium, and fit a small
+  version. The small version is 50 trees of 31 leaves. The small version plays inside the next
+  round's playouts at about 8 times Medium's cost. The full model costs 200 times Medium's.
+  `scripts/status.ts` serves a round's progress.
+- **Serving.** `src/trees.ts` flattens the trees into typed arrays. `scoreAll` scores all of a
+  decision's plays at once, walking each tree's situation-only branches once. `scripts/pack.ts`
+  packs the model as base64 into `src/packed/model.ts`, so Convex can bundle it for the online game. The
   end-of-game review plays out every option at your decisions, with the small model for Hard
   seats, in a web worker per core.
 
@@ -410,14 +414,14 @@ And against Medium as it was before it led face down:
 | 9 | 91.0% | 88.6% |
 
 Round 0 learned from Medium's games with Medium inside the playouts, on 32 deals. Round 4 doubled
-the games, round 7 added card counting, round 8 rescored a hand's end with `chance` refit to
-learned players' games (a chip is worth 40–60% more among strong players), and round 9 labeled two
-hands deep with bigger trees. Round 9 is Hard. Rounds 5 on gained under 1.5 points each, and
-rounds 10 and 11 lost to round 9, so training stopped.
+the games. Round 7 added card counting. Round 8 rescored a hand's end with `chance` refit to
+learned players' games (a chip is worth 40–60% more among strong players). Round 9 labeled two
+hands deep with bigger trees. Round 9 is Hard. Rounds 5 on gained under 1.5 points each. Rounds 10
+and 11 lost to round 9, so training stopped.
 
-What caps it is the labels, not the model: playouts among round 6's small models on 16 deals lose
-to round 6 itself (25.3% at 3 players, 17.4% at 4), and playouts on top of round 9 need 64 deals
-to edge past it (27.1% at 4 players, against a fair 25%), at many times the cost.
+The labels are what cap Hard: playouts among round 6's small models on 16 deals, the way labels are
+made, lose to round 6 itself (25.3% at 3 players, 17.4% at 4). Playouts on top of round 9 need 64
+deals to edge past round 9 (27.1% at 4 players, against a fair 25%), at many times the cost.
 
 Searchers against Medium as it was before this guide, when it still took sure tricks (800 games):
 
@@ -433,4 +437,4 @@ Hard plays about as well as hand playouts on 32 deals, at a tiny fraction of the
 ### Rerunning it
 
 After `pnpm install`, `node scripts/charts.ts` redraws `charts/` from this README's tables. The
-script that made each table is named beside it; `CLAUDE.md` describes the rest.
+script that made each table is named beside it. `CLAUDE.md` describes the rest.
