@@ -28,6 +28,10 @@
         from the trees all lost or tied, against the default and learned players. Search on top
         of Hard isn't worth it either: 64-deal playouts among its rollout players win 27.1% at
         4 players against it (2026-11-20).
+  - [x] Drop each rule to measure it, for the README rewrite, 2026-11-21: never taking a sure
+        trick gains 4.2 points at 3 players and nothing at 4 (40,000 games), 4.4 and 1.8 against
+        the league, 3.1 and 0 against the learned player. A sure 25 and dumping once busted were
+        worth nothing. The default is now `leadDown`, `duck`, `least`.
   - [x] Rerun the playouts rows of the README's players table against the new default,
         2026-11-21 (800 games, 15 minutes): 32-deal hand playouts win 63.1% and 62.3%, level with
         round 9.

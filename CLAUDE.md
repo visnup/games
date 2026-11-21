@@ -72,7 +72,7 @@ an afterthought.
   gets measured like one, against the noise.
 - **Record the number.** Put the before and after in the commit message (ms a game, s a
   chunk, minutes a table), and the current figure in the app's `CLAUDE.md` when the engine's
-  cost matters (fives: "a default game is about 0.5 ms").
+  cost matters (fives: "a default game is about 0.1 ms").
 
 ### What has worked
 
@@ -122,3 +122,31 @@ A strategy, variant, feature or rule that didn't help still costs time on every 
 features cost every model that reads them. Remove it, keep the result in `README.md` or the
 commit, and keep the old behavior in `variants.ts` only when it's a baseline something is still
 measured against.
+
+## The README, once a game is near done
+
+When the loop stops paying (rounds no longer gain, and new rules lose), rewrite the app's
+`README.md` as a strategy guide for a new player. fives was the first.
+
+- **The reader is a player, not a data scientist.** Explain every term the first time it comes
+  up, in table words: a fair share, points of win rate, the noise. Call the bots by their names
+  online (Easy, Medium, Hard), not `defaultPolicy` or "the learned model".
+- **The order:**
+  1. What the game is, and where to play it.
+  2. The rules in a minute.
+  3. Reading the numbers, before any chart that needs it.
+  4. How to play well: a short cheat sheet of rules, then a section for each rule or question
+     (what a hand looks like, when to flip, when to take, what a lead is worth).
+  5. How much the rules are worth, and how the bots compare.
+  6. An appendix on how it was built: the engine's readings of the rules, the players, where
+     each rule came from, and a technical description of the learned model and its pipeline
+     (features, trees, labels, rounds, what capped it).
+- **Back every claim with a number, and tell the story with charts.** Each section leads with
+  the advice, then the data, then a chart drawn by `charts.ts` from the README's own tables.
+  Say how many games each number is from.
+- **Measure the guide's numbers among strong players.** Rule worths are one player against a
+  table of Medium bots, but what hands look like, who leads and when to flip come from Hard
+  bots' games, which is how good play looks.
+- **Check every rule before you write it down.** Measure what each rule in the cheat sheet is
+  worth by dropping it. A rule worth nothing goes, and one that loses gets fixed first: in fives
+  that rewrite found "take sure tricks" cost 4 points.

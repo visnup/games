@@ -342,11 +342,13 @@ export const takeWithin =
   (game, p, plays) =>
     most(plays, value, (x) => (value(x) === room(p) || value(x) <= room(p) - slack) && sure(game, p, x));
 
+/**
+ * Never chasing a trick: taking every sure win that doesn't bust, before ducking, cost 4.2 points at
+ * 3 players and nothing at 4 (40,000 games), 4.4 and 1.8 against the league, 3.1 and 0 against the
+ * learned player (10,000). Dumping the biggest card once busted, and taking a sure 25, were worth
+ * nothing. All three are in `scripts/variants.ts`.
+ */
 export const STEPS = {
-  /** Once busted, nothing more can be lost this hand: dump the biggest card. */
-  busted(game, p, plays) {
-    return room(p) < 0 ? most(plays, (x) => x.card.value) : undefined;
-  },
   /**
    * Leading with 5 or more to go: the highest trump face down, as a magenta 5, or with no trump
    * the highest card. Gets rid of a high card for at most 5. From where round 9's model overrules
@@ -368,20 +370,6 @@ export const STEPS = {
         (x) => x.down,
       )
     );
-  },
-  /** A sure win that makes exactly 25. */
-  exact(game, p, plays) {
-    return plays.find((x) => value(x) === room(p) && sure(game, p, x));
-  },
-  /**
-   * A sure win that doesn't bust, except last to play early in a hand at 4 players, more than 12
-   * from 25. From where round 9's model overrules the default; waiting: +3.5 points against the
-   * default (40,000 games), +4.3 against the league, +0.8 against the learned player, and nothing
-   * at 3 players.
-   */
-  take(game, p, plays) {
-    if (game.players.length === 4 && game.trick.length === 3 && p.hand.length > 8 && room(p) > 12) return undefined;
-    return takeWithin(0)(game, p, plays);
   },
   /** A play that loses the trick for now, dumping the biggest card: face down, if that also loses, gets rid of a high card for a 5. */
   duck(game, p, plays) {

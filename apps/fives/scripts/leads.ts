@@ -1,18 +1,20 @@
 import { parseArgs } from "node:util";
 import { parallel } from "kit/parallel.ts";
 import { Game, mulberry32 } from "../src/game.ts";
+import { learned } from "../src/learned.ts";
 
 type Tally = { hands: number; busts: number; chips: number };
 const ROLES = ["holds the 0 and leads", "holds the 0, doesn't lead", "leads without the 0", "neither"] as const;
 type Tallies = Record<(typeof ROLES)[number], Tally>;
 
 /**
- * Plays `n` default games of `players`. With `swap`, a random other seat leads each hand's first
+ * Plays `n` games of `players` among round 9's learned players, or default players. With `swap`, a random other seat leads each hand's first
  * trick instead of the magenta 0's holder. Tallies busts and chips gained a hand by whether a seat
  * held the 0 and whether it led.
  */
-export function leads(players: number, swap: boolean, seed: number, n: number) {
+export function leads(players: number, swap: boolean, who: string, seed: number, n: number) {
   const rng = mulberry32(seed);
+  const policies = who === "learned" ? learned() : undefined;
   const t = Object.fromEntries(ROLES.map((r) => [r, { hands: 0, busts: 0, chips: 0 }])) as Tallies;
   for (let i = 0; i < n; i++) {
     const holders: number[] = [];
@@ -24,7 +26,7 @@ export function leads(players: number, swap: boolean, seed: number, n: number) {
         if (swap) this.current = (this.current + 1 + Math.floor(rng() * (players - 1))) % players;
         leaders.push(this.current);
       }
-    })({ players, rng: mulberry32(Math.floor(rng() * 2 ** 32)) });
+    })({ players, rng: mulberry32(Math.floor(rng() * 2 ** 32)), policies });
     game.run();
     game.scores.forEach((s, h) => {
       for (let seat = 0; seat < players; seat++) {
@@ -44,13 +46,13 @@ function combine(a: Tallies, b: Tallies) {
 }
 
 if (import.meta.main) {
-  const { values: args } = parseArgs({ options: { n: { type: "string", default: "40000" }, players: { type: "string", default: "3,4" } } });
+  const { values: args } = parseArgs({ options: { n: { type: "string", default: "40000" }, players: { type: "string", default: "3,4" }, who: { type: "string", default: "learned" } } });
   const n = Number(args.n);
-  console.log(`${n} default games each, with the magenta 0's holder leading each hand (the booklet) or a random other seat.\n`);
+  console.log(`${n} games each among ${args.who} players, with the magenta 0's holder leading each hand (the booklet) or a random other seat.\n`);
   console.log("| players, who leads | seat | busts | chips a hand |\n| --- | --- | --- | --- |");
   for (const players of args.players.split(",").map(Number))
     for (const swap of [false, true]) {
-      const t = await parallel<Tallies>(import.meta.url, "leads", [players, swap], n, combine);
+      const t = await parallel<Tallies>(import.meta.url, "leads", [players, swap, args.who], n, combine);
       for (const r of ROLES) if (t[r].hands) console.log(`| ${players}, ${swap ? "another seat" : "the holder"} | ${r} | ${((100 * t[r].busts) / t[r].hands).toFixed(1)}% | ${(t[r].chips / t[r].hands).toFixed(2)} |`);
     }
 }

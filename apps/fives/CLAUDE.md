@@ -18,10 +18,10 @@ last page has the components and a summary.
   shown they're out of, and `hidden` the cards they played face down, which only they know.
 - The engine is the cost of everything else, so it's kept fast: plays are shared objects
   (`up()`, `down()`), `top()` is the highest unseen card of each color, worked out once a
-  decision, and the steps are loops, not sorts. A default game is about 0.5 ms, a game among
+  decision, and the steps are loops, not sorts. A default game is about 0.1 ms, a game among
   round 9's learned players 26 ms (90% of it scoring trees, which `scoreAll` does for all of a
   decision's plays at once), among its rollout players 3.4 ms, and a 16-deal hand-playouts game
-  about 2.4 s. `node scripts/bench.ts [games] [learned|rollout|playouts]` times them and prints a
+  about 2.4 s. `node scripts/bench.ts [games] [default|learned|rollout|playouts]` times them and prints a
   checksum of the winners to compare before and after; profile (`node --cpu-prof`) a change
   there.
 - `strategies.ts`: whole-game strategies in `STRATEGIES`. `playouts` plays every legal play out on
@@ -83,7 +83,7 @@ The steps:
 
 1. **Find a candidate rule**, from any source:
    - Where the model's pick differs from the default's, grouped by the default's step
-     (`scripts/overrules.ts`). It found `leadDown` and `take`'s wait.
+     (`scripts/overrules.ts`). It found `leadDown` and `take`'s wait (since dropped).
    - `scripts/decisions.ts`: where playouts clearly prefer another play.
    - A person's game: a review that shows a costly play (`TODO.md` has some).
 2. **Write it as a variant** in `scripts/variants.ts`, with a few alternatives (cheapest card or
