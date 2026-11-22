@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { Color } from "../cards.ts";
 import type { Choice, Setup } from "../replay.ts";
+import { Card, PAINT } from "./Card";
 import { deals, type Reviewed } from "../review.ts";
 
 const pct = (x: number) => `${Math.round(100 * x)}%`;
@@ -8,6 +10,12 @@ const points = (x: number) => Math.round(100 * x);
 /** A play as words: what you did (`did`), or an option (`other`). */
 function words(label: string) {
   return { did: `played the ${label}`, other: `the ${label}` };
+}
+
+/** A play, from its label in a review ("blue 7" or "blue 7 face down"), as a small card. */
+function Played({ label }: { label: string }) {
+  const [, color, value, down] = label.match(/^(\w+) (\d+)( face down)?$/)!;
+  return <Card card={{ color: color as Color, value: Number(value), id: -1 }} down={!!down} small className="text-[0.4rem]" />;
 }
 
 /** Where a decision came: its hand and trick. */
@@ -158,16 +166,30 @@ export function Review({ setup, log, seat, show }: { setup: Setup; log: Choice[]
   const costly = scored.filter((r) => r.lost >= 0.05).sort((a, b) => b.lost - a.lost);
   const found = scored.filter((r) => r.chose !== r.hint && r.beat >= 0.05).sort((a, b) => b.beat - a.beat);
   const peak = scored.reduce<(typeof scored)[number] | undefined>((a, b) => (!a || b.mine.win > a.mine.win ? b : a), undefined);
-  const item = "cursor-pointer rounded-sm px-[0.3em] hover:bg-ink/5";
+  const item = "flex animate-rise cursor-pointer flex-wrap items-center gap-x-[0.5em] gap-y-[0.2em] rounded-lg px-[0.4em] py-[0.3em] hover:bg-ink/5";
 
   return (
-    <section className="panel p-[0.8em] text-sm">
+    <section className="panel animate-rise p-[0.8em] text-sm">
       <h2 className="label m-0">How you played</h2>
-      {!done && <p className="my-[0.4em] opacity-70">Playing out your decisions… {rows.length} so far</p>}
+      {!done && (
+        <div className="my-[0.5em] flex items-center gap-[0.6em] opacity-70">
+          <span className="h-[0.3em] flex-1 animate-pulse rounded-full bg-magenta/40" />
+          Playing out your decisions… {rows.length} so far
+        </div>
+      )}
       {scored.length > 0 && peak && (
-        <p className="my-[0.4em]">
-          Your chances: {pct(scored[0].mine.win)} after your first decision, {pct(peak.mine.win)} at their best ({when(peak).toLowerCase()}), {pct(scored.at(-1)!.mine.win)} after your last.
-        </p>
+        <div className="my-[0.6em] grid grid-cols-3 gap-[0.5em] text-center" aria-label="Your chance of winning">
+          {[
+            ["after your first decision", scored[0].mine.win],
+            [`at best, ${when(peak).toLowerCase()}`, peak.mine.win],
+            [done ? "after your last" : "so far", scored.at(-1)!.mine.win],
+          ].map(([label, win]) => (
+            <div key={label as string} className="rounded-lg bg-ink/5 px-[0.4em] py-[0.4em]">
+              <div className="text-xl font-extrabold">{pct(win as number)}</div>
+              <div className="label text-[0.6rem]">{label}</div>
+            </div>
+          ))}
+        </div>
       )}
       {scored.length > 0 && <Chances rows={scored} order={order} fair={1 / setup.players} show={show} />}
       {costly.length > 0 && (
@@ -176,8 +198,12 @@ export function Review({ setup, log, seat, show }: { setup: Setup; log: Choice[]
           <ul>
             {costly.slice(0, 4).map((r) => (
               <li key={r.n} className={item} onClick={() => show(r.n)}>
-                {when(r)}: you {words(r.chose).did} ({pct(r.mine.win)}); {words(r.best.label).other} had {pct(r.best.win)}. <b>−{points(r.lost)}</b>
-                {r.chose === r.hint && <span className="opacity-60"> (hinted)</span>}
+                <span className="w-[8.5em] opacity-70">{when(r)}</span>
+                <Played label={r.chose} /> {pct(r.mine.win)}
+                <span className="opacity-60">over</span>
+                <Played label={r.best.label} /> {pct(r.best.win)}
+                <b className="ml-[0.4em] text-bust">−{points(r.lost)}</b>
+                {r.chose === r.hint && <span className="text-xs opacity-60">(hinted)</span>}
               </li>
             ))}
           </ul>
@@ -189,7 +215,13 @@ export function Review({ setup, log, seat, show }: { setup: Setup; log: Choice[]
           <ul>
             {found.slice(0, 3).map((r) => (
               <li key={r.n} className={item} onClick={() => show(r.n)}>
-                {when(r)}: you {words(r.chose).did} over {words(r.hint).other}. <b>+{points(r.beat)}</b>
+                <span className="w-[8.5em] opacity-70">{when(r)}</span>
+                <Played label={r.chose} />
+                <span className="opacity-60">over the Hint&apos;s</span>
+                <Played label={r.hint} />
+                <b className="ml-[0.4em]" style={{ color: PAINT.blue }}>
+                  +{points(r.beat)}
+                </b>
               </li>
             ))}
           </ul>

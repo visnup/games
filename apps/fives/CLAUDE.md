@@ -149,7 +149,8 @@ players' hands aren't hidden from their browsers; it's for friends.
   cards for me" makes the total solid when nothing unseen can beat the card, and marks the colors
   each player has shown they're out of. The Hint names the cheat sheet's rule that picks it
   (`reason`, which walks `STEPS` as `heuristic` does). A finished trick is swept to its winner's
-  seat before the next. Face down turns every card that can be one into a magenta 5; F and a long press flip
+  seat before the next, and a hand's tricks stay in the seats while its scores show. The arrow keys,
+  Enter, F and H play from the keyboard. Face down turns every card that can be one into a magenta 5; F and a long press flip
   one. Motion is CSS keyframes in `globals.css`, off under `prefers-reduced-motion`.
 - Prettier is 220 wide, to match the engine, and leaves Markdown alone.
 - Tailwind under Turbopack can miss a class added while `pnpm dev` runs: restart the dev server

@@ -5,7 +5,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import type { bot } from "../../convex/schema";
-import { type Card as CardType, COLORS } from "../cards.ts";
+import { type Card as CardType, COLORS, deck } from "../cards.ts";
 import { face, type Game, type Play, type Player, type Scored, type Step, STEPS, sure, TARGET, total, type Trick, TRUMP, winning } from "../game.ts";
 import { type Choice, choose, type Prompt, replay, setup } from "../replay.ts";
 import { Card, Chips, PAINT } from "./Card";
@@ -121,15 +121,27 @@ export function Board({ game, me }: Props) {
   const stepping = shown < game.log.length;
   // A past board, replayed up to the decision that wrote the log line clicked
   const [past, setPast] = useState<{ decisions: number; line: number }>();
-  const view = useMemo(() => (past ? until(game, past.decisions) : stepping ? until(game, shown) : state), [past, stepping, shown, game, state]);
+  // A finished hand holds the playback, and your next play, on its scores until you've seen them; not the ones before the page
+  // opened. Every card is a decision, so a hand ends every deck's worth of them.
+  const [seenHands, setSeenHands] = useState(() => state.game.scores.length);
+  const held = !past && state.game.scores.length > seenHands ? (seenHands + 1) * deck(game.seats.length).length : undefined;
+  const at = Math.min(stepping ? shown : game.log.length, held ?? Infinity);
+  const view = useMemo(() => (past ? until(game, past.decisions) : at < game.log.length ? until(game, at) : state), [past, at, game, state]);
   const visit = (line: number) => {
     const decisions = decisionsTo(game, line);
     setPast(decisions >= game.log.length ? undefined : { decisions, line });
   };
   const who = (n: number) => (n === seat ? "You" : "bot" in game.seats[n] ? `Bot ${n + 1}` : (game.names[n] ?? `Player ${n + 1}`));
+  /** Sends a decision; whether it went through. */
   const send = (choice: Choice) => {
     setError(undefined);
-    decide({ game: game._id, player: me!, choice }).catch((e) => setError(String(e.message ?? e)));
+    return decide({ game: game._id, player: me!, choice }).then(
+      () => true,
+      (e) => {
+        setError(String(e.message ?? e));
+        return false;
+      },
+    );
   };
   const { prompt, result } = state;
   const replaceGone = useMutation(api.games.replaceGone);
@@ -157,14 +169,15 @@ export function Board({ game, me }: Props) {
     height.current = el.scrollHeight;
   }, [lines]);
   const g = view.game;
-  // A finished hand holds the playback, and your next play, on its scores until you've seen them; not the ones before the page opened.
-  const [seenHands, setSeenHands] = useState(() => state.game.scores.length);
-  const scored = !past && g.scores.length > seenHands ? g.scores[seenHands] : undefined;
+  const scored = held !== undefined && at >= held ? state.game.scores[seenHands] : undefined;
   const n = g.players.length;
   const bottom = Math.max(0, seat);
-  // the trick under way, or the last one to end until the next has a card in it, within the hand
-  const trick: { plays: Trick["plays"]; winner?: number } = g.trick.length || !view.tricks.length || g.players.every((p) => !p.won.length) ? { plays: g.trick } : view.tricks.at(-1)!;
+  // the trick under way, or the last one to end until the next has a card in it: within the hand, or the hand's last while its
+  // scores show
+  const trick: { plays: Trick["plays"]; winner?: number } = g.trick.length || !view.tricks.length || (!scored && g.players.every((p) => !p.won.length)) ? { plays: g.trick } : view.tricks.at(-1)!;
   const taking = g.trick.length ? g.taking() : undefined;
+  // while a hand's scores show and the next is already dealt, its tricks, to leave in the seats
+  const ended = scored && scored.hand !== g.hand ? view.tricks.slice(-deck(n).length / n) : undefined;
   const swept = trick.winner !== undefined;
   useEffect(() => {
     if (!stepping || scored) return;
@@ -180,8 +193,8 @@ export function Board({ game, me }: Props) {
       </Head>
       <section className="panel sticky top-[0.8em] z-10 flex items-start gap-[1em] px-[0.8em] pt-[0.3em] pb-[0.4em] max-sm:top-0 max-sm:-mx-[0.8em] max-sm:-mt-[0.8em] max-sm:rounded-none max-sm:px-[0.4em] max-sm:pt-[0.2em] max-sm:pb-[0.2em]">
         <div className="flex w-[7em] shrink-0 flex-col items-center gap-[0.2em] pt-[0.2rem] text-center">
-          <span className="label">Hand {g.hand} of 4</span>
-          <span className="text-sm">{view.result ? "Game over" : `Trick ${Math.min(n === 3 ? 12 : 13, g.players.reduce((s, p) => s + p.won.length, 0) + 1)}`}</span>
+          <span className="label">Hand {scored?.hand ?? g.hand} of 4</span>
+          <span className="text-sm">{view.result ? "Game over" : scored ? "Scores" : `Trick ${Math.min(n === 3 ? 12 : 13, g.players.reduce((s, p) => s + p.won.length, 0) + 1)}`}</span>
           {g.pot > 0 && <span className="text-xs opacity-70">{g.pot} in the pot</span>}
         </div>
         <div className="h-[5rem] flex-1 overflow-y-auto text-sm max-sm:h-[3.4rem]" ref={log}>
@@ -233,17 +246,22 @@ export function Board({ game, me }: Props) {
               </div>
             );
           })}
-          {!trick.plays.length && <span className="col-start-2 row-start-2 animate-rise text-center text-xs opacity-60">{view.result ? "" : `${who(g.current)} ${g.current === seat ? "lead" : "leads"}`}</span>}
+          {!view.result && !scored && (!trick.plays.length || swept) && (
+            // after a sweep, once the trick has gone
+            <span key={`${g.played}`} className="col-start-2 row-start-2 text-center text-xs opacity-60" style={{ animation: `rise 0.3s ease-out ${swept ? SWEEP : 0}ms backwards` }}>
+              {who(g.current)} {g.current === seat ? "lead" : "leads"}
+            </span>
+          )}
         </div>
         {g.players.map((p) => (
           <Seat
             key={p.seat}
             className={PLACES[n][(p.seat - bottom + n) % n]}
             tall={SIDES[n][(p.seat - bottom + n) % n]}
-            p={p}
+            p={ended ? { ...p, won: ended.flatMap((t) => (t.winner === p.seat ? [t.plays.find((x) => x.seat === p.seat)!.play] : [])), points: scored!.totals[p.seat], voids: [] } : p}
             name={`${who(p.seat)}${view.result?.winners.includes(p.seat) ? " 🏆" : ""}`}
             level={(game.seats[p.seat] as { bot?: Level }).bot}
-            current={!view.result && view.prompt?.seat === p.seat}
+            current={!view.result && !scored && view.prompt?.seat === p.seat}
             mine={p.seat === seat}
             voids={count && p.seat !== seat ? p.voids : []}
           />
@@ -331,8 +349,11 @@ export function Hand({
   down,
   tag,
   deal,
+  focus,
 }: {
   cards: CardType[];
+  /** A card chosen from the keyboard, lifted like a hovered one. */
+  focus?: number;
   onClick?: (i: number) => void;
   onHover?: (i: number | undefined) => void;
   /** A held touch on a touch screen. */
@@ -345,7 +366,8 @@ export function Hand({
 }) {
   const order = cards.map((_, i) => i).sort((a, b) => rank(cards[a]) - rank(cards[b]));
   const [hover, setHover] = useState<number>();
-  const at = hover === undefined ? -1 : order.indexOf(hover);
+  const lifted = hover ?? focus;
+  const at = lifted === undefined ? -1 : order.indexOf(lifted);
   const hovered = (i: number | undefined) => {
     setHover(i);
     onHover?.(i);
@@ -420,8 +442,8 @@ export function Hand({
       {order.map((i, k) => (
         <div
           key={i}
-          className={`relative transition-transform duration-150 select-none [-webkit-touch-callout:none] ${hover === i ? "z-10" : ""} ${fresh ? "dealt" : ""}`}
-          style={{ "--k": k, ...(onClick && at >= 0 ? { translate: `${aside(k - at)}em ${hover === i ? -lift : 0}em` } : {}) } as React.CSSProperties}
+          className={`relative transition-transform duration-150 select-none [-webkit-touch-callout:none] ${lifted === i ? "z-10" : ""} ${fresh ? "dealt" : ""}`}
+          style={{ "--k": k, ...(onClick && at >= 0 ? { translate: `${aside(k - at)}em ${lifted === i ? -lift : 0}em` } : {}) } as React.CSSProperties}
           onMouseEnter={onClick && (() => touched.current || hovered(i))}
         >
           {tag?.(i)}
@@ -479,7 +501,9 @@ export const LEVELS: Record<Level, { name: string; title: string }> = {
 function Seat({ p, name, level, current, mine, voids, className, tall }: { p: Player; name: string; level?: Level; current: boolean; mine: boolean; voids: Player["voids"]; className: string; tall?: boolean }) {
   const t = total(p);
   return (
-    <section className={`panel flex min-w-0 flex-col gap-[0.4em] p-[0.6em] ${current ? "current" : ""} ${className} ${tall ? "w-[7.5em] justify-self-center pb-[1.2em] max-sm:w-[5em]" : "w-[13em] max-w-full justify-self-center max-sm:w-[11em]"}`}>
+    <section
+      className={`panel flex min-w-0 flex-col gap-[0.4em] p-[0.6em] ${current ? "current" : ""} ${className} ${tall ? "w-[7.5em] justify-self-center pb-[1.2em] max-sm:w-[5em]" : "w-[13em] max-w-full justify-self-center max-sm:w-[11em]"}`}
+    >
       <h2 className={`m-0 flex flex-wrap gap-x-[0.5em] text-sm font-bold ${tall ? "flex-col items-center gap-y-[0.3em] text-center" : "items-center"}`}>
         <span className={tall ? "flex max-w-full flex-col" : "truncate"}>
           <span className="truncate">{name}</span>
@@ -527,7 +551,9 @@ function Seat({ p, name, level, current, mine, voids, className, tall }: { p: Pl
   );
 }
 
-function Ask({ game, p, send, prompt, deal }: { game: Game; p: Player; send: (c: Choice) => void; prompt: Prompt; deal: string }) {
+function Ask({ game, p, send, prompt, deal }: { game: Game; p: Player; send: (c: Choice) => Promise<boolean>; prompt: Prompt; deal: string }) {
+  // a play on its way, so a second tap before the table catches up doesn't send another
+  const [sent, setSent] = useState(false);
   const legal = game.legal(p);
   const [hint, setHint] = useState<Play>();
   const [hover, setHover] = useState<number>();
@@ -542,18 +568,13 @@ function Ask({ game, p, send, prompt, deal }: { game: Game; p: Player; send: (c:
   const canDown = (c: CardType) => legal.some((l) => l.card === c && l.down);
   const anyDown = legal.some((l) => l.down);
   const down = (i: number) => (allDown ? canDown(p.hand[i]) : flipped.includes(i));
-  useEffect(() => {
-    const key = (e: KeyboardEvent) => {
-      if (e.key !== "f" || e.metaKey || e.ctrlKey || e.target instanceof HTMLInputElement) return;
-      if (hover !== undefined) flip(hover);
-      else if (anyDown) setAllDown((d) => !d);
-    };
-    addEventListener("keydown", key);
-    return () => removeEventListener("keydown", key);
-  }, [hover, anyDown]);
   const play = (i: number) => {
     const card = p.hand[i];
-    if (legal.some((l) => l.card === card && l.down === down(i))) return send({ kind: prompt.kind, seat: p.seat, ...choose(p, { card, down: down(i) }) });
+    if (sent) return;
+    if (legal.some((l) => l.card === card && l.down === down(i))) {
+      setSent(true);
+      return void send({ kind: prompt.kind, seat: p.seat, ...choose(p, { card, down: down(i) }) }).then((ok) => ok || setSent(false));
+    }
     setNote(
       down(i) || allDown
         ? "You can't play that one as a magenta 5 now."
@@ -564,11 +585,58 @@ function Ask({ game, p, send, prompt, deal }: { game: Game; p: Player; send: (c:
             : "You can't play that now.",
     );
   };
+  // a card chosen with the arrow keys
+  const [focus, setFocus] = useState<number>();
+  const pointer = hover ?? focus;
+  const toggleHint = () => {
+    if (hint) {
+      setHint(undefined);
+      setWhy(undefined);
+      setFlipped([]);
+      return;
+    }
+    const { play: m, why } = reason(game, p);
+    const i = p.hand.indexOf(m.card);
+    setHint(m);
+    setWhy(why);
+    setAllDown(false);
+    setFlipped(m.down ? [i] : []);
+  };
+  // the arrows move between the cards you can play, as the hand shows them; Enter plays, F flips, H hints
+  const keys = useRef<(e: KeyboardEvent) => void>(undefined);
+  useEffect(() => {
+    keys.current = (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.target instanceof HTMLInputElement) return;
+      const playable = p.hand
+        .map((_, i) => i)
+        .sort((a, b) => rank(p.hand[a]) - rank(p.hand[b]))
+        .filter((i) => legal.some((l) => l.card === p.hand[i]));
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        e.preventDefault();
+        const k = pointer === undefined ? -1 : playable.indexOf(pointer);
+        const next = k < 0 ? (e.key === "ArrowLeft" ? playable.length - 1 : 0) : (k + (e.key === "ArrowLeft" ? -1 : 1) + playable.length) % playable.length;
+        setHover(undefined);
+        setFocus(playable[next]);
+        setNote(undefined);
+      } else if ((e.key === "Enter" || e.key === " ") && pointer !== undefined) {
+        e.preventDefault();
+        play(pointer);
+      } else if (e.key === "f") {
+        if (pointer !== undefined) flip(pointer);
+        else if (anyDown) setAllDown((d) => !d);
+      } else if (e.key === "h") toggleHint();
+    };
+  });
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => keys.current?.(e);
+    addEventListener("keydown", key);
+    return () => removeEventListener("keydown", key);
+  }, []);
   const led = game.led();
   const t = total(p);
   const [count] = useState(counting);
   // what the card under the pointer would do, in words
-  const pointed = hover !== undefined && legal.some((l) => l.card === p.hand[hover] && l.down === down(hover)) ? { card: p.hand[hover], down: down(hover) } : undefined;
+  const pointed = pointer !== undefined && legal.some((l) => l.card === p.hand[pointer] && l.down === down(pointer)) ? { card: p.hand[pointer], down: down(pointer) } : undefined;
   const preview =
     pointed && game.trick.length
       ? winning(game, pointed)
@@ -587,8 +655,10 @@ function Ask({ game, p, send, prompt, deal }: { game: Game; p: Player; send: (c:
             dim={(c) => !legal.some((l) => l.card === c && (!allDown || l.down))}
             onClick={play}
             onFlip={flip}
+            focus={focus}
             onHover={(i) => {
               setHover(i);
+              if (i !== undefined) setFocus(undefined);
               setNote(undefined);
             }}
             tag={(i) => <Outcome game={game} p={p} play={{ card: p.hand[i], down: down(i) }} legal={legal} count={count} />}
@@ -616,24 +686,7 @@ function Ask({ game, p, send, prompt, deal }: { game: Game; p: Player; send: (c:
                 Face down
               </button>
             )}
-            <button
-              className={`quiet px-[0.6em] ${hint ? "ring-2 ring-ink/50" : ""}`}
-              aria-pressed={!!hint}
-              onClick={() => {
-                if (hint) {
-                  setHint(undefined);
-                  setWhy(undefined);
-                  setFlipped([]);
-                  return;
-                }
-                const { play: m, why } = reason(game, p);
-                const i = p.hand.indexOf(m.card);
-                setHint(m);
-                setWhy(why);
-                setAllDown(false);
-                setFlipped(m.down ? [i] : []);
-              }}
-            >
+            <button className={`quiet px-[0.6em] ${hint ? "ring-2 ring-ink/50" : ""}`} aria-pressed={!!hint} title="Medium's play, and why (H)" onClick={toggleHint}>
               Hint
             </button>
           </div>

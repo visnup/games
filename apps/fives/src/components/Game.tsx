@@ -52,8 +52,6 @@ export function Game({ table }: { table: string }) {
   );
 }
 
-const NEXT: Record<Level, Level> = { "face up": "default", default: "learned", learned: "face up" };
-
 /** Who's at the table and the bots to deal in; `alone` centers it in the window when there's no board above. */
 function Lobby({ table, me, alone }: { table: string; me: Id<"players">; alone: boolean }) {
   const start = useMutation(api.games.start);
@@ -115,13 +113,23 @@ function Lobby({ table, me, alone }: { table: string; me: Id<"players">; alone: 
             ),
           )}
           {bots.map((kind, i) => (
-            <li key={`bot${i}`} className={row}>
-              <span className="flex-1">🤖 Bot</span>
-              <button className="quiet w-[4.5em] px-2 py-0.5 text-sm" title={LEVELS[kind].title} onClick={() => setBots(bots.map((k, j) => (j === i ? NEXT[k] : k)))}>
-                {LEVELS[kind].name}
-              </button>
-              <button className="quiet px-2 py-0.5 text-sm" aria-label="Remove bot" onClick={() => setBots(bots.filter((_, j) => j !== i))}>
-                Remove
+            <li key={`bot${i}`} className={`${row} animate-rise`}>
+              <span className="flex-1">Bot</span>
+              <span role="group" aria-label="Bot level" className="flex rounded-lg bg-ink/8 p-0.5">
+                {(Object.keys(LEVELS) as Level[]).map((level) => (
+                  <button
+                    key={level}
+                    aria-pressed={level === kind}
+                    title={LEVELS[level].title}
+                    className={`rounded-md px-2 py-0.5 text-sm transition-colors ${level === kind ? "bg-ink font-semibold text-bar" : "bg-transparent text-ink/70 hover:text-ink"}`}
+                    onClick={() => setBots(bots.map((k, j) => (j === i ? level : k)))}
+                  >
+                    {LEVELS[level].name}
+                  </button>
+                ))}
+              </span>
+              <button className="quiet size-7 rounded-full p-0 text-sm" aria-label="Remove bot" title="Remove bot" onClick={() => setBots(bots.filter((_, j) => j !== i))}>
+                ✕
               </button>
             </li>
           ))}
