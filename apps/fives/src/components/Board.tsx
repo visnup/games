@@ -479,7 +479,7 @@ export const LEVELS: Record<Level, { name: string; title: string }> = {
 function Seat({ p, name, level, current, mine, voids, className, tall }: { p: Player; name: string; level?: Level; current: boolean; mine: boolean; voids: Player["voids"]; className: string; tall?: boolean }) {
   const t = total(p);
   return (
-    <section className={`panel flex min-w-0 flex-col gap-[0.4em] p-[0.6em] ${current ? "current" : ""} ${className} ${tall ? "justify-self-center pb-[1.2em]" : "justify-self-stretch"}`}>
+    <section className={`panel flex min-w-0 flex-col gap-[0.4em] p-[0.6em] ${current ? "current" : ""} ${className} ${tall ? "w-[7.5em] justify-self-center pb-[1.2em] max-sm:w-[5em]" : "w-[13em] max-w-full justify-self-center max-sm:w-[11em]"}`}>
       <h2 className={`m-0 flex flex-wrap gap-x-[0.5em] text-sm font-bold ${tall ? "flex-col items-center gap-y-[0.3em] text-center" : "items-center"}`}>
         <span className={tall ? "flex max-w-full flex-col" : "truncate"}>
           <span className="truncate">{name}</span>
@@ -506,7 +506,7 @@ function Seat({ p, name, level, current, mine, voids, className, tall }: { p: Pl
           )}
         </span>
         {tall ? (
-          <div className="flex flex-col *:not-first:-mt-[calc(var(--small)*2.2)]">
+          <div className="flex min-h-[calc(6.8*var(--small))] flex-col *:not-first:-mt-[calc(var(--small)*2.2)]">
             {p.won.map((w, i) => (
               <div key={i} className="grid h-[calc(4.5*var(--small))] w-[calc(6.3*var(--small))] landed place-items-center">
                 <div className="rotate-90">
