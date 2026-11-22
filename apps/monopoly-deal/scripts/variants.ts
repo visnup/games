@@ -262,6 +262,45 @@ const swap = (from: Step, to: Step) => steps.map((s) => (s === from ? to : s));
 const before = (list: Step[], step: Step, ...add: Step[]) => list.toSpliced(list.indexOf(step), 0, ...add);
 const { passGo, complete, dealBreaker, place, placeWhenBanked, bankBuildings, passGoLast } = STEPS;
 
+/** `step`, only while holding `action`. */
+const holding =
+  (action: string, step: Step): Step =>
+  (game, p, left) =>
+    p.hand.some((c) => isAction(c, action)) ? step(game, p, left) : null;
+
+/** `STEPS.emptyHand`, except after the first `rounds` rounds while holding any of `keep`. */
+const emptyHolding =
+  (keep: string[], rounds = 0): Step =>
+  (game, p, left) =>
+    game.turns > rounds * game.players.length && p.hand.some((c) => keep.some((a) => isAction(c, a))) ? null : STEPS.emptyHand(game, p, left);
+
+/** Lays down a property, but not a wild. */
+const placePlain: Step = (game, p, left) => {
+  const move = place(game, p, left);
+  return move?.card.kind === "property" ? move : null;
+};
+
+/** Whether the card Sly Deal would take completes a set. */
+const slyCompletes = (game: Game, p: Player) => {
+  const take = stealable(game, p, game.players.filter((q) => q !== p))[0];
+  return !!take && colorsOf(take.x.card).some((color) => count(p, color) + 1 === size(color));
+};
+
+/** How many cards short of a set the card Sly Deal would take leaves us, at best. */
+const slyShort = (game: Game, p: Player) => {
+  const take = stealable(game, p, game.players.filter((q) => q !== p))[0];
+  return take ? Math.min(...colorsOf(take.x.card).map((color) => size(color) - ((count(p, color) % size(color)) + 1))) : Infinity;
+};
+
+/** Sly Deal for the loose property that helps us most, when `when` holds. */
+const slyWhen =
+  (when: (game: Game, p: Player) => boolean): Step =>
+  (game, p) => {
+    const sly = p.hand.find((c) => isAction(c, "slyDeal"));
+    const take = sly && stealable(game, p, game.players.filter((q) => q !== p))[0];
+    return take && when(game, p) ? { type: "action", card: sly, target: take.q.seat, take: take.x } : null;
+  };
+
 export const VARIANTS: Record<string, () => Policy> = {
   "the builder": () => STRATEGIES.builder(0),
   "lay down properties before charging (previous)": () => heuristic(...before(without(place), STEPS.rent, place)),
@@ -328,7 +367,12 @@ export const VARIANTS: Record<string, () => Policy> = {
   "hold Double the Rent (previous)": () => heuristic(...without(STEPS.bankDoubleRent)),
   "bank Rent cards for colors we have none of": beforeBank(deadRent),
   "Deal Breaker on the leader first": withStep(STEPS.dealBreaker, breakLeader),
-  "Deal Breaker on whoever is one set from winning first": withStep(STEPS.dealBreaker, breakNearest()),
+  "Deal Breaker on the highest rent (previous)": withStep(STEPS.dealBreaker, (game, p) => {
+    const breaker = p.hand.find((c) => isAction(c, "dealBreaker"));
+    const sets = game.players.filter((q) => q !== p).flatMap((q) => fullColors(game, q).map((color) => ({ q, color })));
+    const pick = sets.filter((s) => !fullSets(game, p, s.color)).sort((a, b) => rent(game, b.q, b.color) - rent(game, a.q, a.color))[0];
+    return breaker && pick ? { type: "action", card: breaker, target: pick.q.seat, color: pick.color } : null;
+  }),
   "Deal Breaker on whoever is one set from winning first, colors we have full too": withStep(STEPS.dealBreaker, breakNearest(true)),
   "Deal Breaker before completing a set": () => heuristic(...before(without(dealBreaker), complete, dealBreaker)),
   "Deal Breaker before Pass Go, on whoever is one set from winning first": () => heuristic(...before(without(dealBreaker), passGo, breakNearest())),
@@ -384,6 +428,29 @@ export const VARIANTS: Record<string, () => Policy> = {
   "lay down properties before Sly Deal in rounds 2–3": () =>
     heuristic(...before(steps, STEPS.slyDeal, (game, p, left) => (game.turns > game.players.length && game.turns <= 3 * game.players.length && p.hand.some((c) => isAction(c, "slyDeal")) ? place(game, p, left) : null))),
   "lay down properties before Sly Deal": () => heuristic(...before(steps, STEPS.slyDeal, (game, p, left) => (p.hand.some((c) => isAction(c, "slyDeal")) ? place(game, p, left) : null))),
+  "lay down plain properties before Sly Deal": () => heuristic(...before(steps, STEPS.slyDeal, holding("slyDeal", placePlain))),
+  "lay down plain properties before Sly Deal, unless it completes a set": () =>
+    heuristic(...before(steps, STEPS.slyDeal, (game, p, left) => (slyCompletes(game, p) ? null : holding("slyDeal", placePlain)(game, p, left)))),
+  "lay down plain properties before Sly Deal after round 3": () => heuristic(...before(steps, STEPS.slyDeal, after(3, holding("slyDeal", placePlain)))),
+  "once $10M is banked, plain properties before more money, wilds after": () => heuristic(...swap(placeWhenBanked, placeOnce(10, placePlain))),
+  "lay down plain properties before Forced Deal": () => heuristic(...before(steps, STEPS.forcedDeal, holding("forcedDeal", placePlain))),
+  "lay down plain properties before Sly Deal and Forced Deal": () =>
+    heuristic(...before(before(steps, STEPS.forcedDeal, holding("forcedDeal", placePlain)), STEPS.slyDeal, holding("slyDeal", placePlain))),
+  "Sly Deal for any card that helps (previous)": () => heuristic(...swap(STEPS.slyDeal, slyWhen(() => true))),
+  "Sly Deal only for a card that completes a set, at 2 players too": () => heuristic(...swap(STEPS.slyDeal, slyWhen(slyCompletes))),
+  "Sly Deal only for a card that completes a set, until round 4": () => heuristic(...swap(STEPS.slyDeal, slyWhen((game, p) => slyCompletes(game, p) || game.turns > 3 * game.players.length))),
+  "Sly Deal only for a card that leaves us at most one from a set, at 3+ players": () =>
+    heuristic(...swap(STEPS.slyDeal, slyWhen((game, p) => game.players.length < 3 || slyShort(game, p) <= 1))),
+  "Sly Deal only for a color we have": () => heuristic(...swap(STEPS.slyDeal, slyWhen((game, p) => colorsOf(stealable(game, p, game.players.filter((q) => q !== p))[0].x.card).some((color) => count(p, color) > 0)))),
+  "empty the hand, Deal Breaker too (previous)": () =>
+    heuristic(
+      ...swap(STEPS.emptyHand, (game, p, left) => {
+        const c = p.hand.length <= left && p.hand.find((c) => c.kind !== "property" && c.kind !== "wild");
+        return c ? { type: "bank", card: c } : null;
+      }),
+    ),
+  "empty the hand, but hold Just Say No too": () => heuristic(...swap(STEPS.emptyHand, emptyHolding(["justSayNo"]))),
+  "empty the hand, but hold Just Say No too after round 3": () => heuristic(...swap(STEPS.emptyHand, emptyHolding(["justSayNo"], 3))),
   ...Object.fromEntries([5, 12, 15, 20, 30].map((amount) => [`lay down properties once $${amount}M is banked`, () => heuristic(...swap(placeWhenBanked, placeOnce(amount)))])),
 };
 

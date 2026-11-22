@@ -274,6 +274,22 @@
             full is even too. Deal Breakers are rare enough that 8 points on 2% of 5-player
             decisions is under 0.2 a game. Next at 2–4 players: Forced Deal before Pass Go after
             round 3, which a dozen Forced Deal rules have already failed to capture.
+            Round 12's (2026-11-20, held out): at every count its biggest overrule is a property
+            laid down where the default plays Sly Deal. Laying down first loses 0.7 to 2.3 in
+            every form tried (all properties, plain ones only, unless the take completes a set,
+            after round 3; before Forced Deal it ties at 3–5 and loses 0.9 at 2). What the model
+            does instead is hold Sly Deal: at 3+ players only for a card that completes a set,
+            +0.63, +1.01 and +1.03 at 3–5 players (±0.13–0.14, 200,000 paired deals), −1.55 at
+            2. Adopted; `chance` refit. Weaker holds (a color we have, one from a set, completes
+            until round 4) gain less. Holding wilds until after banking once $10M is banked
+            loses 0.2 to 0.4, and a $11M–$15M lay-down threshold ties the new default. Its
+            "bank Deal Breaker → end" (18 points a time at 2 players): emptying the hand but
+            holding a Deal Breaker gains +0.39 at 2 and +0.07 at 3 (±0.04, 200,000 paired deals),
+            adopted; holding Just Say No too gains +0.16 at 2 (±0.05) and loses 0.05–0.08 at 3–4,
+            untried at 2 players only. Deal Breaker on whoever is one
+            set from winning first now gains +0.09, +0.11 and +0.21 at 3–5 (±0.04–0.06, 100,000),
+            adopted. Rechecked and still losing: any-color Rent on the most or least banked, and
+            Forced Deal or Deal Breaker for the best chance.
       - [x] Then Just Say No and discarding (the "Learn the other decisions" item below), used
             in the rollouts like the payer (2026-11-17). `saynodata.ts` on 131,072 default games
             a player count (about 1.5 chances a game, 32 shuffles each way) to `src/sayno.json`:
@@ -354,8 +370,15 @@
             playouts' filter, for 181 minutes of labeling instead of 76. Round 11's 200-tree
             playouts gained +0.06, −0.10, +0.21 and +0.14. Over the card-memory model in its
             field: +1.71, +2.32, +2.94 and +4.46. Adopted as `src/model.json` and
-            `src/packed/model.ts`. `src/packed/light.ts`, the review's, is still round 10's
-            200 trees.
+            `src/packed/model.ts`. Round 13, the same again from round 12 against the
+            stronger default (Deal Breaker held when emptying the hand, and on whoever is
+            nearest to winning): +0.63, +0.57, +0.24 and +0.61 over round 12 against its
+            learned players (±0.35–0.42), +0.58, +0.52, +0.06 and +0.54 against the default,
+            a tie as playouts' filter. Over the card-memory model in its field: +2.05, +3.28,
+            +3.62 and +4.85. Its 5-player data first stopped at `HOURS` half done, with a
+            strong-findings table sharing the cores; finished on a rerun, that took 5 players
+            from +0.26 to +0.54 against the default. Adopted as `src/packed/model.ts`.
+            `src/packed/light.ts`, the review's, is still round 10's 200 trees.
       - [x] Adopted the card-memory model (`model-r6m`, rounds 4b and 6 with `memory()`) as
             `src/model.json` and `src/packed/model.ts`: +0.3, +0.4, +0.5 and +1.0 over round 4
             (±0.3–0.5, 50,000 deals).

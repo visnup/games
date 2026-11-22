@@ -619,19 +619,28 @@ export const STEPS = {
     }
     return null;
   },
-  /** The highest-rent full set of a color we don't have. */
+  /**
+   * The highest-rent full set of a color we don't have, from whoever is one set from winning
+   * first: +0.1, +0.1 and +0.2 points at 3–5 players (`variants.ts`, 100,000 paired deals).
+   */
   dealBreaker(game, p) {
     const breaker = p.hand.find((c) => isAction(c, "dealBreaker"));
     if (!breaker) return null;
+    const near = (q: Player) => +(fullColors(game, q).length >= 2);
     const sets = others(game, p).flatMap((q) => fullColors(game, q).map((color) => ({ q, color })));
-    const pick = sets.filter((s) => !fullSets(game, p, s.color)).sort((a, b) => rent(game, b.q, b.color) - rent(game, a.q, a.color))[0];
+    const pick = sets.filter((s) => !fullSets(game, p, s.color)).sort((a, b) => near(b.q) - near(a.q) || rent(game, b.q, b.color) - rent(game, a.q, a.color))[0];
     return pick ? { type: "action", card: breaker, target: pick.q.seat, color: pick.color } : null;
   },
-  /** The loose property that helps us most. */
+  /**
+   * The loose property that helps us most, at 3+ players only if it completes a set: +0.6, +1.0
+   * and +1.0 points at 3–5 players, −1.5 at 2 (`variants.ts`, 200,000 paired deals). Found where
+   * `learned.ts`'s model overrules the default.
+   */
   slyDeal(game, p) {
     const sly = p.hand.find((c) => isAction(c, "slyDeal"));
     const take = sly && stealable(game, p, others(game, p))[0];
-    return take ? { type: "action", card: sly, target: take.q.seat, take: take.x } : null;
+    if (!take || (game.players.length >= 3 && !colorsOf(take.x.card).some((color) => count(p, color) + 1 === size(color)))) return null;
+    return { type: "action", card: sly, target: take.q.seat, take: take.x };
   },
   /**
    * The best rent, the any-color one on someone who has to pay in property: +2.8 points at 5
@@ -688,10 +697,11 @@ export const STEPS = {
   /**
    * When the plays left can empty the hand, what's left as money, so the next turn draws 5
    * instead of 2: +0.3 to +0.8 points at 2–5 players (`variants.ts`, 100,000 games). Found where
-   * `learned.ts`'s model overrules the default.
+   * `learned.ts`'s model overrules the default. Not while holding a Deal Breaker: +0.4 points at
+   * 2 players, +0.07 at 3 (`variants.ts`, 200,000 paired deals), found the same way.
    */
   emptyHand(game, p, left) {
-    const c = p.hand.length <= left && p.hand.find((c) => c.kind !== "property" && c.kind !== "wild");
+    const c = p.hand.length <= left && !p.hand.some((c) => isAction(c, "dealBreaker")) && p.hand.find((c) => c.kind !== "property" && c.kind !== "wild");
     return c ? { type: "bank", card: c } : null;
   },
 } satisfies Record<string, Step>;
