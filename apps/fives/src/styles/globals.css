@@ -60,6 +60,7 @@
     ::before,
     ::after {
       animation-duration: 1ms !important;
+      animation-delay: 0ms !important;
       transition-duration: 1ms !important;
     }
   }
@@ -125,6 +126,26 @@
       scale: 1.15;
       opacity: 0;
     }
+  }
+
+  /* A finished trick, swept off to its winner's pile: `--sx` and `--sy` in em, toward the winner's seat */
+  .swept {
+    animation:
+      played 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+      swept 0.45s ease-in 0.65s forwards;
+  }
+
+  @keyframes swept {
+    to {
+      translate: calc(var(--sx, 0) * 1em) calc(var(--sy, 0) * 1em);
+      scale: 0.4;
+      opacity: 0;
+    }
+  }
+
+  /* What a swept trick lands as: the winner's new card and total, once it gets there */
+  .landed {
+    animation: pop 0.35s var(--ease-out-back) 1s backwards;
   }
 
   /* A hand as it's dealt, one card after another: `--k` is a card's place */

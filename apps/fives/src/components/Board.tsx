@@ -6,7 +6,7 @@ import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import type { bot } from "../../convex/schema";
 import { type Card as CardType, COLORS } from "../cards.ts";
-import { defaultPolicy, face, type Game, type Play, type Player, type Scored, sure, TARGET, total, type Trick, winning } from "../game.ts";
+import { face, type Game, type Play, type Player, type Scored, type Step, STEPS, sure, TARGET, total, type Trick, TRUMP, winning } from "../game.ts";
 import { type Choice, choose, type Prompt, replay, setup } from "../replay.ts";
 import { Card, Chips, PAINT } from "./Card";
 import { Review } from "./Review";
@@ -91,6 +91,8 @@ const SLOTS: Record<number, string[]> = {
   3: ["col-start-2 row-start-3", "col-start-1 row-start-1", "col-start-3 row-start-1"],
   4: ["col-start-2 row-start-3", "col-start-1 row-start-2", "col-start-2 row-start-1", "col-start-3 row-start-2"],
 };
+/** How long a finished trick shows, in ms, before it's swept to its winner: `.swept`'s delay and duration. */
+const SWEEP = 1100;
 /** Where a card played into the trick comes from, in em, toward its seat. */
 const FROM: Record<number, [number, number][]> = {
   3: [
@@ -114,6 +116,8 @@ export function Board({ game, me }: Props) {
   // Others' decisions shown one at a time, so each play can be seen. A long gap, like opening the page, jumps to now.
   const [shown, setShown] = useState(game.log.length);
   const [step] = useState(() => SPEEDS[stepSpeed()]);
+  // read every time, so the lobby's checkbox under a finished game counts for the next
+  const count = counting();
   const stepping = shown < game.log.length;
   // A past board, replayed up to the decision that wrote the log line clicked
   const [past, setPast] = useState<{ decisions: number; line: number }>();
@@ -156,23 +160,25 @@ export function Board({ game, me }: Props) {
   // A finished hand holds the playback, and your next play, on its scores until you've seen them; not the ones before the page opened.
   const [seenHands, setSeenHands] = useState(() => state.game.scores.length);
   const scored = !past && g.scores.length > seenHands ? g.scores[seenHands] : undefined;
-  useEffect(() => {
-    if (!stepping || scored) return;
-    const jump = !step || game.log.length - shown > 40;
-    const t = setTimeout(() => setShown((n) => (jump ? game.log.length : n + 1)), jump || game.log[shown].seat === seat ? 0 : step);
-    return () => clearTimeout(t);
-  }, [stepping, step, shown, game.log, seat, scored]);
   const n = g.players.length;
   const bottom = Math.max(0, seat);
   // the trick under way, or the last one to end until the next has a card in it, within the hand
   const trick: { plays: Trick["plays"]; winner?: number } = g.trick.length || !view.tricks.length || g.players.every((p) => !p.won.length) ? { plays: g.trick } : view.tricks.at(-1)!;
   const taking = g.trick.length ? g.taking() : undefined;
+  const swept = trick.winner !== undefined;
+  useEffect(() => {
+    if (!stepping || scored) return;
+    const jump = !step || game.log.length - shown > 40;
+    // a finished trick stays long enough to see it swept to its winner
+    const t = setTimeout(() => setShown((n) => (jump ? game.log.length : n + 1)), jump || game.log[shown].seat === seat ? 0 : swept ? step + SWEEP : step);
+    return () => clearTimeout(t);
+  }, [stepping, step, shown, game.log, seat, scored, swept]);
   return (
     <div className="mx-auto flex min-h-dvh max-w-[64em] flex-col gap-[0.8em] p-[0.8em]">
       <Head>
         <title>{up ? "Your play · Fives" : "Fives"}</title>
       </Head>
-      <section className="panel sticky top-[0.8em] z-10 flex items-start gap-[1em] px-[0.8em] pt-[0.3em] pb-[0.8em] max-sm:top-0 max-sm:-mx-[0.8em] max-sm:-mt-[0.8em] max-sm:rounded-none max-sm:px-[0.4em] max-sm:pt-[0.2em] max-sm:pb-[0.4em]">
+      <section className="panel sticky top-[0.8em] z-10 flex items-start gap-[1em] px-[0.8em] pt-[0.3em] pb-[0.4em] max-sm:top-0 max-sm:-mx-[0.8em] max-sm:-mt-[0.8em] max-sm:rounded-none max-sm:px-[0.4em] max-sm:pt-[0.2em] max-sm:pb-[0.2em]">
         <div className="flex w-[7em] shrink-0 flex-col items-center gap-[0.2em] pt-[0.2rem] text-center">
           <span className="label">Hand {g.hand} of 4</span>
           <span className="text-sm">{view.result ? "Game over" : `Trick ${Math.min(n === 3 ? 12 : 13, g.players.reduce((s, p) => s + p.won.length, 0) + 1)}`}</span>
@@ -206,9 +212,15 @@ export function Board({ game, me }: Props) {
           {trick.plays.map(({ seat: s, play }) => {
             const place = (s - bottom + n) % n;
             const [dx, dy] = FROM[n][place];
+            // toward the winner's seat, from this card's place
+            const [wx, wy] = swept ? FROM[n][(trick.winner! - bottom + n) % n] : [0, 0];
             const badge = trick.winner === s ? "wins" : taking === s ? "taking" : undefined;
             return (
-              <div key={`${s}:${play.card.id}`} className={`${SLOTS[n][place]} played relative`} style={{ "--dx": dx, "--dy": dy } as React.CSSProperties}>
+              <div
+                key={`${s}:${play.card.id}`}
+                className={`${SLOTS[n][place]} ${swept ? "swept" : "played"} relative`}
+                style={{ "--dx": dx, "--dy": dy, "--sx": wx * 2 - dx * 1.2, "--sy": wy * 2 - dy * 1.2 } as React.CSSProperties}
+              >
                 <Card card={play.down && s !== seat ? undefined : play.card} down={play.down} className={`trick ${badge ? "outline-2 outline-offset-2 outline-ink" : ""}`} />
                 {badge && (
                   <span
@@ -233,11 +245,12 @@ export function Board({ game, me }: Props) {
             level={(game.seats[p.seat] as { bot?: Level }).bot}
             current={!view.result && view.prompt?.seat === p.seat}
             mine={p.seat === seat}
+            voids={count && p.seat !== seat ? p.voids : []}
           />
         ))}
       </div>
       <section className="panel sticky bottom-0 z-10 mb-[0.4em] max-sm:-mx-[0.8em] max-sm:-mb-[0.8em] max-sm:rounded-none">
-        <div className="px-[0.8em] pb-[0.8em] max-sm:px-[0.4em] max-sm:pb-[0.4em]">
+        <div className="px-[0.8em] pb-[0.4em] max-sm:px-[0.4em] max-sm:pb-[0.2em]">
           {past ? (
             <p className="m-0 flex items-center justify-between pt-[0.5em]">
               Viewing the table after an earlier play.{" "}
@@ -400,7 +413,7 @@ export function Hand({
   return (
     <div
       ref={ref}
-      className="@container flex touch-none justify-center pt-[1.3em] pb-[1.2em] text-[0.85rem] max-sm:pb-[0.4em] *:not-first:-ml-[clamp(0.6em,calc(4.875em-8.33cqw),3.2em)] @max-[34rem]:[&>div:not(:last-child)_.big]:opacity-0"
+      className="@container flex touch-none justify-center pt-[1.3em] pb-[0.6em] text-[0.85rem] max-sm:pb-[0.2em] *:not-first:-ml-[clamp(0.6em,calc(4.875em-8.33cqw),3.2em)] @max-[34rem]:[&>div:not(:last-child)_.big]:opacity-0"
       onMouseLeave={() => press.current || hovered(undefined)}
       {...touch}
     >
@@ -463,7 +476,7 @@ export const LEVELS: Record<Level, { name: string; title: string }> = {
 };
 
 /** A player's place at the table: name, chips, this hand's winning cards and total. `tall` stacks it all, for a seat at the side. */
-function Seat({ p, name, level, current, mine, className, tall }: { p: Player; name: string; level?: Level; current: boolean; mine: boolean; className: string; tall?: boolean }) {
+function Seat({ p, name, level, current, mine, voids, className, tall }: { p: Player; name: string; level?: Level; current: boolean; mine: boolean; voids: Player["voids"]; className: string; tall?: boolean }) {
   const t = total(p);
   return (
     <section className={`panel flex min-w-0 flex-col gap-[0.4em] p-[0.6em] ${current ? "current" : ""} ${className} ${tall ? "justify-self-center pb-[1.2em]" : "justify-self-stretch"}`}>
@@ -481,16 +494,21 @@ function Seat({ p, name, level, current, mine, className, tall }: { p: Player; n
         </span>
       </h2>
       <div className={`flex gap-[0.5em] ${tall ? "flex-col items-center" : "items-center"}`}>
-        <span className="flex min-w-[2.6em] flex-col items-center" title="This hand's total: the cards that won tricks">
-          <span key={t} className={`animate-pop text-xl leading-none font-extrabold ${t > TARGET ? "text-bust" : t === TARGET ? "text-magenta" : ""}`}>
-            {t}
-          </span>
+        <span key={t} className="landed flex min-w-[2.6em] flex-col items-center" title="This hand's total: the cards that won tricks">
+          <span className={`text-xl leading-none font-extrabold ${t > TARGET ? "text-bust" : t === TARGET ? "text-magenta" : ""}`}>{t}</span>
           <span className={`label text-[0.55rem] ${t > TARGET ? "text-bust opacity-100" : t === TARGET ? "text-magenta opacity-100" : ""}`}>{t > TARGET ? "bust" : t === TARGET ? "on 25" : `${TARGET - t} to go`}</span>
+          {voids.length > 0 && (
+            <span className="mt-[0.3em] flex gap-[0.2em]" title={`Out of ${voids.join(" and ")}`}>
+              {voids.map((c) => (
+                <span key={c} className="size-[0.75em] animate-pop rounded-full" style={{ background: `linear-gradient(135deg, transparent 42%, var(--bar) 42% 58%, transparent 58%), ${PAINT[c]}` }} />
+              ))}
+            </span>
+          )}
         </span>
         {tall ? (
           <div className="flex flex-col *:not-first:-mt-[calc(var(--small)*2.2)]">
             {p.won.map((w, i) => (
-              <div key={i} className="grid h-[calc(4.5*var(--small))] w-[calc(6.3*var(--small))] animate-pop place-items-center">
+              <div key={i} className="grid h-[calc(4.5*var(--small))] w-[calc(6.3*var(--small))] landed place-items-center">
                 <div className="rotate-90">
                   <Card card={w.down && !mine ? undefined : w.card} down={w.down} small />
                 </div>
@@ -500,7 +518,7 @@ function Seat({ p, name, level, current, mine, className, tall }: { p: Player; n
         ) : (
           <div className="flex min-h-[calc(6.3*var(--small))] min-w-0 flex-wrap *:not-first:-ml-[calc(var(--small)*2.2)]">
             {p.won.map((w, i) => (
-              <Card key={i} card={w.down && !mine ? undefined : w.card} down={w.down} small className="animate-pop" />
+              <Card key={i} card={w.down && !mine ? undefined : w.card} down={w.down} small className="landed" />
             ))}
           </div>
         )}
@@ -518,6 +536,8 @@ function Ask({ game, p, send, prompt, deal }: { game: Game; p: Player; send: (c:
   // every card that can be, face down
   const [allDown, setAllDown] = useState(false);
   const [note, setNote] = useState<string>();
+  // the Hint's reason, until the next decision
+  const [why, setWhy] = useState<string>();
   const flip = (i: number) => setFlipped((f) => (f.includes(i) ? f.filter((x) => x !== i) : [...f, i]));
   const canDown = (c: CardType) => legal.some((l) => l.card === c && l.down);
   const anyDown = legal.some((l) => l.down);
@@ -597,11 +617,19 @@ function Ask({ game, p, send, prompt, deal }: { game: Game; p: Player; send: (c:
               </button>
             )}
             <button
-              className="quiet px-[0.6em]"
+              className={`quiet px-[0.6em] ${hint ? "ring-2 ring-ink/50" : ""}`}
+              aria-pressed={!!hint}
               onClick={() => {
-                const m = defaultPolicy.play(game, p);
+                if (hint) {
+                  setHint(undefined);
+                  setWhy(undefined);
+                  setFlipped([]);
+                  return;
+                }
+                const { play: m, why } = reason(game, p);
                 const i = p.hand.indexOf(m.card);
                 setHint(m);
+                setWhy(why);
                 setAllDown(false);
                 setFlipped(m.down ? [i] : []);
               }}
@@ -611,9 +639,36 @@ function Ask({ game, p, send, prompt, deal }: { game: Game; p: Player; send: (c:
           </div>
         </div>
       </div>
-      {note && <div className="panel absolute -right-[0.8em] bottom-full -left-[0.8em] mb-[0.8em] animate-rise p-[0.6em] text-center">{note}</div>}
+      {(note ?? why) && (
+        <div key={note ?? why} className="panel absolute -right-[0.8em] bottom-full -left-[0.8em] mb-[0.8em] animate-rise p-[0.6em] text-center">
+          {note ?? why}
+        </div>
+      )}
     </div>
   );
+}
+
+/** Medium's play, which is the Hint, and the rule of the README's cheat sheet that picks it, in words. */
+function reason(game: Game, p: Player): { play: Play; why: string } {
+  const plays = game.legal(p);
+  if (plays.length === 1) return { play: plays[0], why: "It's your only play." };
+  const room = TARGET - total(p);
+  for (const [name, step] of Object.entries(STEPS) as [keyof typeof STEPS, Step][]) {
+    const play = step(game, p, plays);
+    if (!play) continue;
+    const why =
+      name === "leadDown"
+        ? `You're 5 or more from 25, so lead your highest ${play.card.color === TRUMP ? "silver" : "card"} face down. It counts 5 at most.`
+        : name === "duck"
+          ? !game.trick.length
+            ? "You're within 5 of 25, so lead your lowest card face up."
+            : `Duck: ${play.down ? "flip" : "play"} your biggest card that loses the trick. Tricks will come to you anyway.`
+          : face(play).value <= room
+            ? "Every card you can play takes the trick, so play the biggest that doesn't bust you."
+            : "Every card you can play takes the trick and busts you, so play the smallest.";
+    return { play, why };
+  }
+  return { play: plays[0], why: "" };
 }
 
 /**
@@ -627,7 +682,7 @@ function Outcome({ game, p, play, legal, count }: { game: Game; p: Player; play:
   const certain = count && sure(game, p, play);
   return (
     <span
-      className="absolute -top-[1.3em] left-[0.1em] z-10 animate-pop rounded-full px-[0.35em] text-[0.7em] sm:left-1/2 sm:-translate-x-1/2 sm:text-[0.8em] leading-[1.4] font-bold whitespace-nowrap"
+      className="absolute -top-[1.3em] -left-px z-10 animate-pop rounded-full px-[0.35em] text-[0.7em] sm:text-[0.8em] leading-[1.4] font-bold whitespace-nowrap"
       style={certain ? { background: color, color: "var(--bar)" } : { boxShadow: `inset 0 0 0 1.5px ${color}`, color, background: "var(--bar)" }}
       title={certain ? "Takes the trick" : count ? "Takes the trick unless someone after you beats it" : "Takes the trick as it stands"}
     >

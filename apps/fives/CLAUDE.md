@@ -145,8 +145,11 @@ players' hands aren't hidden from their browsers; it's for friends.
 - `src/components/Board.tsx`: the table as a 3×3 grid, the trick in the middle
   with each card toward its player, and the seats around it, you at the bottom. A hand's scores
   hold the playback until you continue. When you follow, each card that would take the trick
-  shows your total after it (solid when it's sure to, if the lobby's "Count cards for me" is on), and the card under the pointer says what
-  it does. Face down turns every card that can be one into a magenta 5; F and a long press flip
+  shows your total after it, and the card under the pointer says what it does. The lobby's "Count
+  cards for me" makes the total solid when nothing unseen can beat the card, and marks the colors
+  each player has shown they're out of. The Hint names the cheat sheet's rule that picks it
+  (`reason`, which walks `STEPS` as `heuristic` does). A finished trick is swept to its winner's
+  seat before the next. Face down turns every card that can be one into a magenta 5; F and a long press flip
   one. Motion is CSS keyframes in `globals.css`, off under `prefers-reduced-motion`.
 - Prettier is 220 wide, to match the engine, and leaves Markdown alone.
 - Tailwind under Turbopack can miss a class added while `pnpm dev` runs: restart the dev server
