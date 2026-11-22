@@ -718,11 +718,15 @@ function reason(game: Game, p: Player): { play: Play; why: string } {
         ? `You're 5 or more from 25, so lead your highest ${play.card.color === TRUMP ? "silver" : "card"} face down. It counts 5 at most.`
         : name === "duck"
           ? !game.trick.length
-            ? "You're within 5 of 25, so lead your lowest card face up."
+            ? room < 0
+              ? "You've busted, so this hand's total no longer matters. Lead your lowest card face up."
+              : "You're within 5 of 25, so lead your lowest card face up."
             : `Duck: ${play.down ? "flip" : "play"} your biggest card that loses the trick. Tricks will come to you anyway.`
           : face(play).value <= room
             ? "Every card you can play takes the trick, so play the biggest that doesn't bust you."
-            : "Every card you can play takes the trick and busts you, so play the smallest.";
+            : room < 0
+              ? "You've busted, so play your smallest card."
+              : "Every card you can play takes the trick and busts you, so play the smallest.";
     return { play, why };
   }
   return { play: plays[0], why: "" };
