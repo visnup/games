@@ -17,7 +17,7 @@ export function Card({ card, down, hinted, dim, small, className = "", onClick }
   const value = back ? 5 : card.value;
   return (
     <Tag
-      className={`card ${small ? "small" : ""} relative m-0 inline-flex items-center justify-center p-0 font-numbers transition-[translate,filter,opacity] duration-150 ${back ? "bg-back text-magenta ring-1 ring-black/10" : "text-white"} ${hinted ? "outline-3 outline-offset-2 outline-ink/50" : ""} ${dim ? "brightness-125 grayscale dark:brightness-50" : ""} ${className}`}
+      className={`card ${small ? "small" : ""} relative m-0 inline-flex items-center justify-center p-0 font-numbers transition-[translate,filter,opacity] duration-150 ${back ? "bg-back text-magenta ring-1 ring-black/10" : "text-white"} ${hinted ? "outline-3 outline-offset-2 outline-ink/50" : ""} ${dim ? "brightness-125 saturate-25 dark:brightness-50" : ""} ${className}`}
       style={back ? undefined : { background: PAINT[card.color] }}
       onClick={onClick}
       data-hinted={hinted || undefined}
