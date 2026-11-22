@@ -155,7 +155,7 @@ save("payoff", {
     ),
     Plot.dot(
       totals.filter((d) => !Number.isNaN(d.chips)),
-      { fx: "players", x: "total", y: "chips", fill: totalColor, r: 3 },
+      { fx: "players", x: "total", y: "chips", fill: totalColor, stroke: art.paper, strokeWidth: 1.5, r: 3.5 },
     ),
   ],
 });
