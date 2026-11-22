@@ -274,12 +274,15 @@ export function Board({ game, me }: Props) {
       <section className="panel sticky bottom-0 z-10 mb-[0.4em] max-sm:-mx-[0.8em] max-sm:-mb-[0.8em] max-sm:rounded-none">
         <div className="px-[0.8em] pb-[0.4em] max-sm:px-[0.4em] max-sm:pb-[0.2em]">
           {past ? (
-            <p className="m-0 flex items-center justify-between pt-[0.5em]">
-              Viewing the table after an earlier play.{" "}
-              <button className="primary" onClick={() => setPast(undefined)}>
-                Back to now
-              </button>
-            </p>
+            <div className="flex items-end gap-[0.8em] max-sm:flex-col-reverse max-sm:items-stretch max-sm:gap-0">
+              <div className="min-w-0 flex-1">{seat >= 0 && <Hand key={g.hand} cards={g.players[seat].hand} deal={`${game._id}:${g.hand}`} />}</div>
+              <div className="flex shrink-0 flex-col items-center justify-center self-stretch pt-[0.4em] max-sm:flex-row max-sm:justify-between max-sm:pt-[0.4em]">
+                <span className="label">After an earlier play</span>
+                <button className="primary mt-[0.4em]" onClick={() => setPast(undefined)}>
+                  Back to now
+                </button>
+              </div>
+            </div>
           ) : scored ? (
             <HandScores scored={scored} who={who} chips={g.players.map((p) => p.chips)} done={() => setSeenHands(seenHands + 1)} />
           ) : view.result ? (
@@ -544,9 +547,12 @@ function Seat({ p, name, level, current, mine, voids, className, tall }: { p: Pl
             ))}
           </div>
         ) : (
-          <div className="flex min-h-[calc(6.3*var(--small))] min-w-0 flex-wrap *:not-first:-ml-[calc(var(--small)*2.2)]">
+          // each card but the last shows a strip that narrows, down to its index, as the row fills
+          <div className="flex min-h-[calc(6.3*var(--small))] min-w-0 flex-1">
             {p.won.map((w, i) => (
-              <Card key={i} card={w.down && !mine ? undefined : w.card} down={w.down} small className="landed" />
+              <div key={i} className={i === p.won.length - 1 ? "shrink-0" : "w-[calc(var(--small)*2.3)] min-w-[calc(var(--small)*1.1)]"}>
+                <Card card={w.down && !mine ? undefined : w.card} down={w.down} small className="landed" />
+              </div>
             ))}
           </div>
         )}
