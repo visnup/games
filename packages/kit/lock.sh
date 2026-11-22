@@ -1,6 +1,6 @@
-# Sourced by each app's scripts/round.sh: `lock` waits until no other app's round is running, so
-# two rounds never split the cores. A round's data step stops after $HOURS, so sharing would
-# quietly halve its data. The lock is a directory holding its owner's pid; a dead owner's lock is
+# Sourced by each app's scripts/round.sh and by queue.sh. `lock` waits until no other round or
+# queued job is running. Two jobs sharing the cores would each run at half speed. A round's data
+# step stops after $HOURS, so it would quietly get half its data. The lock is a directory holding its owner's pid; a dead owner's lock is
 # taken over. The smoke test's nested round.sh inherits ROUND_LOCK and doesn't wait on itself.
 lock() {
   [ -n "$ROUND_LOCK" ] && return

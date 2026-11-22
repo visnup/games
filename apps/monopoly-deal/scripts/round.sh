@@ -8,7 +8,8 @@
 #   3. data: $GAMES new games a player count (10000), the model's top $TOP (6) moves (plus the
 #      default's and one at random) played out on $DEALS deals (16), the mover paying, saying no
 #      and discarding by the learned models, $EXTRA passed to dataset.ts. Stops after $HOURS (2),
-#      and logs how many decisions it has written every 10 minutes, so a stall shows.
+#      and logs how many decisions it has written every 10 minutes, so a stall shows. Rerun
+#      the round to finish its data: finished shards are kept. DATA=0 skips the step.
 #   4. extract, then train: $TREES trees (1000) fit to the rounds in $WINDOW ($1 and this one).
 #   5. The new model against the old on the same deals: against the default ($N deals, 50000),
 #      against the old model's learned players ($FIELD deals, 40000), as playouts' filter
@@ -66,11 +67,15 @@ if [ -n "$strong" ]; then
 fi
 
 begin data
-(while sleep 600; do echo "  [$((($(date +%s) - start) / 60)) min, $(date +%H:%M)] $(cat $D/data-r$next/*.jsonl 2>/dev/null | wc -l | tr -d ' ') decisions so far"; done) &
-progress=$!
-timeout $((${HOURS:-2} * 3600)) node scripts/dataset.ts --games $games --deals ${DEALS:-16} --model $D/model-r$prev.json --top ${TOP:-6} --pay ${strong:+--strong $strong} $EXTRA --out $D/data-r$next
-{ kill $progress && wait $progress; } 2>/dev/null || true
-end
+if [ "${DATA:-1}" = 0 ]; then
+  end skipped
+else
+  (while sleep 600; do echo "  [$((($(date +%s) - start) / 60)) min, $(date +%H:%M)] $(cat $D/data-r$next/*.jsonl* 2>/dev/null | wc -l | tr -d ' ') decisions so far"; done) &
+  progress=$!
+  timeout $((${HOURS:-2} * 3600)) node scripts/dataset.ts --games $games --deals ${DEALS:-16} --model $D/model-r$prev.json --top ${TOP:-6} --pay ${strong:+--strong $strong} $EXTRA --out $D/data-r$next || [ $? = 124 ]
+  { kill $progress && wait $progress; } 2>/dev/null || true
+  end
+fi
 
 begin extract
 timeout 3600 node scripts/learn.ts extract --n $((games < 256 ? games : 256)) --data $D/data-r$next --features $D/features-r$next

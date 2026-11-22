@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { board, type Enc, learned, MODEL, move } from "../src/learned.ts";
 import { memory } from "../src/memory.ts";
@@ -11,7 +11,9 @@ import { shardName } from "./dataset.ts";
  * and the default's pick as 0 or 1, and each decision's move count.
  */
 export function extract(players: number, data: string, features: string, seed: number) {
-  const lines = readFileSync(`${data}/${shardName(players, seed)}.jsonl`, "utf8")
+  const file = `${data}/${shardName(players, seed)}.jsonl`;
+  if (!existsSync(file)) return [0, 0]; // a data step stopped by HOURS
+  const lines = readFileSync(file, "utf8")
     .trim()
     .split("\n");
   const x: number[] = [];
@@ -51,7 +53,7 @@ if (import.meta.main) {
   if (positionals[0] === "extract") {
     mkdirSync(args.features, { recursive: true });
     for (const players of counts) {
-      const [decisions, features] = await parallel<number[]>(import.meta.url, "extract", [players, args.data, args.features], Number(args.n), (a, b) => [a[0] + b[0], b[1]]);
+      const [decisions, features] = await parallel<number[]>(import.meta.url, "extract", [players, args.data, args.features], Number(args.n), (a, b) => [a[0] + b[0], Math.max(a[1], b[1])]);
       console.log(`${players} players: ${decisions} decisions from ${args.n} shards, ${features} features`);
     }
   } else {

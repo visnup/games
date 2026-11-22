@@ -38,8 +38,13 @@ don't work here: `dataset/` is ignored and holds every model and shard.
   `HOURS`, so two sharing the cores would each quietly get half the data. A queued round
   starts within a minute of the last one exiting; with several queued, the order isn't
   first-come.
-- Quick experiments (variants, mining the model) can run beside a round and each other: results
-  don't depend on the core count. `WORKERS=n` caps `parallel`'s workers to leave a round room.
+- Anything longer than a few minutes queues behind the round with
+  `bash ../../packages/kit/queue.sh <command>`. That covers a strong-findings table, `tables.sh`
+  and a 100,000-game variants run. `queue.sh` takes the same lock as a round. On 2026-11-21 a
+  strong-findings rerun beside monopoly-deal's round 13 left round 13's 5-player data half done
+  at `HOURS`.
+- Only quick checks run beside a round. Their results don't depend on the core count.
+  `WORKERS=n` caps `parallel`'s workers to leave the round room.
 - While any round runs, nobody edits `packages/kit` or runs `pnpm up`: every app's workers load
   those files.
 

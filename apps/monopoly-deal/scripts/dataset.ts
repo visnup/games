@@ -1,4 +1,4 @@
-import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { defaultPolicy, Game, moves, mulberry32, type Policy } from "../src/game.ts";
 import { discarded, learned, paid, ranked, said } from "../src/learned.ts";
@@ -23,7 +23,9 @@ export function shard(players: number, deals: number, model: string, top: number
   const rank = model ? ranked(model) : null;
   const field = strong ? learned(strong) : defaultPolicy;
   const rollout = strong ? field : pay ? { ...defaultPolicy, pay: paid(), sayNo: said(), discard: discarded() } : defaultPolicy;
-  const file = `${out}/${shardName(players, seed)}.jsonl`;
+  const done = `${out}/${shardName(players, seed)}.jsonl`;
+  if (existsSync(done)) return readFileSync(done, "utf8").split("\n").length - 1;
+  const file = `${done}.part`;
   writeFileSync(file, "");
   let decisions = 0;
   for (let i = 0; i < n; i++) {
@@ -75,6 +77,7 @@ export function shard(players: number, deals: number, model: string, top: number
     appendFileSync(file, rows.map((r) => JSON.stringify(r) + "\n").join(""));
     decisions += rows.length;
   }
+  renameSync(file, done);
   return decisions;
 }
 
