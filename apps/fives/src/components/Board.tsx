@@ -735,7 +735,9 @@ function reason(game: Game, p: Player): { play: Play; why: string } {
           ? !game.trick.length
             ? room < 0
               ? "You've busted, so this hand's total no longer matters. Lead your lowest card face up."
-              : "You're within 5 of 25, so lead your lowest card face up."
+              : play.down
+                ? "You're within 5 of 25, so lead your lowest card. It's over 5, so flip it: it counts 5 at most, and a higher magenta can take it."
+                : "You're within 5 of 25, so lead your lowest card face up."
             : `Duck: ${play.down ? "flip" : "play"} your biggest card that loses the trick. Tricks will come to you anyway.`
           : face(play).value <= room
             ? "Every card you can play takes the trick, so play the biggest that doesn't bust you."

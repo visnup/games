@@ -32,6 +32,12 @@
         trick gains 4.2 points at 3 players and nothing at 4 (40,000 games), 4.4 and 1.8 against
         the league, 3.1 and 0 against the learned player. A sure 25 and dumping once busted were
         worth nothing. The default is now `leadDown`, `duck`, `least`.
+  - [x] `duck` leads a card over 5 face down within 5 of 25, 2026-11-22, from production games:
+        at a hand's last lead, flipping a silver 8, 9 or 12 won 8 to 74 points more than leading
+        it face up (200 deals each). +0.2 and +0.8 points (200,000 games), +0.3 and +1.1 against
+        the league, +0.1 and +0.1 against the learned player. Only over 5: leading any lowest card
+        face down lost (2026-11-21, above). The playouts rows weren't rerun. Their noise at 2,000
+        games is bigger than the effect.
   - [x] Rerun the playouts rows of the README's players table against the new default,
         2026-11-21 (800 games, 15 minutes): 32-deal hand playouts win 63.1% and 62.3%, level with
         round 9.

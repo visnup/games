@@ -371,14 +371,21 @@ export const STEPS = {
       )
     );
   },
-  /** A play that loses the trick for now, dumping the biggest card: face down, if that also loses, gets rid of a high card for a 5. */
+  /**
+   * A play that loses the trick for now, dumping the biggest card: face down, if that also loses, gets rid of a high card for a 5.
+   * Leading within 5 of 25, the lowest card, face down if it's over 5: led face up, a last high silver is sure to take, and a
+   * magenta 5 can be beaten. From people's games online. Face down: +0.2 and +0.8 points against the default at 3 and 4 players
+   * (200,000 games), +0.3 and +1.1 against the league (40,000), +0.1 and +0.1 against the learned player (20,000).
+   */
   duck(game, p, plays) {
-    if (!game.trick.length)
-      return least(
+    if (!game.trick.length) {
+      const low = least(
         plays,
         (x) => x.card.value,
         (x) => !x.down,
       );
+      return (low && low.card.value > 5 && room(p) >= 0 && room(p) < 5 && plays.find((x) => x.card === low.card && x.down)) || low;
+    }
     return least(
       plays,
       (x) => -x.card.value * 2 - +x.down,
