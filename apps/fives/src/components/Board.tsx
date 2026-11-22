@@ -181,11 +181,14 @@ export function Board({ game, me }: Props) {
   const swept = trick.winner !== undefined;
   useEffect(() => {
     if (!stepping || scored) return;
-    const jump = !step || game.log.length - shown > 40;
+    const far = game.log.length - shown > 40;
+    // Off shows a trick's plays at once, up to its end; a trick has a play from every seat, so tricks end every `n` decisions
+    const next = far ? game.log.length : step ? shown + 1 : Math.min(game.log.length, (Math.floor(shown / n) + 1) * n);
     // a finished trick stays long enough to see it swept to its winner
-    const t = setTimeout(() => setShown((n) => (jump ? game.log.length : n + 1)), jump || game.log[shown].seat === seat ? 0 : swept ? step + SWEEP : step);
+    const delay = far ? 0 : swept ? step + SWEEP : !step || game.log[shown].seat === seat ? 0 : step;
+    const t = setTimeout(() => setShown(next), delay);
     return () => clearTimeout(t);
-  }, [stepping, step, shown, game.log, seat, scored, swept]);
+  }, [stepping, step, shown, game.log, seat, scored, swept, n]);
   return (
     <div className="mx-auto flex min-h-dvh max-w-[64em] flex-col gap-[0.8em] p-[0.8em]">
       <Head>
