@@ -519,9 +519,16 @@ function Seat({ p, name, level, current, mine, voids, className, tall }: { p: Pl
     >
       <h2 className={`m-0 flex flex-wrap gap-x-[0.5em] text-sm font-bold ${tall ? "flex-col items-center gap-y-[0.3em] text-center" : "items-center"}`}>
         <span className={tall ? "flex max-w-full flex-col" : "truncate"}>
-          <span className="truncate">{name}</span>
+          <span className="truncate">
+            {name}
+            {level && (
+              <small className="ml-[0.3em] font-normal opacity-60 sm:hidden" title={LEVELS[level].title}>
+                {LEVELS[level].name[0]}
+              </small>
+            )}
+          </span>
           {level && (
-            <small className={`font-normal opacity-60 ${tall ? "" : "ml-[0.4em]"}`} title={LEVELS[level].title}>
+            <small className={`font-normal opacity-60 max-sm:hidden ${tall ? "" : "ml-[0.4em]"}`} title={LEVELS[level].title}>
               {LEVELS[level].name}
             </small>
           )}
@@ -530,7 +537,7 @@ function Seat({ p, name, level, current, mine, voids, className, tall }: { p: Pl
           <Chips n={p.chips} />
         </span>
       </h2>
-      <div className={`flex gap-[0.5em] ${tall ? "min-h-0 flex-1 flex-col items-center" : "items-center"}`}>
+      <div className={`flex ${tall ? "min-h-0 flex-1 flex-col items-center gap-[0.2em]" : "items-center gap-[0.5em]"}`}>
         <span key={t} className="landed flex min-w-[2.6em] flex-col items-center" title="This hand's total: the cards that won tricks">
           <span className={`text-xl leading-none font-extrabold ${t > TARGET ? "text-bust" : t === TARGET ? "text-magenta" : ""}`}>{t}</span>
           <span className={`label text-[0.55rem] ${t > TARGET ? "text-bust opacity-100" : t === TARGET ? "text-magenta opacity-100" : ""}`}>{t > TARGET ? "bust" : t === TARGET ? "on 25" : `${TARGET - t} to go`}</span>
