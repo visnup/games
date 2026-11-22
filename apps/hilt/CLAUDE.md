@@ -28,19 +28,20 @@ Its last page has the card list and each fate card's rule.
 - `learned.ts`: the learned player. `board` and `move` turn a decision into numbers, and the
   LightGBM trees in `src/packed/model.ts` (flattened by `trees.ts`, copied from monopoly-deal) rank the moves.
   One of a move's numbers is whether it's the default's pick, and `hint` is the default the
-  models were trained with (before `hold`); move it to `defaultPolicy` once a round trains on the
-  new default.
+  models were trained with (before `hold`). It matters little: today's model reading today's
+  default's pick instead wins 0.2 to 1.7 points less (2026-11-21, 10,000 games). A plain round never
+  plays the default, so the default reaches it only through this number.
   `scripts/dataset.ts` writes every decision of default games with each move's playout value as
   JSONL shards in `dataset/data*/` (not committed); `--play` has a model's learned player play
   the games and `--rollout` play inside the playouts; `--mixed` seats the rollout player or a
   default from `LEAGUE` beside it, evenly, each played on as it really plays, and `round.sh`
-  takes it as `MIXED=1`, naming the round with `NAME` (`o1`, `o2`). `uv run scripts/learn.py [trees] [out]
+  takes it as `MIXED=1`, naming the round with `NAME` (`o1` to `o3`). `uv run scripts/learn.py [trees] [out]
   [directories…]` fits the trees, holding out the last directory's last 8 shards a player count.
   Each round's data and model live in `dataset/data-rN/` and `dataset/model-rN.json` (not
   committed), an `s` for labels from learned players in the playouts and `-200` for the
   200-tree rollout models; `variants.ts` names them `learned rN` and takes any variant as
   `--field`. From round 4, round N's model is fit to rounds 3 to N's games, and its file is named for them
-  (`model-r345678s` is round 8). `src/packed/model.ts` is rounds 3–9 with `o1` and `o2` fit together (see the README's "Knowing the table"), 2.3 MB packed; its JSON is `dataset/model-r3456789o12.json`, and `src/packed/rollout.ts` its 200-tree version. `scripts/round.sh N` runs
+  (`model-r345678s` is round 8). `src/packed/model.ts` is rounds 3–9 with `o1` to `o3` fit together (see the README's "Knowing the table"); its JSON is `dataset/model-r3456789o123.json`, and `src/packed/rollout.ts` its 200-tree version. `scripts/round.sh N` runs
   round N end to end after a half-minute smoke test of itself (`SMOKE=0` skips it), writing
   `log.txt`, `run.json` and `events.jsonl` to `dataset/rN/`, and `node scripts/status.ts`
   (`status` in `.claude/launch.json`) serves the newest round's progress and ETA at
@@ -118,7 +119,7 @@ When to dig in, and when to stop:
   until `hold` the default had never learned from the model.
 - Stop training rounds once one gains less than twice the noise over the last. Round 9 gained
   0.5 to 0.9, and round 10, on twice the games, 0.3 to 0.7. Before another round, change one
-  lever and say why: labels from the new default, more deals a label, new features (card memory,
+  lever and say why: more deals a label, new features (card memory,
   as in `../fives`), or bigger trees. First check what caps it, as `../fives`' TODO "Headroom"
   does: if playouts among the rollout players lose to the model, it's the labels.
 - Dig into a decision when a person's game shows a costly one, or a card's value in `cards.ts`

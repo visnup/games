@@ -61,10 +61,10 @@
       with true rollouts gain 19 to 29 points against the league, as much as playouts that know
       every seat; the features for what each player has shown add nothing (same data without
       them ties). It loses badly to round 9's tables (7 to 20%).
-- [ ] A Hard bot for people: `o2` (round 9's player in half the seats) still loses badly to
-      round 9's tables; fit with rounds 3–9's data too (`model-r3456789o12`), it gives up 0.4 to
-      2.8 points there and gains 12 to 33 against the league and the default (2026-11-21).
-      Decide whether to adopt it; if so, pack it and its 200-tree version.
+- [x] A Hard bot for people (README "Knowing the table", 2026-11-21): rounds 3–9 with `o1` and
+      `o2`, adopted in ae34a09. A third mixed round against today's league (`o3`), fit with the
+      rest, ties at round 9's tables and against the default, and gains 1.5 to 1.9 against the
+      league at 4 to 6 players. Adopted.
 - [ ] More from the learned player: at 6 players it passes on 1s the default opens with, and
       plays 10s where it plays 1s.
 - [x] Use the model to prune playouts to its top moves, and race on more deals, 2026-11-19:

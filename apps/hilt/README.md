@@ -620,6 +620,20 @@ moves. Fit to all of it together:
 It gives up 0.4 to 2.8 points at a table of round 9's players, and gains 12 to 24 against the
 league and 12 to 33 against the default. Against a table it doesn't know, it's the safer player.
 
+A third mixed round (`o3`, 2026-11-21) played against today's league, which now ends with today's
+default, with round 9's player in half the other seats. Alone, it wins 0.6 to 1.6 points more
+than `o2` at a table of round 9's players and 1.1 to 4.1 more against today's default. It ties
+`o2` against the league. Fit with everything else, against today's default and league (20,000
+games each):
+
+| model | at a table of round 9 | against the league | against the default |
+| --- | --- | --- | --- |
+| rounds 3–9, `o1` and `o2` | 32.9 / 22.2 / 18.0 / 15.8 | 67.9 / 55.7 / 49.9 / 44.1 | 64.4 / 53.4 / 47.2 / 42.4 |
+| rounds 3–9, `o1` to `o3` | 32.8 / 22.3 / 17.3 / 15.4 | 68.3 / 57.2 / 51.4 / 46.0 | 64.6 / 54.0 / 47.8 / 43.0 |
+
+It ties at a table of round 9's players and against the default. It gains 1.5 to 1.9 points
+against the league at 4 to 6 players. Hard plays it.
+
 ## Rule readings
 
 The booklet leaves one thing open that a flag in `Rules` reads either way: whether a Favor holder
