@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "convex/react";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-import { Board, type Level, LEVELS, setStepSpeed, type Speed, stepSpeed } from "./Board";
+import { Board, counting, type Level, LEVELS, setCounting, setStepSpeed, type Speed, stepSpeed } from "./Board";
 
 const notice = "m-0 grid min-h-dvh place-items-center text-xl font-semibold tracking-wide opacity-80";
 
@@ -78,6 +78,7 @@ function Lobby({ table, me, alone }: { table: string; me: Id<"players">; alone: 
   const [now, setNow] = useState(() => Math.floor(Date.now() / 5e3) * 5e3);
   const [bots, setBots] = useState<Level[]>(["default", "default", "default"]);
   const [step, setStep] = useState(stepSpeed);
+  const [count, setCount] = useState(counting);
   // each new `now` is a new query, so keep showing the last list while it loads
   const active = useQuery(api.players.active, { table, now });
   const [players, setPlayers] = useState<NonNullable<typeof active>>([]);
@@ -146,6 +147,18 @@ function Lobby({ table, me, alone }: { table: string; me: Id<"players">; alone: 
             <option value="slow">Slow</option>
             <option value="off">Off</option>
           </select>
+        </label>
+        <label className="mt-3 flex items-center justify-between gap-2 text-sm opacity-80" title="Marks which of your cards no card you haven't seen can beat">
+          Count cards for me
+          <input
+            type="checkbox"
+            className="size-4 accent-magenta"
+            checked={count}
+            onChange={(e) => {
+              setCount(e.target.checked);
+              setCounting(e.target.checked);
+            }}
+          />
         </label>
         <button className="primary mt-5 w-full py-2 text-lg" disabled={total < 3 || total > 4} onClick={() => start({ table, players: players.map((p) => p._id), bots })}>
           Deal {total} players

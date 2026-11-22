@@ -17,10 +17,14 @@ test("plays a whole game by taking the Hint", async ({ page }) => {
   await page.getByRole("button", { name: "Deal 3 players" }).click();
   const over = page.getByText(/ won!$| share the win\.$/);
   while (!(await over.isVisible())) {
-    for (const name of [/^Skip$/, /^Continue$/, /^Hint$/, /^Play /]) {
+    for (const name of [/^Skip$/, /^Continue$/, /^Hint$/]) {
       const button = page.getByRole("button", { name }).first();
-      if (await button.isVisible()) await button.click();
+      // the bar redraws with every play, so a button can go before the click lands
+      if (await button.isVisible()) await button.click({ timeout: 1e3 }).catch(() => {});
     }
+    const hinted = page.locator("[data-hinted]");
+    // the hinted card can be under its neighbor, so a click at its middle would play that one
+    if (await hinted.isVisible()) await hinted.dispatchEvent("click");
     await page.waitForTimeout(100);
   }
   await expect(over).toBeVisible();

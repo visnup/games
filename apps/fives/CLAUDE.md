@@ -144,7 +144,10 @@ players' hands aren't hidden from their browsers; it's for friends.
   report at a game's end, in a web worker per core.
 - `src/components/Board.tsx`: the table as a 3×3 grid, the trick in the middle
   with each card toward its player, and the seats around it, you at the bottom. A hand's scores
-  hold the playback until you continue.
+  hold the playback until you continue. When you follow, each card that would take the trick
+  shows your total after it (solid when it's sure to, if the lobby's "Count cards for me" is on), and the card under the pointer says what
+  it does. Face down turns every card that can be one into a magenta 5; F and a long press flip
+  one. Motion is CSS keyframes in `globals.css`, off under `prefers-reduced-motion`.
 - Prettier is 220 wide, to match the engine, and leaves Markdown alone.
 - Tailwind under Turbopack can miss a class added while `pnpm dev` runs: restart the dev server
   before deciding a class doesn't work.

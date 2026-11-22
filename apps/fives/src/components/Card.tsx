@@ -8,29 +8,31 @@ const corner = "absolute top-[0.25em] left-[0.2em] flex flex-col items-center fo
 
 /**
  * A card face up, in its color with its number in white; or `down`, the light back with its
- * magenta 5. `dim` is for a card that can't be played now.
+ * magenta 5, with the card's own number under the corner when it's yours. `dim` is for a card
+ * that can't be played now.
  */
-export function Card({ card, down, hinted, dim, small, onClick }: { card?: CardType; down?: boolean; hinted?: boolean; dim?: boolean; small?: boolean; onClick?: () => void }) {
+export function Card({ card, down, hinted, dim, small, className = "", onClick }: { card?: CardType; down?: boolean; hinted?: boolean; dim?: boolean; small?: boolean; className?: string; onClick?: () => void }) {
   const Tag = onClick ? "button" : "div";
   const back = down || !card;
   const value = back ? 5 : card.value;
   return (
     <Tag
-      className={`card ${small ? "small" : ""} relative m-0 inline-flex items-center justify-center p-0 font-numbers transition-transform duration-150 ${back ? "bg-back text-magenta ring-1 ring-black/10" : "text-white"} ${hinted ? "outline-3 outline-ink/40" : ""} ${dim ? "brightness-150 grayscale dark:brightness-50" : ""}`}
+      className={`card ${small ? "small" : ""} relative m-0 inline-flex items-center justify-center p-0 font-numbers transition-[translate,filter,opacity] duration-150 ${back ? "bg-back text-magenta ring-1 ring-black/10" : "text-white"} ${hinted ? "outline-3 outline-offset-2 outline-ink/50" : ""} ${dim ? "brightness-125 grayscale dark:brightness-50" : ""} ${className}`}
       style={back ? undefined : { background: PAINT[card.color] }}
       onClick={onClick}
+      data-hinted={hinted || undefined}
       aria-label={back ? (card ? `${card.color} ${card.value} face down` : "magenta 5") : `${card.color} ${card.value}`}
     >
       <span className={corner}>
         {value}
         <span className="mt-[0.15em] size-[0.18em] rounded-full bg-current" />
+        {back && card && (
+          <span className="mt-[0.3em] rounded-[0.2em] px-[0.15em] py-[0.1em] text-[0.8em] text-white" style={{ background: PAINT[card.color] }}>
+            {card.value}
+          </span>
+        )}
       </span>
-      <span className="text-[2.6em] leading-none font-bold tracking-tight">{value}</span>
-      {back && card && (
-        <span className="absolute right-[0.35em] bottom-[0.25em] text-[0.65em] font-bold opacity-80" style={{ color: PAINT[card.color] }}>
-          {card.value}
-        </span>
-      )}
+      <span className="big text-[2.6em] leading-none font-bold tracking-tight">{value}</span>
     </Tag>
   );
 }

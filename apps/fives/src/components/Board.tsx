@@ -6,9 +6,9 @@ import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import type { bot } from "../../convex/schema";
 import { type Card as CardType, COLORS } from "../cards.ts";
-import { defaultPolicy, type Game, type Play, type Player, type Scored, TARGET, total, type Trick } from "../game.ts";
+import { defaultPolicy, face, type Game, type Play, type Player, type Scored, sure, TARGET, total, type Trick, winning } from "../game.ts";
 import { type Choice, choose, type Prompt, replay, setup } from "../replay.ts";
-import { Card, Chips } from "./Card";
+import { Card, Chips, PAINT } from "./Card";
 import { Review } from "./Review";
 
 type Props = { game: Doc<"games"> & { log: Choice[]; names: (string | null)[] }; me?: Id<"players"> };
@@ -91,6 +91,20 @@ const SLOTS: Record<number, string[]> = {
   3: ["col-start-2 row-start-3", "col-start-1 row-start-1", "col-start-3 row-start-1"],
   4: ["col-start-2 row-start-3", "col-start-1 row-start-2", "col-start-2 row-start-1", "col-start-3 row-start-2"],
 };
+/** Where a card played into the trick comes from, in em, toward its seat. */
+const FROM: Record<number, [number, number][]> = {
+  3: [
+    [0, 5],
+    [-5, -1],
+    [5, -1],
+  ],
+  4: [
+    [0, 5],
+    [-5, 0],
+    [0, -5],
+    [5, 0],
+  ],
+};
 
 export function Board({ game, me }: Props) {
   const decide = useMutation(api.games.decide);
@@ -152,8 +166,9 @@ export function Board({ game, me }: Props) {
   const bottom = Math.max(0, seat);
   // the trick under way, or the last one to end until the next has a card in it, within the hand
   const trick: { plays: Trick["plays"]; winner?: number } = g.trick.length || !view.tricks.length || g.players.every((p) => !p.won.length) ? { plays: g.trick } : view.tricks.at(-1)!;
+  const taking = g.trick.length ? g.taking() : undefined;
   return (
-    <div className="mx-auto flex max-w-[64em] flex-col gap-[0.8em] p-[0.8em]">
+    <div className="mx-auto flex min-h-dvh max-w-[64em] flex-col gap-[0.8em] p-[0.8em]">
       <Head>
         <title>{up ? "Your play · Fives" : "Fives"}</title>
       </Head>
@@ -163,7 +178,7 @@ export function Board({ game, me }: Props) {
           <span className="text-sm">{view.result ? "Game over" : `Trick ${Math.min(n === 3 ? 12 : 13, g.players.reduce((s, p) => s + p.won.length, 0) + 1)}`}</span>
           {g.pot > 0 && <span className="text-xs opacity-70">{g.pot} in the pot</span>}
         </div>
-        <div className="h-[5rem] flex-1 overflow-y-auto text-sm" ref={log}>
+        <div className="h-[5rem] flex-1 overflow-y-auto text-sm max-sm:h-[3.4rem]" ref={log}>
           {entries(logged, who).map(({ heading, line: first, lines }, i) => (
             <section key={i}>
               {heading && (
@@ -186,15 +201,27 @@ export function Board({ game, me }: Props) {
         </div>
       </section>
       {result && seat >= 0 && <Review key={game._id} setup={setup(game)} log={game.log} seat={seat} show={(n) => setPast({ decisions: n, line: until(game, n).lines.length - 1 })} />}
-      <div className="mb-[9em] max-sm:mb-[6em] grid grid-cols-[1fr_auto_1fr] grid-rows-[auto_auto_auto] items-center gap-[0.6em] max-sm:gap-[0.3em]">
-        <div className="col-start-2 row-start-2 grid aspect-square w-[min(17em,46vw,34dvh)] grid-cols-3 grid-rows-3 place-items-center">
-          {trick.plays.map(({ seat: s, play }) => (
-            <div key={s} className={`${SLOTS[n][(s - bottom + n) % n]} relative`}>
-              <Card card={play.down && s !== seat ? undefined : play.card} down={play.down} small />
-              {trick.winner === s && <span className="absolute -top-[0.6em] -right-[0.6em] rounded-full bg-ink px-[0.4em] text-[0.65rem] font-bold text-bar">wins</span>}
-            </div>
-          ))}
-          {!trick.plays.length && <span className="col-start-2 row-start-2 text-center text-xs opacity-50">{view.result ? "" : `${who(g.current)} ${g.current === seat ? "lead" : "leads"}`}</span>}
+      <div className="grid flex-1 grid-cols-[1fr_auto_1fr] grid-rows-[auto_auto_auto] content-center items-center gap-[0.6em] max-sm:gap-[0.3em]">
+        <div className="col-start-2 row-start-2 grid aspect-square w-[min(21em,50vw,36dvh)] grid-cols-3 grid-rows-3 place-items-center rounded-full bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--color-magenta)_9%,transparent),transparent)]">
+          {trick.plays.map(({ seat: s, play }) => {
+            const place = (s - bottom + n) % n;
+            const [dx, dy] = FROM[n][place];
+            const badge = trick.winner === s ? "wins" : taking === s ? "taking" : undefined;
+            return (
+              <div key={`${s}:${play.card.id}`} className={`${SLOTS[n][place]} played relative`} style={{ "--dx": dx, "--dy": dy } as React.CSSProperties}>
+                <Card card={play.down && s !== seat ? undefined : play.card} down={play.down} className={`trick ${badge ? "outline-2 outline-offset-2 outline-ink" : ""}`} />
+                {badge && (
+                  <span
+                    key={badge}
+                    className={`absolute -top-[0.7em] -right-[0.7em] animate-pop rounded-full px-[0.45em] text-[0.65rem] font-bold ${badge === "wins" ? "bg-ink text-bar" : "bg-bar text-ink ring-1 ring-ink/40"}`}
+                  >
+                    {badge}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+          {!trick.plays.length && <span className="col-start-2 row-start-2 animate-rise text-center text-xs opacity-60">{view.result ? "" : `${who(g.current)} ${g.current === seat ? "lead" : "leads"}`}</span>}
         </div>
         {g.players.map((p) => (
           <Seat
@@ -223,11 +250,11 @@ export function Board({ game, me }: Props) {
           ) : view.result ? (
             <p className="m-0 pt-[0.8em] font-bold">{view.result.winners.length > 1 ? `${view.result.winners.map(who).join(" and ")} share the win.` : `${who(view.result.winners[0])} won!`}</p>
           ) : !stepping && prompt && prompt.seat === seat ? (
-            <Ask key={game.log.length} game={g} p={g.players[seat]} send={send} prompt={prompt} />
+            <Ask key={game.log.length} game={g} p={g.players[seat]} send={send} prompt={prompt} deal={`${game._id}:${g.hand}`} />
           ) : (
-            <div className="flex items-end gap-[0.8em]">
-              <div className="min-w-0 flex-1">{seat >= 0 && <Hand cards={g.players[seat].hand} />}</div>
-              <div className="flex shrink-0 flex-col items-center justify-center self-stretch pt-[0.8em]">
+            <div className="flex items-end gap-[0.8em] max-sm:flex-col-reverse max-sm:items-stretch max-sm:gap-0">
+              <div className="min-w-0 flex-1">{seat >= 0 && <Hand key={g.hand} cards={g.players[seat].hand} deal={`${game._id}:${g.hand}`} />}</div>
+              <div className="flex shrink-0 flex-col items-center justify-center self-stretch pt-[0.8em] max-sm:flex-row max-sm:justify-between max-sm:pt-[0.4em]">
                 <span className="label">Waiting for {view.prompt ? who(view.prompt.seat) : "…"}</span>
                 {stepping && (
                   <button className="quiet mt-[0.4em] px-3 py-1 text-sm" onClick={() => setShown(game.log.length)}>
@@ -237,7 +264,7 @@ export function Board({ game, me }: Props) {
               </div>
             </div>
           )}
-          {error && <p className="text-red-600">{error}</p>}
+          {error && <p className="text-bust">{error}</p>}
         </div>
       </section>
     </div>
@@ -247,13 +274,13 @@ export function Board({ game, me }: Props) {
 /** A hand's scores: each player's total, and the chips it won or cost them. */
 function HandScores({ scored, who, chips, done }: { scored: Scored; who: (n: number) => string; chips: number[]; done: () => void }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-[0.8em] pt-[0.8em]">
+    <div className="flex animate-rise flex-wrap items-center justify-between gap-[0.8em] pt-[0.8em]">
       <div>
         <h3 className="label m-0">Hand {scored.hand} scores</h3>
         <ul className="mt-[0.3em] flex flex-wrap gap-x-[1.2em] gap-y-[0.2em]">
           {scored.totals.map((t, i) => (
             <li key={i}>
-              {who(i)}: <b className={t > TARGET ? "text-red-600" : t === TARGET ? "text-magenta" : ""}>{t > TARGET ? `${t}, bust` : t}</b>{" "}
+              {who(i)}: <b className={t > TARGET ? "text-bust" : t === TARGET ? "text-magenta" : ""}>{t > TARGET ? `${t}, bust` : t}</b>{" "}
               <span className="opacity-70">{scored.gained[i] >= 0 ? `+${scored.gained[i]}` : `−${-scored.gained[i]}`}</span> <span className="text-xs opacity-50">({chips[i]})</span>
             </li>
           ))}
@@ -272,10 +299,14 @@ const rank = (c: CardType) => COLORS.indexOf(c.color) * 100 + c.value;
 /** How far the card `d` places from the hovered one moves aside, in em: most for its neighbors, none from 4 away. */
 const aside = (d: number) => (d === 0 ? 0 : Math.sign(d) * 1.2 * Math.max(0, 1 - (Math.abs(d) - 1) / 3));
 
+/** The last hand dealt in, by game and hand, so a hand animates its deal once however often it's drawn again. */
+let lastDeal: string | undefined;
+
 /**
- * A hand, sorted by color and overlapped in a row, 2.4em of each card under the next, up to 3.2em when 13 wouldn't fit, which
- * still shows a two-digit index. On a phone only the cards' tops show. With `onClick`, a hovered card rises and the others move
- * aside. `onClick` and the rest take places in the hand as dealt, not as shown.
+ * A hand, sorted by color in a row, overlapped only as much as it needs to fit, up to 3.2em of each card under the next, which
+ * still shows a two-digit index. Once the cards overlap past their middles, only the last shows its big number. With `onClick`,
+ * a hovered card rises and the others move aside. `tag` labels a card from above. `onClick` and the rest take places in the hand
+ * as dealt, not as shown. A new `deal` deals the cards in.
  */
 export function Hand({
   cards,
@@ -285,12 +316,16 @@ export function Hand({
   hinted,
   dim,
   down,
+  tag,
+  deal,
 }: {
   cards: CardType[];
   onClick?: (i: number) => void;
   onHover?: (i: number | undefined) => void;
   /** A held touch on a touch screen. */
   onFlip?: (i: number) => void;
+  tag?: (i: number) => React.ReactNode;
+  deal?: string;
   hinted?: number;
   dim?: (c: CardType) => boolean;
   down?: (i: number) => boolean;
@@ -357,20 +392,26 @@ export function Hand({
   };
   // a touch plays on release, not on the click after it
   const click = (i: number) => touched.current || onClick?.(i);
+  // fixed at mount, since dropping the class would stop the animation part way
+  const [fresh] = useState(() => deal !== undefined && deal !== lastDeal);
+  useEffect(() => {
+    lastDeal = deal;
+  }, [deal]);
   return (
     <div
       ref={ref}
-      className="@container flex touch-none justify-center pt-[1.4em] pb-[1.5em] text-[0.85rem] max-sm:h-[4.6em] max-sm:pb-0 max-sm:[clip-path:inset(-100vh_-100vw_0)] *:not-first:-ml-[clamp(2.4em,calc(4.875em-8.33cqw),3.2em)]"
+      className="@container flex touch-none justify-center pt-[1.6em] pb-[1.2em] text-[0.85rem] max-sm:pb-[0.4em] *:not-first:-ml-[clamp(0.6em,calc(4.875em-8.33cqw),3.2em)] @max-[34rem]:[&>div:not(:last-child)_.big]:opacity-0"
       onMouseLeave={() => press.current || hovered(undefined)}
       {...touch}
     >
       {order.map((i, k) => (
         <div
           key={i}
-          className={`relative transition-transform duration-150 select-none [-webkit-touch-callout:none] ${hover === i ? "z-10" : ""}`}
-          style={onClick && at >= 0 ? { translate: `${aside(k - at)}em ${hover === i ? -lift : 0}em` } : undefined}
+          className={`relative transition-transform duration-150 select-none [-webkit-touch-callout:none] ${hover === i ? "z-10" : ""} ${fresh ? "dealt" : ""}`}
+          style={{ "--k": k, ...(onClick && at >= 0 ? { translate: `${aside(k - at)}em ${hover === i ? -lift : 0}em` } : {}) } as React.CSSProperties}
           onMouseEnter={onClick && (() => touched.current || hovered(i))}
         >
+          {tag?.(i)}
           <Card card={cards[i]} down={down?.(i)} hinted={hinted === i} dim={dim?.(cards[i])} onClick={onClick && (() => click(i))} />
         </div>
       ))}
@@ -398,6 +439,21 @@ export function setStepSpeed(s: Speed) {
   } catch {}
 }
 
+/** Whether this browser asked, in the lobby, to have cards counted for it: which of your cards are sure to take a trick. */
+export function counting(): boolean {
+  try {
+    return localStorage.getItem("count") === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function setCounting(on: boolean) {
+  try {
+    localStorage.setItem("count", on ? "1" : "0");
+  } catch {}
+}
+
 /** A bot's kind of player, as the lobby and its seat name it. */
 export type Level = Infer<typeof bot>;
 export const LEVELS: Record<Level, { name: string; title: string }> = {
@@ -420,20 +476,21 @@ function Seat({ p, name, level, current, mine, className, tall }: { p: Player; n
             </small>
           )}
         </span>
-        <span className={tall ? "" : "ml-auto"}>
+        <span key={p.chips} className={`animate-pop ${tall ? "" : "ml-auto"}`}>
           <Chips n={p.chips} />
         </span>
       </h2>
       <div className={`flex gap-[0.5em] ${tall ? "flex-col items-center" : "items-center"}`}>
         <span className="flex min-w-[2.6em] flex-col items-center" title="This hand's total: the cards that won tricks">
-          <span className={`text-lg leading-none font-extrabold ${t > TARGET ? "text-red-600" : t === TARGET ? "text-magenta" : ""}`}>{t}</span>
-          <span className="label text-[0.55rem]">{t > TARGET ? "bust" : "of 25"}</span>
-          {t <= TARGET && <span className="label text-[0.55rem] opacity-60">{TARGET - t} to go</span>}
+          <span key={t} className={`animate-pop text-xl leading-none font-extrabold ${t > TARGET ? "text-bust" : t === TARGET ? "text-magenta" : ""}`}>
+            {t}
+          </span>
+          <span className={`label text-[0.55rem] ${t > TARGET ? "text-bust opacity-100" : t === TARGET ? "text-magenta opacity-100" : ""}`}>{t > TARGET ? "bust" : t === TARGET ? "on 25" : `${TARGET - t} to go`}</span>
         </span>
         {tall ? (
           <div className="flex flex-col *:not-first:-mt-[calc(var(--small)*2.2)]">
             {p.won.map((w, i) => (
-              <div key={i} className="grid h-[calc(4.5*var(--small))] w-[calc(6.3*var(--small))] place-items-center">
+              <div key={i} className="grid h-[calc(4.5*var(--small))] w-[calc(6.3*var(--small))] animate-pop place-items-center">
                 <div className="rotate-90">
                   <Card card={w.down && !mine ? undefined : w.card} down={w.down} small />
                 </div>
@@ -443,7 +500,7 @@ function Seat({ p, name, level, current, mine, className, tall }: { p: Player; n
         ) : (
           <div className="flex min-h-[calc(6.3*var(--small))] min-w-0 flex-wrap *:not-first:-ml-[calc(var(--small)*2.2)]">
             {p.won.map((w, i) => (
-              <Card key={i} card={w.down && !mine ? undefined : w.card} down={w.down} small />
+              <Card key={i} card={w.down && !mine ? undefined : w.card} down={w.down} small className="animate-pop" />
             ))}
           </div>
         )}
@@ -452,69 +509,129 @@ function Seat({ p, name, level, current, mine, className, tall }: { p: Player; n
   );
 }
 
-function Ask({ game, p, send, prompt }: { game: Game; p: Player; send: (c: Choice) => void; prompt: Prompt }) {
+function Ask({ game, p, send, prompt, deal }: { game: Game; p: Player; send: (c: Choice) => void; prompt: Prompt; deal: string }) {
   const legal = game.legal(p);
   const [hint, setHint] = useState<Play>();
   const [hover, setHover] = useState<number>();
   // cards flipped face down, by place in hand
   const [flipped, setFlipped] = useState<number[]>([]);
+  // every card that can be, face down
+  const [allDown, setAllDown] = useState(false);
   const [note, setNote] = useState<string>();
   const flip = (i: number) => setFlipped((f) => (f.includes(i) ? f.filter((x) => x !== i) : [...f, i]));
+  const canDown = (c: CardType) => legal.some((l) => l.card === c && l.down);
+  const anyDown = legal.some((l) => l.down);
+  const down = (i: number) => (allDown ? canDown(p.hand[i]) : flipped.includes(i));
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
-      if (e.key === "f" && hover !== undefined && !e.metaKey && !e.ctrlKey && !(e.target instanceof HTMLInputElement)) flip(hover);
+      if (e.key !== "f" || e.metaKey || e.ctrlKey || e.target instanceof HTMLInputElement) return;
+      if (hover !== undefined) flip(hover);
+      else if (anyDown) setAllDown((d) => !d);
     };
     addEventListener("keydown", key);
     return () => removeEventListener("keydown", key);
-  }, [hover]);
+  }, [hover, anyDown]);
   const play = (i: number) => {
     const card = p.hand[i];
-    const down = flipped.includes(i);
-    if (legal.some((l) => l.card === card && l.down === down)) return send({ kind: prompt.kind, seat: p.seat, ...choose(p, { card, down }) });
+    if (legal.some((l) => l.card === card && l.down === down(i))) return send({ kind: prompt.kind, seat: p.seat, ...choose(p, { card, down: down(i) }) });
     setNote(
-      down
-        ? "You can't play a magenta 5 now."
+      down(i) || allDown
+        ? "You can't play that one as a magenta 5 now."
         : game.led() && legal.some((l) => l.card === card)
-          ? "Only face down, as a magenta 5: press F, or long-press it."
+          ? "Only face down, as a magenta 5: turn on Face down, press F, or long-press it."
           : game.led()
             ? `You have to follow ${game.led()}.`
             : "You can't play that now.",
     );
   };
+  const led = game.led();
+  const t = total(p);
+  const [count] = useState(counting);
+  // what the card under the pointer would do, in words
+  const pointed = hover !== undefined && legal.some((l) => l.card === p.hand[hover] && l.down === down(hover)) ? { card: p.hand[hover], down: down(hover) } : undefined;
+  const preview =
+    pointed && game.trick.length
+      ? winning(game, pointed)
+        ? `${count && sure(game, p, pointed) ? "Takes it" : "Takes it for now"}:${t + face(pointed).value}${t + face(pointed).value > TARGET ? ", bust" : ""}`
+        : "Ducks"
+      : undefined;
   return (
     <div className="relative">
-      <div className="flex items-end gap-[0.8em]">
+      <div className="flex items-end gap-[0.8em] max-sm:flex-col-reverse max-sm:items-stretch max-sm:gap-0">
         <div className="min-w-0 flex-1">
           <Hand
             cards={p.hand}
-            down={(i) => flipped.includes(i)}
+            deal={deal}
+            down={down}
             hinted={hint ? p.hand.indexOf(hint.card) : undefined}
-            dim={(c) => !legal.some((l) => l.card === c)}
+            dim={(c) => !legal.some((l) => l.card === c && (!allDown || l.down))}
             onClick={play}
             onFlip={flip}
             onHover={(i) => {
               setHover(i);
               setNote(undefined);
             }}
+            tag={(i) => <Outcome game={game} p={p} play={{ card: p.hand[i], down: down(i) }} legal={legal} count={count} />}
           />
         </div>
-        <div className="flex shrink-0 flex-col items-center justify-center gap-[0.4em] self-stretch pt-[0.8em]">
-          <span className="label">{game.trick.length ? "Your play" : "Your lead"}</span>
-          <button
-            className="quiet"
-            onClick={() => {
-              const m = defaultPolicy.play(game, p);
-              const i = p.hand.indexOf(m.card);
-              setHint(m);
-              setFlipped((f) => (m.down ? [...f.filter((x) => x !== i), i] : f.filter((x) => x !== i)));
-            }}
-          >
-            Hint
-          </button>
-          <span className="label hidden text-[0.55rem] pointer-coarse:block">Hold to flip</span>
+        <div className="flex w-[9em] shrink-0 flex-col items-center justify-center gap-[0.4em] self-stretch pt-[0.8em] text-center max-sm:w-auto max-sm:flex-row max-sm:justify-between max-sm:pt-[0.4em]">
+          <span className="label flex items-center gap-[0.4em]">
+            {!led ? (
+              "Your lead"
+            ) : p.hand.some((c) => c.color === led) ? (
+              <>
+                <span className="size-[0.8em] rounded-full" style={{ background: PAINT[led] }} />
+                Follow {led}
+              </>
+            ) : (
+              "Any card"
+            )}
+          </span>
+          <span className={`text-xs font-bold whitespace-nowrap ${preview ? "" : t > TARGET ? "text-bust" : t === TARGET ? "text-magenta" : "opacity-70"}`}>
+            {preview ?? (t > TARGET ? `${t}, bust` : `${t} · ${TARGET - t} to go`)}
+          </span>
+          <div className="flex flex-wrap justify-center gap-[0.3em]">
+            {anyDown && (
+              <button className={`quiet px-[0.6em] ${allDown ? "ring-2 ring-magenta" : ""}`} aria-pressed={allDown} title="Play cards face down, as magenta 5s (F)" onClick={() => setAllDown(!allDown)}>
+                Face down
+              </button>
+            )}
+            <button
+              className="quiet px-[0.6em]"
+              onClick={() => {
+                const m = defaultPolicy.play(game, p);
+                const i = p.hand.indexOf(m.card);
+                setHint(m);
+                setAllDown(false);
+                setFlipped(m.down ? [i] : []);
+              }}
+            >
+              Hint
+            </button>
+          </div>
         </div>
       </div>
-      {note && <div className="panel absolute -right-[0.8em] bottom-full -left-[0.8em] mb-[0.8em] p-[0.6em] text-center">{note}</div>}
+      {note && <div className="panel absolute -right-[0.8em] bottom-full -left-[0.8em] mb-[0.8em] animate-rise p-[0.6em] text-center">{note}</div>}
     </div>
+  );
+}
+
+/**
+ * Above a card in your hand when you follow: if it would take the trick as it stands, your total after it. With `count`, solid
+ * when no card you haven't seen could beat it. Nothing over a card that ducks, or one you can't play.
+ */
+function Outcome({ game, p, play, legal, count }: { game: Game; p: Player; play: Play; legal: Play[]; count: boolean }) {
+  if (!game.trick.length || !legal.some((l) => l.card === play.card && l.down === play.down) || !winning(game, play)) return null;
+  const after = total(p) + face(play).value;
+  const color = after > TARGET ? "var(--color-bust)" : after === TARGET ? "var(--color-magenta)" : "var(--ink)";
+  const certain = count && sure(game, p, play);
+  return (
+    <span
+      className="absolute -top-[1.5em] left-[0.1em] z-10 animate-pop rounded-full px-[0.35em] text-[0.7em] sm:left-1/2 sm:-translate-x-1/2 sm:text-[0.8em] leading-[1.4] font-bold whitespace-nowrap"
+      style={certain ? { background: color, color: "var(--bar)" } : { boxShadow: `inset 0 0 0 1.5px ${color}`, color, background: "var(--bar)" }}
+      title={certain ? "Takes the trick" : count ? "Takes the trick unless someone after you beats it" : "Takes the trick as it stands"}
+    >
+      {after > TARGET ? `${after}✕` : after}
+    </span>
   );
 }

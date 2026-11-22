@@ -7,6 +7,23 @@
   --color-magenta: #de35a2;
   --color-back: #ececec;
   --color-bar: var(--bar);
+  --color-bust: #e0464b;
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-pop: pop 0.35s var(--ease-out-back);
+  --animate-rise: rise 0.3s ease-out;
+
+  @keyframes pop {
+    from {
+      scale: 0.6;
+      opacity: 0;
+    }
+  }
+  @keyframes rise {
+    from {
+      translate: 0 0.6em;
+      opacity: 0;
+    }
+  }
 }
 
 @layer base {
@@ -17,6 +34,8 @@
     --shadow: 0 4px 16px rgb(60 0 40 / 0.15);
     /* the font size of cards on the table, which sets their size and how they overlap */
     --small: 0.6rem;
+    /* the trick's cards, in the middle of the table */
+    --trick: 0.8rem;
     color-scheme: light dark;
   }
 
@@ -32,6 +51,16 @@
   @media (width < 40rem) {
     :root {
       --small: 0.45rem;
+      --trick: 0.6rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 1ms !important;
+      transition-duration: 1ms !important;
     }
   }
 
@@ -81,6 +110,37 @@
     font-size: var(--small);
   }
 
+  .card.trick {
+    font-size: var(--trick);
+  }
+
+  /* A card as it lands in the trick, from the direction of its seat: `--dx` and `--dy` in em */
+  .played {
+    animation: played 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  @keyframes played {
+    from {
+      translate: calc(var(--dx, 0) * 1em) calc(var(--dy, 0) * 1em);
+      scale: 1.15;
+      opacity: 0;
+    }
+  }
+
+  /* A hand as it's dealt, one card after another: `--k` is a card's place */
+  .dealt {
+    animation: dealt 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+    animation-delay: calc(var(--k) * 35ms);
+  }
+
+  @keyframes dealt {
+    from {
+      translate: 0 3em;
+      rotate: -8deg;
+      opacity: 0;
+    }
+  }
+
   /* The start page's hand, fanned out from one stack along an arc. `--o` is a card's offset from the middle. */
   .fan {
     position: relative;
@@ -114,6 +174,15 @@
   /* Whoever's turn it is */
   .current {
     outline: 3px solid var(--color-magenta);
+    animation: breathe 1.6s ease-in-out infinite alternate;
+  }
+
+  @keyframes breathe {
+    to {
+      box-shadow:
+        var(--shadow),
+        0 0 0 6px color-mix(in srgb, var(--color-magenta) 25%, transparent);
+    }
   }
 
   /* Small headings */

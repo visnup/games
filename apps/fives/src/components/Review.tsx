@@ -39,7 +39,7 @@ function Chances({ rows, order, fair, show }: { rows: Scored[]; order: number[];
       // SVG attributes can't take var(), so the theme's colors as they are now
       const css = getComputedStyle(el);
       const [ink, paper] = [css.getPropertyValue("--ink").trim(), css.getPropertyValue("--bar").trim()];
-      const color = (d: Scored) => (d.lost >= 0.05 ? "#d64545" : d.beat >= 0.05 ? "#2f5db1" : ink);
+      const color = (d: Scored) => (d.lost >= 0.05 ? "#e0464b" : d.beat >= 0.05 ? "#2f5db1" : ink);
       const plot = Plot.plot({
         width: el.clientWidth,
         height: 160,
@@ -52,7 +52,7 @@ function Chances({ rows, order, fair, show }: { rows: Scored[]; order: number[];
           Plot.ruleY([fair], { strokeDasharray: "3 3", strokeOpacity: 0.5 }),
           Plot.ruleX(
             data.filter((d) => d.lost >= 0.05),
-            { x: "i", y1: (d) => d.best.win, y2: "win", stroke: "#d64545", strokeWidth: 2 },
+            { x: "i", y1: (d) => d.best.win, y2: "win", stroke: "#e0464b", strokeWidth: 2 },
           ),
           Plot.lineY(data, { x: "i", y: "win", stroke: "#de35a2", strokeWidth: 2 }),
           Plot.dot(data, { x: "i", y: "win", r: (d) => (d.lost >= 0.05 || d.beat >= 0.05 ? 4 : 2.5), fill: color, stroke: paper, strokeWidth: 1.5 }),
