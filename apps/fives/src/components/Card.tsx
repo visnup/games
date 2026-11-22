@@ -3,6 +3,9 @@ import type { Card as CardType, Color } from "../cards.ts";
 /** The cards' inks, from the booklet. */
 export const PAINT: Record<Color, string> = { blue: "#2f5db1", green: "#3db389", silver: "#808080", magenta: "#de35a2" };
 
+/** How far right of center a number's ink sits in Futura Bold, in em, where it shows: a leading 1's bearing, and the 7's. */
+const OFF: Record<number, number> = { 7: 0.05, 10: 0.08, 12: 0.065, 13: 0.065 };
+
 /** The corner index: the number, and a dot under it, as printed. */
 const corner = "absolute top-[0.25em] left-[0.2em] flex flex-col items-center font-numbers text-[0.85em] leading-none font-bold tracking-tighter";
 
@@ -32,7 +35,9 @@ export function Card({ card, down, hinted, dim, small, className = "", onClick }
           </span>
         )}
       </span>
-      <span className="big text-[2.6em] leading-none font-bold tracking-tight">{value}</span>
+      <span className="big text-[2.6em] leading-none font-bold tracking-tight" style={OFF[value] ? { translate: `${-OFF[value]}em` } : undefined}>
+        {value}
+      </span>
     </Tag>
   );
 }
