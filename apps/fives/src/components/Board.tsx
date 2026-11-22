@@ -172,8 +172,8 @@ export function Board({ game, me }: Props) {
       <Head>
         <title>{up ? "Your play · Fives" : "Fives"}</title>
       </Head>
-      <section className="panel sticky top-[0.8em] z-10 flex items-start gap-[1em] p-[0.8em] max-sm:top-0 max-sm:-mx-[0.8em] max-sm:-mt-[0.8em] max-sm:rounded-none max-sm:p-[0.4em]">
-        <div className="flex w-[7em] shrink-0 flex-col items-center gap-[0.2em] pt-[0.3rem] text-center">
+      <section className="panel sticky top-[0.8em] z-10 flex items-start gap-[1em] px-[0.8em] pt-[0.3em] pb-[0.8em] max-sm:top-0 max-sm:-mx-[0.8em] max-sm:-mt-[0.8em] max-sm:rounded-none max-sm:px-[0.4em] max-sm:pt-[0.2em] max-sm:pb-[0.4em]">
+        <div className="flex w-[7em] shrink-0 flex-col items-center gap-[0.2em] pt-[0.2rem] text-center">
           <span className="label">Hand {g.hand} of 4</span>
           <span className="text-sm">{view.result ? "Game over" : `Trick ${Math.min(n === 3 ? 12 : 13, g.players.reduce((s, p) => s + p.won.length, 0) + 1)}`}</span>
           {g.pot > 0 && <span className="text-xs opacity-70">{g.pot} in the pot</span>}
@@ -239,7 +239,7 @@ export function Board({ game, me }: Props) {
       <section className="panel sticky bottom-0 z-10 mb-[0.4em] max-sm:-mx-[0.8em] max-sm:-mb-[0.8em] max-sm:rounded-none">
         <div className="px-[0.8em] pb-[0.8em] max-sm:px-[0.4em] max-sm:pb-[0.4em]">
           {past ? (
-            <p className="m-0 flex items-center justify-between pt-[0.8em]">
+            <p className="m-0 flex items-center justify-between pt-[0.5em]">
               Viewing the table after an earlier play.{" "}
               <button className="primary" onClick={() => setPast(undefined)}>
                 Back to now
@@ -248,13 +248,13 @@ export function Board({ game, me }: Props) {
           ) : scored ? (
             <HandScores scored={scored} who={who} chips={g.players.map((p) => p.chips)} done={() => setSeenHands(seenHands + 1)} />
           ) : view.result ? (
-            <p className="m-0 pt-[0.8em] font-bold">{view.result.winners.length > 1 ? `${view.result.winners.map(who).join(" and ")} share the win.` : `${who(view.result.winners[0])} won!`}</p>
+            <p className="m-0 pt-[0.5em] font-bold">{view.result.winners.length > 1 ? `${view.result.winners.map(who).join(" and ")} share the win.` : `${who(view.result.winners[0])} won!`}</p>
           ) : !stepping && prompt && prompt.seat === seat ? (
             <Ask key={game.log.length} game={g} p={g.players[seat]} send={send} prompt={prompt} deal={`${game._id}:${g.hand}`} />
           ) : (
             <div className="flex items-end gap-[0.8em] max-sm:flex-col-reverse max-sm:items-stretch max-sm:gap-0">
               <div className="min-w-0 flex-1">{seat >= 0 && <Hand key={g.hand} cards={g.players[seat].hand} deal={`${game._id}:${g.hand}`} />}</div>
-              <div className="flex shrink-0 flex-col items-center justify-center self-stretch pt-[0.8em] max-sm:flex-row max-sm:justify-between max-sm:pt-[0.4em]">
+              <div className="flex shrink-0 flex-col items-center justify-center self-stretch pt-[0.4em] max-sm:flex-row max-sm:justify-between max-sm:pt-[0.4em]">
                 <span className="label">Waiting for {view.prompt ? who(view.prompt.seat) : "…"}</span>
                 {stepping && (
                   <button className="quiet mt-[0.4em] px-3 py-1 text-sm" onClick={() => setShown(game.log.length)}>
@@ -274,7 +274,7 @@ export function Board({ game, me }: Props) {
 /** A hand's scores: each player's total, and the chips it won or cost them. */
 function HandScores({ scored, who, chips, done }: { scored: Scored; who: (n: number) => string; chips: number[]; done: () => void }) {
   return (
-    <div className="flex animate-rise flex-wrap items-center justify-between gap-[0.8em] pt-[0.8em]">
+    <div className="flex animate-rise flex-wrap items-center justify-between gap-[0.8em] pt-[0.5em]">
       <div>
         <h3 className="label m-0">Hand {scored.hand} scores</h3>
         <ul className="mt-[0.3em] flex flex-wrap gap-x-[1.2em] gap-y-[0.2em]">
@@ -400,7 +400,7 @@ export function Hand({
   return (
     <div
       ref={ref}
-      className="@container flex touch-none justify-center pt-[1.6em] pb-[1.2em] text-[0.85rem] max-sm:pb-[0.4em] *:not-first:-ml-[clamp(0.6em,calc(4.875em-8.33cqw),3.2em)] @max-[34rem]:[&>div:not(:last-child)_.big]:opacity-0"
+      className="@container flex touch-none justify-center pt-[1.3em] pb-[1.2em] text-[0.85rem] max-sm:pb-[0.4em] *:not-first:-ml-[clamp(0.6em,calc(4.875em-8.33cqw),3.2em)] @max-[34rem]:[&>div:not(:last-child)_.big]:opacity-0"
       onMouseLeave={() => press.current || hovered(undefined)}
       {...touch}
     >
@@ -552,7 +552,7 @@ function Ask({ game, p, send, prompt, deal }: { game: Game; p: Player; send: (c:
   const preview =
     pointed && game.trick.length
       ? winning(game, pointed)
-        ? `${count && sure(game, p, pointed) ? "Takes it" : "Takes it for now"}:${t + face(pointed).value}${t + face(pointed).value > TARGET ? ", bust" : ""}`
+        ? `${count && sure(game, p, pointed) ? "Takes it" : "Takes it for now"}: ${t + face(pointed).value}${t + face(pointed).value > TARGET ? ", bust" : ""}`
         : "Ducks"
       : undefined;
   return (
@@ -574,7 +574,7 @@ function Ask({ game, p, send, prompt, deal }: { game: Game; p: Player; send: (c:
             tag={(i) => <Outcome game={game} p={p} play={{ card: p.hand[i], down: down(i) }} legal={legal} count={count} />}
           />
         </div>
-        <div className="flex w-[9em] shrink-0 flex-col items-center justify-center gap-[0.4em] self-stretch pt-[0.8em] text-center max-sm:w-auto max-sm:flex-row max-sm:justify-between max-sm:pt-[0.4em]">
+        <div className="flex w-[9em] shrink-0 flex-col items-center justify-center gap-[0.4em] self-stretch pt-[0.4em] text-center max-sm:w-auto max-sm:flex-row max-sm:justify-between max-sm:pt-[0.4em]">
           <span className="label flex items-center gap-[0.4em]">
             {!led ? (
               "Your lead"
@@ -627,7 +627,7 @@ function Outcome({ game, p, play, legal, count }: { game: Game; p: Player; play:
   const certain = count && sure(game, p, play);
   return (
     <span
-      className="absolute -top-[1.5em] left-[0.1em] z-10 animate-pop rounded-full px-[0.35em] text-[0.7em] sm:left-1/2 sm:-translate-x-1/2 sm:text-[0.8em] leading-[1.4] font-bold whitespace-nowrap"
+      className="absolute -top-[1.3em] left-[0.1em] z-10 animate-pop rounded-full px-[0.35em] text-[0.7em] sm:left-1/2 sm:-translate-x-1/2 sm:text-[0.8em] leading-[1.4] font-bold whitespace-nowrap"
       style={certain ? { background: color, color: "var(--bar)" } : { boxShadow: `inset 0 0 0 1.5px ${color}`, color, background: "var(--bar)" }}
       title={certain ? "Takes the trick" : count ? "Takes the trick unless someone after you beats it" : "Takes the trick as it stands"}
     >
