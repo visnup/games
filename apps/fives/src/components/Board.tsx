@@ -543,17 +543,19 @@ function Seat({ p, name, level, current, mine, voids, className, tall }: { p: Pl
           )}
         </span>
         {tall ? (
-          // as the row below, down the seat: as tall as the table's middle, and taller only once every card is down to its index
-          <div className="flex w-[calc(6.3*var(--small))] flex-1 flex-col contain-size" style={{ minHeight: `calc(var(--small) * ${Math.max(6.8, 4.5 + 1.1 * (p.won.length - 1))})` }}>
-            {p.won.map((w, i) => (
-              <div key={i} className={i === p.won.length - 1 ? "shrink-0" : "h-[calc(var(--small)*2.3)] min-h-[calc(var(--small)*1.1)]"}>
-                <div className="grid h-[calc(4.5*var(--small))] w-[calc(6.3*var(--small))] landed place-items-center">
-                  <div className="rotate-90">
-                    <Card card={w.down && !mine ? undefined : w.card} down={w.down} small />
+          // as the row below, down the seat: as tall as the table's middle, scrolling once every card is down to its index
+          <div className="relative min-h-[calc(6.8*var(--small))] w-[calc(6.3*var(--small))] flex-1">
+            <div className="absolute inset-0 flex flex-col overflow-y-auto">
+              {p.won.map((w, i) => (
+                <div key={i} className={i === p.won.length - 1 ? "shrink-0" : "h-[calc(var(--small)*2.3)] min-h-[calc(var(--small)*1.1)]"}>
+                  <div className="grid h-[calc(4.5*var(--small))] w-[calc(6.3*var(--small))] landed place-items-center">
+                    <div className="rotate-90">
+                      <Card card={w.down && !mine ? undefined : w.card} down={w.down} small />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         ) : (
           // each card but the last shows a strip that narrows, down to its index, as the row fills
