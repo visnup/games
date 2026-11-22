@@ -198,7 +198,11 @@ export function Review({ setup, log, seat, show }: { setup: Setup; log: Choice[]
           <ul>
             {costly.slice(0, 4).map((r) => (
               <li key={r.n} className={item} onClick={() => show(r.n)}>
-                <span className="w-[8.5em] opacity-70">{when(r)}</span>
+                <span className="w-[4.5em] leading-tight opacity-70">
+                  Hand {r.hand}
+                  <br />
+                  trick {r.trick}
+                </span>
                 <Played label={r.chose} /> {pct(r.mine.win)}
                 <span className="opacity-60">over</span>
                 <Played label={r.best.label} /> {pct(r.best.win)}
@@ -215,7 +219,11 @@ export function Review({ setup, log, seat, show }: { setup: Setup; log: Choice[]
           <ul>
             {found.slice(0, 3).map((r) => (
               <li key={r.n} className={item} onClick={() => show(r.n)}>
-                <span className="w-[8.5em] opacity-70">{when(r)}</span>
+                <span className="w-[4.5em] leading-tight opacity-70">
+                  Hand {r.hand}
+                  <br />
+                  trick {r.trick}
+                </span>
                 <Played label={r.chose} />
                 <span className="opacity-60">over the Hint&apos;s</span>
                 <Played label={r.hint} />
