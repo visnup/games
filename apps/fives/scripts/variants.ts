@@ -81,6 +81,25 @@ const VARIANTS: Record<string, (seed: number) => Policy> = {
       }, "duck"),
     ]),
   ),
+  // from people's games: a last silver led face up within 5 of 25 is sure to take, and a magenta 5 can be beaten
+  ...Object.fromEntries(
+    (
+      [
+        ["any card", 13, () => true],
+        ["a silver", 13, (x) => x.card.color === TRUMP],
+        ["a silver, last card only", 1, (x) => x.card.color === TRUMP],
+        ["any card, last card only", 1, () => true],
+      ] as [string, number, (x: Play) => boolean][]
+    ).map(([what, left, which]) => [
+      `within 5 of 25, lead the lowest card face down if it's ${what} over 5`,
+      insert((game, p, plays) => {
+        const room = TARGET - total(p);
+        if (game.trick.length || room < 0 || room >= 5 || p.hand.length > left) return undefined;
+        const low = STEPS.duck(game, p, plays);
+        return low && low.card.value > 5 && which(low) ? plays.find((x) => x.card === low.card && x.down) : undefined;
+      }, "duck"),
+    ]),
+  ),
   "the learned player": () => learned(),
   "the learned player, told the previous default's pick": () => learned(undefined, taking),
   "hand playouts among learned players": (seed) => playouts(16, seed, learned("dataset/model-r6-rollout.json"), 1),
