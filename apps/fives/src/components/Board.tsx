@@ -184,8 +184,9 @@ export function Board({ game, me }: Props) {
     const far = game.log.length - shown > 40;
     // Off shows a trick's plays at once, up to its end; a trick has a play from every seat, so tricks end every `n` decisions
     const next = far ? game.log.length : step ? shown + 1 : Math.min(game.log.length, (Math.floor(shown / n) + 1) * n);
-    // a finished trick stays long enough to see it swept to its winner
-    const delay = far ? 0 : swept ? step + SWEEP : !step || game.log[shown].seat === seat ? 0 : step;
+    // a finished trick stays long enough to see it swept to its winner; your own play shows at once, since you saw the sweep
+    // while you chose it
+    const delay = far || game.log[shown].seat === seat ? 0 : swept ? step + SWEEP : step;
     const t = setTimeout(() => setShown(next), delay);
     return () => clearTimeout(t);
   }, [stepping, step, shown, game.log, seat, scored, swept, n]);
