@@ -191,7 +191,8 @@ export function Board({ game, me }: Props) {
     return () => clearTimeout(t);
   }, [stepping, step, shown, game.log, seat, scored, swept, n]);
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[64em] flex-col gap-[0.8em] p-[0.8em]">
+    // on a phone, the hand's cards run off the screen's bottom edge, clipped here so the page can't scroll to them
+    <div className="mx-auto flex min-h-dvh max-w-[64em] flex-col gap-[0.8em] p-[0.8em] max-sm:overflow-y-clip">
       <Head>
         <title>{up ? "Your play · Fives" : "Fives"}</title>
       </Head>
@@ -250,6 +251,11 @@ export function Board({ game, me }: Props) {
               </div>
             );
           })}
+          {view.result && !scored && (
+            <span className="col-start-2 row-start-2 animate-rise text-center font-bold">
+              {view.result.winners.length > 1 ? `${view.result.winners.map(who).join(" and ")} share the win` : `${who(view.result.winners[0])} won`}
+            </span>
+          )}
           {!view.result && !scored && (!trick.plays.length || swept) && (
             // after a sweep, once the trick has gone
             <span key={`${g.played}`} className="col-start-2 row-start-2 text-center text-xs opacity-60" style={{ animation: `rise 0.3s ease-out ${swept ? SWEEP : 0}ms backwards` }}>
@@ -271,40 +277,40 @@ export function Board({ game, me }: Props) {
           />
         ))}
       </div>
-      <section className="panel sticky bottom-0 z-10 mb-[0.4em] max-sm:-mx-[0.8em] max-sm:-mb-[0.8em] max-sm:rounded-none">
-        <div className="px-[0.8em] pb-[0.4em] max-sm:px-[0.4em] max-sm:pb-[0.2em]">
-          {past ? (
-            <div className="flex items-end gap-[0.8em] max-sm:flex-col-reverse max-sm:items-stretch max-sm:gap-0">
-              <div className="min-w-0 flex-1">{seat >= 0 && <Hand key={g.hand} cards={g.players[seat].hand} deal={`${game._id}:${g.hand}`} />}</div>
-              <div className="flex shrink-0 flex-col items-center justify-center self-stretch pt-[0.4em] max-sm:flex-row max-sm:justify-between max-sm:pt-[0.4em]">
-                <span className="label">After an earlier play</span>
-                <button className="primary mt-[0.4em]" onClick={() => setPast(undefined)}>
-                  Back to now
-                </button>
-              </div>
-            </div>
-          ) : scored ? (
-            <HandScores scored={scored} who={who} chips={g.players.map((p) => p.chips)} done={() => setSeenHands(seenHands + 1)} />
-          ) : view.result ? (
-            <p className="m-0 pt-[0.5em] font-bold">{view.result.winners.length > 1 ? `${view.result.winners.map(who).join(" and ")} share the win.` : `${who(view.result.winners[0])} won!`}</p>
-          ) : !stepping && prompt && prompt.seat === seat ? (
-            <Ask key={game.log.length} game={g} p={g.players[seat]} send={send} prompt={prompt} deal={`${game._id}:${g.hand}`} />
-          ) : (
-            <div className="flex items-end gap-[0.8em] max-sm:flex-col-reverse max-sm:items-stretch max-sm:gap-0">
-              <div className="min-w-0 flex-1">{seat >= 0 && <Hand key={g.hand} cards={g.players[seat].hand} deal={`${game._id}:${g.hand}`} />}</div>
-              <div className="flex shrink-0 flex-col items-center justify-center self-stretch pt-[0.4em] max-sm:flex-row max-sm:justify-between max-sm:pt-[0.4em]">
-                <span className="label">Waiting for {view.prompt ? who(view.prompt.seat) : "…"}</span>
-                {stepping && (
-                  <button className="quiet mt-[0.4em] px-3 py-1 text-sm" onClick={() => setShown(game.log.length)}>
-                    Skip
+      {(past || scored || !view.result) && (
+        <section className="panel sticky bottom-0 z-10 mb-[0.4em] max-sm:-mx-[0.8em] max-sm:-mb-[0.8em] max-sm:rounded-none">
+          <div className="px-[0.8em] pb-[0.4em] max-sm:px-[0.4em] max-sm:pb-[0.2em]">
+            {past ? (
+              <div className="flex items-end gap-[0.8em] max-sm:flex-col-reverse max-sm:items-stretch max-sm:gap-0">
+                <div className="min-w-0 flex-1">{seat >= 0 && <Hand key={g.hand} cards={g.players[seat].hand} deal={`${game._id}:${g.hand}`} />}</div>
+                <div className="flex shrink-0 flex-col items-center justify-center self-stretch pt-[0.4em] max-sm:flex-row max-sm:justify-between max-sm:pt-[0.4em]">
+                  <span className="label">After an earlier play</span>
+                  <button className="primary mt-[0.4em]" onClick={() => setPast(undefined)}>
+                    Back to now
                   </button>
-                )}
+                </div>
               </div>
-            </div>
-          )}
-          {error && <p className="text-bust">{error}</p>}
-        </div>
-      </section>
+            ) : scored ? (
+              <HandScores scored={scored} who={who} chips={g.players.map((p) => p.chips)} done={() => setSeenHands(seenHands + 1)} />
+            ) : !stepping && prompt && prompt.seat === seat ? (
+              <Ask key={game.log.length} game={g} p={g.players[seat]} send={send} prompt={prompt} deal={`${game._id}:${g.hand}`} />
+            ) : (
+              <div className="flex items-end gap-[0.8em] max-sm:flex-col-reverse max-sm:items-stretch max-sm:gap-0">
+                <div className="min-w-0 flex-1">{seat >= 0 && <Hand key={g.hand} cards={g.players[seat].hand} deal={`${game._id}:${g.hand}`} />}</div>
+                <div className="flex shrink-0 flex-col items-center justify-center self-stretch pt-[0.4em] max-sm:flex-row max-sm:justify-between max-sm:pt-[0.4em]">
+                  <span className="label">Waiting for {view.prompt ? who(view.prompt.seat) : "…"}</span>
+                  {stepping && (
+                    <button className="quiet mt-[0.4em] px-3 py-1 text-sm" onClick={() => setShown(game.log.length)}>
+                      Skip
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+            {error && <p className="text-bust">{error}</p>}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
@@ -442,7 +448,7 @@ export function Hand({
   return (
     <div
       ref={ref}
-      className="@container flex touch-none justify-center pt-[1.3em] pb-[0.6em] text-[0.85rem] max-sm:pb-[0.2em] *:not-first:-ml-[clamp(0.6em,calc(4.875em-8.33cqw),3.2em)] @max-[34rem]:[&>div:not(:last-child)_.big]:opacity-0"
+      className="@container flex touch-none justify-center pt-[1.3em] pb-[0.6em] text-[0.85rem] max-sm:-mb-[2.35em] max-sm:pb-0 *:not-first:-ml-[clamp(0.6em,calc(4.875em-8.33cqw),3.2em)] @max-[34rem]:[&>div:not(:last-child)_.big]:opacity-0"
       onMouseLeave={() => press.current || hovered(undefined)}
       {...touch}
     >
