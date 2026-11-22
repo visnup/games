@@ -515,7 +515,7 @@ function Seat({ p, name, level, current, mine, voids, className, tall }: { p: Pl
   const t = total(p);
   return (
     <section
-      className={`panel flex min-w-0 flex-col gap-[0.4em] p-[0.6em] ${current ? "current" : ""} ${className} ${tall ? "w-[7.5em] justify-self-center pb-[1.2em] max-sm:w-[5em]" : "w-[13em] max-w-full justify-self-center max-sm:w-[11em]"}`}
+      className={`panel flex min-w-0 flex-col gap-[0.4em] p-[0.6em] ${current ? "current" : ""} ${className} ${tall ? "w-[7.5em] self-stretch justify-self-center pb-[1.2em] max-sm:w-[5em]" : "w-[13em] max-w-full justify-self-center max-sm:w-[11em]"}`}
     >
       <h2 className={`m-0 flex flex-wrap gap-x-[0.5em] text-sm font-bold ${tall ? "flex-col items-center gap-y-[0.3em] text-center" : "items-center"}`}>
         <span className={tall ? "flex max-w-full flex-col" : "truncate"}>
@@ -530,7 +530,7 @@ function Seat({ p, name, level, current, mine, voids, className, tall }: { p: Pl
           <Chips n={p.chips} />
         </span>
       </h2>
-      <div className={`flex gap-[0.5em] ${tall ? "flex-col items-center" : "items-center"}`}>
+      <div className={`flex gap-[0.5em] ${tall ? "min-h-0 flex-1 flex-col items-center" : "items-center"}`}>
         <span key={t} className="landed flex min-w-[2.6em] flex-col items-center" title="This hand's total: the cards that won tricks">
           <span className={`text-xl leading-none font-extrabold ${t > TARGET ? "text-bust" : t === TARGET ? "text-magenta" : ""}`}>{t}</span>
           <span className={`label text-[0.55rem] ${t > TARGET ? "text-bust opacity-100" : t === TARGET ? "text-magenta opacity-100" : ""}`}>{t > TARGET ? "bust" : t === TARGET ? "on 25" : `${TARGET - t} to go`}</span>
@@ -543,11 +543,14 @@ function Seat({ p, name, level, current, mine, voids, className, tall }: { p: Pl
           )}
         </span>
         {tall ? (
-          <div className="flex min-h-[calc(6.8*var(--small))] flex-col *:not-first:-mt-[calc(var(--small)*2.2)]">
+          // as the row below, down the seat: as tall as the table's middle, and taller only once every card is down to its index
+          <div className="flex w-[calc(6.3*var(--small))] flex-1 flex-col contain-size" style={{ minHeight: `calc(var(--small) * ${Math.max(6.8, 4.5 + 1.1 * (p.won.length - 1))})` }}>
             {p.won.map((w, i) => (
-              <div key={i} className="grid h-[calc(4.5*var(--small))] w-[calc(6.3*var(--small))] landed place-items-center">
-                <div className="rotate-90">
-                  <Card card={w.down && !mine ? undefined : w.card} down={w.down} small />
+              <div key={i} className={i === p.won.length - 1 ? "shrink-0" : "h-[calc(var(--small)*2.3)] min-h-[calc(var(--small)*1.1)]"}>
+                <div className="grid h-[calc(4.5*var(--small))] w-[calc(6.3*var(--small))] landed place-items-center">
+                  <div className="rotate-90">
+                    <Card card={w.down && !mine ? undefined : w.card} down={w.down} small />
+                  </div>
                 </div>
               </div>
             ))}
@@ -680,7 +683,7 @@ function Ask({ game, p, send, prompt, deal }: { game: Game; p: Player; send: (c:
             tag={(i) => <Outcome game={game} p={p} play={{ card: p.hand[i], down: down(i) }} legal={legal} count={count} />}
           />
         </div>
-        <div className="flex w-[9em] shrink-0 flex-col items-center justify-center gap-[0.4em] self-stretch pt-[0.4em] text-center max-sm:w-auto max-sm:flex-row max-sm:justify-between max-sm:pt-[0.4em]">
+        <div className="flex w-[10em] shrink-0 flex-col items-center justify-center gap-[0.4em] self-stretch pt-[0.4em] text-center max-sm:w-auto max-sm:flex-row max-sm:justify-between max-sm:pt-[0.4em]">
           <span className="label flex items-center gap-[0.4em]">
             {!led ? (
               "Your lead"
