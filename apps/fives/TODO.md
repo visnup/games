@@ -74,8 +74,9 @@
       none adopted (README, "When to play a magenta 5").
 - [x] Rule readings: `tiesLow` both ways (`scripts/rules.ts`), 2026-11-21: decides 10–14% of
       hands' chips, no player's wins move beyond the noise.
-- [x] Leading versus holding the magenta 0 (`scripts/leads.ts`), 2026-11-21: at 4 players both
-      help and about add up, leading more; at 3 neither gains chips.
+- [x] Leading versus holding the magenta 0 (`scripts/leads.ts`), 2026-11-21, among learned
+      players: at 4 players only the lead helps. At 3 players the lead and the card each help a
+      little, and they add up.
 
 ## Online
 

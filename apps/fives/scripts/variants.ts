@@ -83,10 +83,10 @@ const VARIANTS: Record<string, (seed: number) => Policy> = {
   ),
   "the learned player": () => learned(),
   "the learned player, told the previous default's pick": () => learned(undefined, taking),
-  "hand playouts among learned players": (seed) => playouts(16, seed, learned("dataset/model-r6-rollout.json"), 0, 1),
-  "hand playouts among round 9's rollout players": (seed) => playouts(16, seed, learned("dataset/model-r9-rollout.json"), 0, 1),
-  ...Object.fromEntries([2, 4].map((k) => [`hand playouts on ${k} deals among round 9's full players`, (seed: number) => playouts(k, seed, learned("dataset/model-r9.json"), 0, 1)])),
-  "hand playouts on 64 deals among round 9's rollout players": (seed) => playouts(64, seed, learned("dataset/model-r9-rollout.json"), 0, 1),
+  "hand playouts among learned players": (seed) => playouts(16, seed, learned("dataset/model-r6-rollout.json"), 1),
+  "hand playouts among round 9's rollout players": (seed) => playouts(16, seed, learned("dataset/model-r9-rollout.json"), 1),
+  ...Object.fromEntries([2, 4].map((k) => [`hand playouts on ${k} deals among round 9's full players`, (seed: number) => playouts(k, seed, learned("dataset/model-r9.json"), 1)])),
+  "hand playouts on 64 deals among round 9's rollout players": (seed) => playouts(64, seed, learned("dataset/model-r9-rollout.json"), 1),
   "full-game playouts among round 9's rollout players": (seed) => playouts(16, seed, learned("dataset/model-r9-rollout.json")),
   // every model in dataset/, oldest first, as `learned r3` for dataset/model-r3.json
   ...Object.fromEntries(
@@ -107,8 +107,8 @@ const league = (seed: number) => LEAGUE[Math.floor(mulberry32(seed)() * LEAGUE.l
 const FIELDS: Record<string, [string, ((seed: number) => Policy) | undefined]> = {
   default: ["the default player", undefined],
   league: ["a default from every round so far", league],
-  playouts: ["hand playouts on 16 deals", (seed) => playouts(16, seed, defaultPolicy, 0, 1)],
-  "learned playouts": ["hand playouts on 16 deals among learned players", (seed) => playouts(16, seed, learned("dataset/model-r6-rollout.json"), 0, 1)],
+  playouts: ["hand playouts on 16 deals", (seed) => playouts(16, seed, defaultPolicy, 1)],
+  "learned playouts": ["hand playouts on 16 deals among learned players", (seed) => playouts(16, seed, learned("dataset/model-r6-rollout.json"), 1)],
   learned: ["the learned player", () => learned()],
 };
 

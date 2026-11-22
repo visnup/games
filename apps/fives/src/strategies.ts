@@ -13,26 +13,21 @@ const greedy: Policy = {
 
 // Whole-game strategies, each a player of its own, compared head to head in `scripts/strategies.ts`.
 export const STRATEGIES: Record<string, (seed: number) => Policy> = {
-  /** `defaultPolicy`: take sure wins up to 25, else duck under the trick dumping the biggest card. */
+  /** `defaultPolicy`, the online game's medium bot. */
   default: () => defaultPolicy,
 
   /** The default without face-down plays: never uses the magenta 5. The online game's easy bot. */
   "face up": () => ({ play: (game, p) => pick(defaultPolicy, game, p) }),
 
-  /** Takes the lead whenever it can without busting, with its biggest card, and otherwise plays its smallest. */
   greedy: () => greedy,
 
-  /** Plays a legal card at random. */
   random: (seed) => random(seed),
 
-  /** Plays out every legal play to the end on 32 deals of the hidden cards, and makes the one that wins most. The online game's hard bot plays 16. */
+  /** Plays out every legal play to the end on 32 deals of the hidden cards, and makes the one that wins most. */
   playouts: (seed) => playouts(32, seed),
-  "quick playouts": (seed) => playouts(16, seed),
-  "deep playouts": (seed) => playouts(128, seed),
-  "racing playouts": (seed) => playouts(128, seed, defaultPolicy, 2),
   /** Playouts to the end of the hand only, scored by `chance`: a fraction of the cost, and less noise. */
-  "hand playouts": (seed) => playouts(32, seed, defaultPolicy, 0, 1),
-  "quick hand playouts": (seed) => playouts(16, seed, defaultPolicy, 0, 1),
+  "hand playouts": (seed) => playouts(32, seed, defaultPolicy, 1),
+  "quick hand playouts": (seed) => playouts(16, seed, defaultPolicy, 1),
 };
 
 /** `policy`'s play from only the face-up plays. */
@@ -72,34 +67,25 @@ export function random(seed = 1): Policy {
 
 /**
  * Plays out every legal play with `rollout` for everyone, and makes the one that wins most. Each
- * playout first deals the cards `p` can't see again, so it doesn't peek. With `z`, plays race on
- * shared deals, 8 at a time, and a play drops out once it's `z` standard errors of the paired
- * difference behind the leader, until `n` deals a play. With `hands`, each playout stops once
- * that many more hands have been dealt and is scored by `chance`.
+ * playout first deals the cards `p` can't see again, so it doesn't peek. Every play is played out
+ * on the same `n` deals. With `hands`, each playout stops once that many more hands have been dealt
+ * and is scored by `chance`.
  */
-export function playouts(n: number, seed = 1, rollout = defaultPolicy, z = 0, hands = HANDS): Policy {
+export function playouts(n: number, seed = 1, rollout = defaultPolicy, hands = HANDS): Policy {
   const rng = mulberry32(seed);
-  const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
   return {
     play(game, p) {
       const options = game.legal(p);
       if (options.length === 1) return options[0];
-      const wins = options.map(() => [] as number[]);
-      let alive = options.map((_, i) => i);
-      const step = z ? 8 : n;
-      for (let dealt = 0; dealt < n && alive.length > 1; dealt += step) {
-        const seeds = Array.from({ length: step }, () => Math.floor(rng() * 2 ** 32));
-        for (const m of alive) for (const s of seeds) wins[m].push(playout(game, p, options[m], [s], rollout, hands));
-        if (!z) break;
-        const lead = alive.reduce((a, b) => (sum(wins[b]) > sum(wins[a]) ? b : a));
-        alive = alive.filter((m) => {
-          const d = wins[m].map((w, i) => wins[lead][i] - w);
-          const mean = sum(d) / d.length;
-          const sd = Math.sqrt(d.reduce((s, x) => s + (x - mean) ** 2, 0) / (d.length - 1)) || 1 / Math.sqrt(d.length);
-          return m === lead || mean < (z * sd) / Math.sqrt(d.length);
-        });
+      const seeds = Array.from({ length: n }, () => Math.floor(rng() * 2 ** 32));
+      let best = 0;
+      let most = -1;
+      for (const [m, option] of options.entries()) {
+        let wins = 0;
+        for (const s of seeds) wins += playout(game, p, option, [s], rollout, hands);
+        if (wins > most) [best, most] = [m, wins];
       }
-      return options[alive.reduce((a, b) => (sum(wins[b]) > sum(wins[a]) ? b : a))];
+      return options[best];
     },
   };
 }

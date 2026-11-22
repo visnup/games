@@ -25,8 +25,8 @@ last page has the components and a summary.
   checksum of the winners to compare before and after; profile (`node --cpu-prof`) a change
   there.
 - `strategies.ts`: whole-game strategies in `STRATEGIES`. `playouts` plays every legal play out on
-  copies with the cards it can't see dealt again (`sample`, which respects `voids`), optionally
-  racing plays (`z`), and with `hand` only to the end of the hand, scored by `chance`: the win
+  copies with the cards it can't see dealt again (`sample`, which respects `voids`), and
+  with `hands` only to the end of the hand, scored by `chance`: the win
   chance from the chips, a softmax fit by `scripts/chance.ts`. Refit it after changing the
   default. `headToHead` seats one player against `defaultPolicy` everywhere else; a shared win
   counts its share.

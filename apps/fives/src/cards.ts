@@ -1,4 +1,4 @@
-// Fives' 52 cards, per the rule sheet's components: 1 to 13 in blue, green and silver, and 0 to 4
+// Fives' 52 cards, per the booklet's components: 1 to 13 in blue, green and silver, and 0 to 4
 // and 6 to 13 in magenta. Every card's back is a magenta 5.
 
 export const COLORS = ["blue", "green", "silver", "magenta"] as const;

@@ -267,8 +267,7 @@ function HandScores({ scored, who, chips, done }: { scored: Scored; who: (n: num
   );
 }
 
-const ORDER = COLORS;
-const rank = (c: CardType) => ORDER.indexOf(c.color) * 100 + c.value;
+const rank = (c: CardType) => COLORS.indexOf(c.color) * 100 + c.value;
 
 /** How far the card `d` places from the hovered one moves aside, in em: most for its neighbors, none from 4 away. */
 const aside = (d: number) => (d === 0 ? 0 : Math.sign(d) * 1.2 * Math.max(0, 1 - (Math.abs(d) - 1) / 3));

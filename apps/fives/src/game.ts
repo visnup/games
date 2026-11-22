@@ -23,9 +23,9 @@ export type Player = {
   hidden: Card[];
 };
 
-/** Readings the sheet leaves open. */
+/** Readings the booklet leaves open. */
 export type Rules = {
-  /** Whether players tied for a place all take the lowest of the places they tie for, as the sheet says, or the highest. */
+  /** Whether players tied for a place all take the lowest of the places they tie for, as the booklet says, or the highest. */
   tiesLow: boolean;
 };
 export const RULES: Rules = { tiesLow: true };
