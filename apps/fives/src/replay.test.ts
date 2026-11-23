@@ -36,6 +36,12 @@ test("a review plays out every option at each of a seat's decisions with a choic
     parts.sort((a, b) => a - b),
     reviewed.map((r) => r.n),
   );
+  const { n, chose } = reviewed[1];
+  const again = [...review(setup, decisions, 1, { deals: 8, only: { [n]: [chose] } })];
+  assert.deepEqual(
+    again.map((r) => [r.n, r.deals, r.options.map((o) => o.label)]),
+    [[n, 8, [chose]]],
+  );
   for (const r of reviewed) {
     assert.ok(r.options.some((o) => o.label === r.chose));
     assert.equal(r.chose, r.hint);

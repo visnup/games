@@ -2,10 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Color } from "../cards.ts";
 import type { Choice, Setup } from "../replay.ts";
 import { Card, PAINT } from "./Card";
-import { deals, type Reviewed } from "../review.ts";
+import { again, deals, type Reviewed } from "../review.ts";
 
 const pct = (x: number) => `${Math.round(100 * x)}%`;
 const points = (x: number) => Math.round(100 * x);
+/** A difference worth pointing out: about twice the noise of one played out on 500 deals. */
+const big = 0.03;
 
 /** A play as words: what you did (`did`), or an option (`other`). */
 function words(label: string) {
@@ -47,7 +49,7 @@ function Chances({ rows, order, fair, show }: { rows: Scored[]; order: number[];
       // SVG attributes can't take var(), so the theme's colors as they are now
       const css = getComputedStyle(el);
       const [ink, paper] = [css.getPropertyValue("--ink").trim(), css.getPropertyValue("--bar").trim()];
-      const color = (d: Scored) => (d.lost >= 0.05 ? "#e0464b" : d.beat >= 0.05 ? "#2f5db1" : ink);
+      const color = (d: Scored) => (d.lost >= big ? "#e0464b" : d.beat >= big ? "#2f5db1" : ink);
       const plot = Plot.plot({
         width: el.clientWidth,
         height: 160,
@@ -59,11 +61,11 @@ function Chances({ rows, order, fair, show }: { rows: Scored[]; order: number[];
         marks: [
           Plot.ruleY([fair], { strokeDasharray: "3 3", strokeOpacity: 0.5 }),
           Plot.ruleX(
-            data.filter((d) => d.lost >= 0.05),
+            data.filter((d) => d.lost >= big),
             { x: "i", y1: (d) => d.best.win, y2: "win", stroke: "#e0464b", strokeWidth: 2 },
           ),
           Plot.lineY(data, { x: "i", y: "win", stroke: "#de35a2", strokeWidth: 2 }),
-          Plot.dot(data, { x: "i", y: "win", r: (d) => (d.lost >= 0.05 || d.beat >= 0.05 ? 4 : 2.5), fill: color, stroke: paper, strokeWidth: 1.5 }),
+          Plot.dot(data, { x: "i", y: "win", r: (d) => (d.lost >= big || d.beat >= big ? 4 : 2.5), fill: color, stroke: paper, strokeWidth: 1.5 }),
           // where your chances started, peaked and ended
           Plot.text([...new Set([data[0], data.reduce((a, b) => (b.win > a.win ? b : a)), data.at(-1)!])], {
             x: "i",
@@ -136,18 +138,33 @@ function Chances({ rows, order, fair, show }: { rows: Scored[]; order: number[];
 export function Review({ setup, log, seat, show }: { setup: Setup; log: Choice[]; seat: number; show: (n: number) => void }) {
   const [rows, setRows] = useState<Reviewed[]>([]);
   const [finished, setFinished] = useState(0);
+  // the second pass, once it's started: how many workers and options it took
+  const [second, setSecond] = useState<{ workers: number; options: number }>();
+  const [checked, setChecked] = useState(0);
+  const workers = useRef<Worker[]>([]);
+  const waiting = useRef(new Map<number, { want: number; options: Reviewed["options"] }>());
   const total = log.filter((c) => c.seat === seat).length;
   const k = Math.max(1, Math.min(globalThis.navigator?.hardwareConcurrency || 4, total));
-  const done = finished === k;
+  const first = finished >= k;
+  const done = second !== undefined && finished === k + second.workers;
   useEffect(() => {
     // a worker per core, each taking every kth decision
-    const workers = Array.from({ length: k }, (_, i) => {
+    workers.current = Array.from({ length: k }, (_, i) => {
       const worker = new Worker(new URL("./review.worker.ts", import.meta.url), { type: "module" });
-      worker.onmessage = ({ data }: MessageEvent<Reviewed | null>) => (data ? setRows((r) => [...r, data].sort((a, b) => a.n - b.n)) : setFinished((f) => f + 1));
+      worker.onmessage = ({ data }: MessageEvent<Reviewed | null>) => {
+        if (!data) return setFinished((f) => f + 1);
+        if (data.deals > deals(setup)) {
+          setChecked((c) => c + data.options.length);
+          const held = waiting.current.get(data.n)!;
+          held.options.push(...data.options);
+          // workers share a decision's options: comparing some on 500 deals to the rest on 100 would flicker
+          if (held.options.length === held.want) setRows((rows) => rows.map((r) => (r.n === data.n ? { ...r, options: r.options.map((o) => held.options.find((d) => d.label === o.label) ?? o) } : r)));
+        } else setRows((rows) => [...rows, data].sort((a, b) => a.n - b.n));
+      };
       worker.postMessage([setup, log, seat, [i, k]]);
       return worker;
     });
-    return () => workers.forEach((w) => w.terminate());
+    return () => workers.current.forEach((w) => w.terminate());
     // a new setup and log arrive with every render, but only these change the review
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setup.seed, log.length, seat, k]);
@@ -162,9 +179,23 @@ export function Review({ setup, log, seat, show }: { setup: Setup; log: Choice[]
       }),
     [rows],
   );
+  // then the decisions that may have cost or gained more than 2 points, again on more deals: your
+  // play, the Hint's and any within 2 points of the best, an option to a worker in turn
+  useEffect(() => {
+    if (!first || second !== undefined) return;
+    const close = scored.filter((r) => r.lost > 0.02 || r.beat > 0.02).flatMap((r) => r.options.filter((o) => o.label === r.chose || o.label === r.hint || o.win >= r.best.win - 0.02).map((o) => [r.n, o.label] as const));
+    for (const [n] of close) waiting.current.set(n, { want: close.filter(([m]) => m === n).length, options: [] });
+    const shares = workers.current
+      .map((_, i) => close.filter((_, j) => j % k === i))
+      .filter((s) => s.length)
+      .map((s) => s.reduce<Record<number, string[]>>((only, [n, label]) => ({ ...only, [n]: [...(only[n] ?? []), label] }), {}));
+    shares.forEach((only, i) => workers.current[i].postMessage([setup, log, seat, [0, 1], only]));
+    setSecond({ workers: shares.length, options: close.length });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [first]);
   const order = useMemo(() => log.flatMap((c, n) => (c.seat === seat ? [n] : [])), [log, seat]);
-  const costly = scored.filter((r) => r.lost >= 0.05).sort((a, b) => b.lost - a.lost);
-  const found = scored.filter((r) => r.chose !== r.hint && r.beat >= 0.05).sort((a, b) => b.beat - a.beat);
+  const costly = scored.filter((r) => r.lost >= big).sort((a, b) => b.lost - a.lost);
+  const found = scored.filter((r) => r.chose !== r.hint && r.beat >= big).sort((a, b) => b.beat - a.beat);
   const peak = scored.reduce<(typeof scored)[number] | undefined>((a, b) => (!a || b.mine.win > a.mine.win ? b : a), undefined);
   const item = "flex animate-rise cursor-pointer flex-wrap items-center gap-x-[0.5em] gap-y-[0.2em] rounded-lg px-[0.4em] py-[0.3em] hover:bg-ink/5";
 
@@ -174,7 +205,7 @@ export function Review({ setup, log, seat, show }: { setup: Setup; log: Choice[]
       {!done && (
         <div className="my-[0.5em] flex items-center gap-[0.6em] opacity-70">
           <span className="h-[0.3em] flex-1 animate-pulse rounded-full bg-magenta/40" />
-          Playing out your decisions… {rows.length} so far
+          {first ? `Checking the close calls on more deals… ${checked} of ${second?.options ?? 0}` : `Playing out your decisions… ${rows.length} so far`}
         </div>
       )}
       {scored.length > 0 && peak && (
@@ -235,10 +266,11 @@ export function Review({ setup, log, seat, show }: { setup: Setup; log: Choice[]
           </ul>
         </>
       )}
-      {done && costly.length === 0 && <p className="my-[0.4em]">No decision cost you more than 5 points.</p>}
+      {done && costly.length === 0 && <p className="my-[0.4em]">No decision cost you more than 3 points.</p>}
       <p className="mt-[0.8em] mb-0 text-xs opacity-60">
         Each option played out on {deals(setup)} deals of the cards you couldn&apos;t see, with each bot playing at its level{setup.bots.includes("learned") ? " (Hard by a lighter version of its model)" : ""} and you and
-        any other people like the Medium bot from there. Only plays with a choice count. Points are chances of winning the game. Click a decision to see the table then.
+        any other people like the Medium bot from there. Where a decision may have cost or gained over 2 points, your play, the Hint&apos;s and the best are played out again on {again(setup)} deals. Only plays with a
+        choice count. Points are chances of winning the game. Click a decision to see the table then.
       </p>
     </section>
   );
