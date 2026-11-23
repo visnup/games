@@ -362,7 +362,7 @@ export function Hand({
     <div
       ref={ref}
       className={`flex justify-center pt-[1.2em] [--gap:1rem] [--least:2.5rem] [--most:2.5rem] *:hover:z-10 max-sm:@container max-sm:-mb-[2.4em] max-sm:pt-[1em] max-sm:[--gap:0.4rem] max-sm:[--least:0.5rem] max-sm:[--most:2.72rem] ${onClick ? "touch-none" : ""} ${order.length > 8 ? "max-sm:[&>div:not(:last-child)_.big]:opacity-0" : ""}`}
-      // a tap's emulated mouse events end in a mouseleave, which would drop the card it just played
+      // Chromium ends a tap's emulated mouse events with a mouseleave, which would drop the card it just played. iOS Safari doesn't.
       onMouseLeave={() => press.current || touched.current || hovered(undefined)}
       {...touch}
     >
