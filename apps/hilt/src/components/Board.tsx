@@ -6,7 +6,8 @@ import type { Doc, Id } from "../../convex/_generated/dataModel";
 import type { bot } from "../../convex/schema";
 import type { Infer } from "convex/values";
 import { type Card as CardType, COLORS } from "../cards.ts";
-import { defaultPolicy, type Game, type Move, type Player } from "../game.ts";
+import { decisive, defaultPolicy, type Game, type Move, type Player } from "../game.ts";
+import { advice, after, gamePoints, leaders, type Standing, standing } from "../read.ts";
 import { type Battle, type Choice, choose, onBoard, type Prompt, replay, setup } from "../replay.ts";
 import { Backs, Card, Chip, label } from "./Card";
 import { Review } from "./Review";
@@ -98,9 +99,16 @@ export function Board({ game, me }: Props) {
     setPast(decisions >= game.log.length ? undefined : { decisions, line });
   };
   const who = (n: number) => (n === seat ? "You" : "bot" in game.seats[n] ? `Bot ${n + 1}` : (game.names[n] ?? `Player ${n + 1}`));
+  /** Sends a decision; whether it went through. */
   const send = (choice: Choice) => {
     setError(undefined);
-    decide({ game: game._id, player: me!, choice }).catch((e) => setError(String(e.message ?? e)));
+    return decide({ game: game._id, player: me!, choice }).then(
+      () => true,
+      (e) => {
+        setError(String(e.message ?? e));
+        return false;
+      },
+    );
   };
   const { prompt, result } = state;
   const replaceGone = useMutation(api.games.replaceGone);
@@ -157,15 +165,14 @@ export function Board({ game, me }: Props) {
           {g.fighting && g.color ? (
             <>
               <span className="label">Battle {g.battles}</span>
-              <span className="flex flex-col items-center gap-[0.3em] max-sm:flex-row">
+              <span className="flex items-center gap-[0.3em] text-sm font-semibold capitalize">
                 <Chip color={g.color} />
-                <span className="text-sm">the {g.color} chip</span>
+                {g.color}
+                {g.winter && <span title="Winter: force cards are 1">❄️</span>}
               </span>
-              {g.winter && (
-                <span className="text-sm max-sm:text-xs">
-                  ❄️ Winter<span className="max-sm:hidden">: force cards are 1</span>
-                </span>
-              )}
+              <span className="max-w-full truncate text-xs opacity-80">
+                {who(g.leader())} {g.leader() === seat ? "lead" : "leads"} with {g.strength(g.players[g.leader()])}
+              </span>
             </>
           ) : (
             <>
@@ -207,6 +214,7 @@ export function Board({ game, me }: Props) {
             name={`${who(n)}${view.result?.winner === n ? " 🏆" : ""}`}
             level={"bot" in game.seats[n] ? game.seats[n].bot : undefined}
             current={!view.result && view.prompt?.seat === n}
+            point={g.fighting && !view.result && decisive(g, g.players[n])}
             fighting={battle.current}
             last={view.last}
             played={discarded(battle.lines).get(n) ?? []}
@@ -216,16 +224,19 @@ export function Board({ game, me }: Props) {
       <section className="panel sticky bottom-0 z-10 text-white max-sm:-mx-[0.8em] max-sm:-mb-[0.8em] max-sm:rounded-none">
         <div className="px-[0.8em] pb-[0.8em] max-sm:px-[0.4em] max-sm:pb-0">
           {past ? (
-            <p className="m-0 flex items-center justify-between pt-[0.8em]">
-              Viewing the board after an earlier play.{" "}
-              <button className="primary" onClick={() => setPast(undefined)}>
-                Back to now
-              </button>
-            </p>
+            <div className="flex items-end gap-[0.8em] max-sm:flex-col-reverse max-sm:items-stretch max-sm:gap-0">
+              <div className="min-w-0 flex-1">{seat >= 0 && <Hand cards={g.players[seat].hand} />}</div>
+              <div className="flex shrink-0 flex-col items-center justify-center gap-[0.4em] self-stretch pt-[0.8em] max-sm:flex-row max-sm:justify-between max-sm:pt-[0.3em]">
+                <span className="label">After an earlier play</span>
+                <button className="primary" onClick={() => setPast(undefined)}>
+                  Back to now
+                </button>
+              </div>
+            </div>
           ) : view.result ? (
-            <p className="m-0 pt-[0.8em] font-bold">{view.result.winner === null ? "Nobody won." : `${who(view.result.winner)} won!`}</p>
+            <p className="m-0 pt-[0.8em] font-bold max-sm:pb-[0.5em]">{view.result.winner === null ? "Nobody won." : `${who(view.result.winner)} won!`}</p>
           ) : ended ? (
-            <p className="m-0 flex items-center justify-between gap-[0.8em] pt-[0.8em]">
+            <p className="m-0 flex animate-rise items-center justify-between gap-[0.8em] pt-[0.8em] max-sm:pb-[0.5em]">
               <span>
                 {ended.ended === "doves"
                   ? `🕊️ ${endedBy ? who(+endedBy[1]) : "Someone"} played Doves: nobody wins the ${ended.color} chip, and the Favor stays with ${who(g.favor)}.`
@@ -236,10 +247,10 @@ export function Board({ game, me }: Props) {
               </button>
             </p>
           ) : !stepping && prompt && prompt.seat === seat ? (
-            <Ask key={game.log.length} game={g} p={g.players[seat]} prompt={prompt} send={send} />
+            <Ask key={game.log.length} game={g} p={g.players[seat]} prompt={prompt} send={send} who={who} deal={`${game._id}:${g.rounds}`} />
           ) : (
             <div className="flex items-end gap-[0.8em] max-sm:flex-col-reverse max-sm:items-stretch max-sm:gap-0">
-              <div className="min-w-0 flex-1">{seat >= 0 && <Hand cards={g.players[seat].hand} />}</div>
+              <div className="min-w-0 flex-1">{seat >= 0 && <Hand key={g.rounds} cards={g.players[seat].hand} deal={`${game._id}:${g.rounds}`} />}</div>
               <div className="flex shrink-0 flex-col items-center justify-center self-stretch pt-[0.8em] max-sm:min-h-[2.3em] max-sm:flex-row max-sm:justify-between max-sm:pt-[0.3em]">
                 <span className="label">Waiting for {view.prompt ? who(view.prompt.seat) : "…"}</span>
                 {stepping && (
@@ -262,25 +273,123 @@ const rank = (c: CardType) => ORDER.indexOf(c.kind) * 100 + c.value;
 
 /**
  * A hand, sorted. On a phone, its cards overlap only as much as they need to fit the width, down to each card's corner. A full hand there shows only the last card's big face.
- * `onClick` and the rest take places in the hand as dealt, not as shown.
+ * With `onClick`, a hovered card rises and the others move aside. On a touch screen, slide to pick a card and release to play it. `tag` labels a card from above. A new `deal`
+ * deals the cards in. `onClick` and the rest take places in the hand as dealt, not as shown.
  */
-export function Hand({ cards, onClick, selected, hinted, dim }: { cards: CardType[]; onClick?: (i: number) => void; selected?: number; hinted?: number; dim?: (c: CardType) => boolean }) {
+export function Hand({
+  cards,
+  onClick,
+  onHover,
+  selected,
+  focus,
+  hinted,
+  dim,
+  tag,
+  deal,
+}: {
+  cards: CardType[];
+  onClick?: (i: number) => void;
+  onHover?: (i: number | undefined) => void;
+  selected?: number;
+  /** A card chosen from the keyboard, lifted like a hovered one. */
+  focus?: number;
+  hinted?: number;
+  dim?: (c: CardType) => boolean;
+  tag?: (i: number) => ReactNode;
+  deal?: string;
+}) {
+  const [hover, setHover] = useState<number>();
+  const [lift, setLift] = useState(0.8);
+  const ref = useRef<HTMLDivElement>(null);
+  const press = useRef<{ lefts: number[]; right: number; area: DOMRect; i?: number }>(undefined);
+  const touched = useRef(false);
+  // fixed at mount, since dropping the class would stop the animation part way
+  const [fresh] = useState(() => deal !== undefined && deal !== lastDeal);
+  useEffect(() => {
+    lastDeal = deal;
+  }, [deal]);
+  const hovered = (i: number | undefined) => {
+    setHover(i);
+    onHover?.(i);
+  };
   const sorted = cards.map((_, i) => i).sort((a, b) => rank(cards[a]) - rank(cards[b]));
   // the cards that can't be played now, held apart to the right
   const playable = sorted.filter((i) => !dim?.(cards[i]));
   const order = [...playable, ...sorted.filter((i) => dim?.(cards[i]))];
   const groups = playable.length && playable.length < order.length ? 2 : 1;
   const overlap = `clamp(var(--least), calc((${order.length} * 3.825rem + ${groups - 1} * var(--gap) - 100cqw) / ${Math.max(1, order.length - groups)}), var(--most))`;
+  const lifted = hover ?? focus;
+  const at = lifted === undefined ? -1 : order.indexOf(lifted);
+  const under = (x: number, y: number) => {
+    const p = press.current!;
+    if (x > p.right || y < p.area.top || y > p.area.bottom) return undefined;
+    const k = p.lefts.findLastIndex((l) => l <= x);
+    return k < 0 ? undefined : order[k];
+  };
+  const pick = (i: number | undefined) => {
+    const p = press.current!;
+    if (i === p.i) return;
+    p.i = i;
+    hovered(i);
+  };
+  const touch = onClick && {
+    onPointerDown: (e: React.PointerEvent) => {
+      touched.current = e.pointerType === "touch";
+      setLift(touched.current ? 3 : 0.8);
+      if (!touched.current) return;
+      // the cards' places before they move aside
+      const rects = [...ref.current!.children].map((c) => c.getBoundingClientRect());
+      press.current = { lefts: rects.map((r) => r.left), right: rects.at(-1)?.right ?? 0, area: ref.current!.getBoundingClientRect() };
+      pick(under(e.clientX, e.clientY));
+    },
+    onPointerMove: (e: React.PointerEvent) => press.current && pick(under(e.clientX, e.clientY)),
+    onPointerUp: (e: React.PointerEvent) => {
+      const p = press.current;
+      if (!p) return;
+      const i = under(e.clientX, e.clientY) === p.i ? p.i : undefined;
+      press.current = undefined;
+      hovered(undefined);
+      if (i !== undefined) onClick(i);
+    },
+    onPointerCancel: () => {
+      press.current = undefined;
+      hovered(undefined);
+    },
+    onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
+  };
   return (
-    <div className={`flex justify-center pt-[1.2em] [--gap:1rem] [--least:2.5rem] [--most:2.5rem] *:hover:z-10 max-sm:@container max-sm:-mb-[2.4em] max-sm:pt-[0.8em] max-sm:[--gap:0.4rem] max-sm:[--least:0.5rem] max-sm:[--most:2.72rem] ${order.length > 8 ? "max-sm:[&>div:not(:last-child)_.big]:opacity-0" : ""}`}>
+    <div
+      ref={ref}
+      className={`flex justify-center pt-[1.2em] [--gap:1rem] [--least:2.5rem] [--most:2.5rem] *:hover:z-10 max-sm:@container max-sm:-mb-[2.4em] max-sm:pt-[1em] max-sm:[--gap:0.4rem] max-sm:[--least:0.5rem] max-sm:[--most:2.72rem] ${onClick ? "touch-none" : ""} ${order.length > 8 ? "max-sm:[&>div:not(:last-child)_.big]:opacity-0" : ""}`}
+      onMouseLeave={() => press.current || hovered(undefined)}
+      {...touch}
+    >
       {order.map((i, k) => (
-        <div key={i} className={`relative ${selected === i ? "z-10" : ""}`} style={{ marginLeft: !k ? 0 : k === playable.length ? "var(--gap)" : `calc(-1 * ${overlap})` }}>
-          <Card card={cards[i]} selected={selected === i} hinted={hinted === i} dim={dim?.(cards[i])} onClick={onClick && (() => onClick(i))} />
+        <div
+          key={i}
+          className={`relative transition-transform duration-150 select-none [-webkit-touch-callout:none] ${selected === i || lifted === i ? "z-10" : ""} ${fresh ? "dealt" : ""}`}
+          style={
+            {
+              "--k": k,
+              marginLeft: !k ? 0 : k === playable.length ? "var(--gap)" : `calc(-1 * ${overlap})`,
+              ...(onClick && at >= 0 ? { translate: `${aside(k - at)}em ${lifted === i ? -lift : 0}em` } : {}),
+            } as React.CSSProperties
+          }
+          onMouseEnter={onClick && (() => touched.current || hovered(i))}
+        >
+          <Card card={cards[i]} selected={selected === i} hinted={hinted === i} dim={dim?.(cards[i])} onClick={onClick && (() => touched.current || onClick(i))} />
+          {tag?.(i)}
         </div>
       ))}
     </div>
   );
 }
+
+/** How far the card `d` places from the hovered one moves aside, in em: most for its neighbors, none from 4 away. */
+const aside = (d: number) => (d === 0 ? 0 : Math.sign(d) * 1.2 * Math.max(0, 1 - (Math.abs(d) - 1) / 3));
+
+/** The last hand dealt in, by game and round, so a hand animates its deal once however often it's drawn again. */
+let lastDeal: string | undefined;
 
 /** How long each of others' plays shows before the next, in ms, or 0 for all at once. */
 const SPEEDS = { off: 0, fast: 400, slow: 900 };
@@ -350,6 +459,7 @@ function Seat({
   name,
   level,
   current,
+  point,
   fighting,
   last,
   played,
@@ -359,6 +469,8 @@ function Seat({
   name: string;
   level?: Level;
   current: boolean;
+  /** Whether winning this battle wins them the game. */
+  point: boolean;
   fighting: boolean;
   last?: Battle;
   played: { card: CardType; took?: CardType }[];
@@ -366,8 +478,8 @@ function Seat({
   const row = fighting ? p.row : (last?.rows[p.seat] ?? []);
   const strength = fighting ? game.strength(p) : last?.strengths[p.seat];
   const leads = fighting ? game.leader() === p.seat : last?.winner === p.seat;
-  // a finished battle, or a player who passed with nothing in it and so can't win it
-  const muted = !fighting || (p.passed && strength === 0) ? "opacity-50" : "";
+  // a finished battle, or a player who passed and isn't winning it
+  const muted = !fighting || (p.passed && !leads) ? "opacity-50" : "";
   const chips = COLORS.map((c, i) => <Chip key={c} color={c} n={p.chips[i]} faded={!p.chips[i]} />);
   // on phones the name runs up the left side, with the Favor as a dot, and the chips stack at the right
   return (
@@ -375,6 +487,11 @@ function Seat({
       <h2 className="m-0 flex flex-wrap items-center gap-x-[0.5em] gap-y-[0.2em] text-base font-bold max-sm:text-xs whitespace-nowrap max-sm:[writing-mode:sideways-lr]">
         <span>
           {name}
+          {level && (
+            <small className="ml-[0.3em] font-normal opacity-60 sm:hidden" title={LEVELS[level].title}>
+              {LEVELS[level].name[0]}
+            </small>
+          )}
           {level && (
             <small className="ml-[0.5em] text-sm font-normal opacity-60 max-sm:hidden" title={LEVELS[level].title}>
               {LEVELS[level].name}
@@ -392,7 +509,7 @@ function Seat({
         {strength !== undefined && (fighting || last) && (
           <span className={`flex min-w-[3em] sm:min-w-[4.5em] flex-col items-center gap-[0.2em] whitespace-nowrap ${muted}`}>
             <span className={`text-xl leading-none font-extrabold ${leads ? "text-accent" : ""}`}>{strength}</span>
-            <span className={`label ${leads ? "" : "text-[0.6rem]"}`}>{fighting ? (leads ? "leads" : "strength") : leads ? "won" : ""}</span>
+            <span className="label">{leads ? (fighting ? "leads" : "won") : " "}</span>
           </span>
         )}
         <div className={`flex *:not-first:-ml-[calc(var(--small)*1.9/0.65)] ${muted}`}>
@@ -404,6 +521,11 @@ function Seat({
         {fighting && p.passed && (
           <span className={`label ${muted}`} title="Passed for the rest of the battle; their cards still count">
             Passed
+          </span>
+        )}
+        {point && (
+          <span className="animate-pop rounded-full bg-white px-[0.6em] py-[0.1em] text-xs font-bold whitespace-nowrap text-black" title="Winning this battle wins them the game">
+            Game point
           </span>
         )}
         <span className="ml-auto flex items-center gap-[0.6em]">
@@ -436,28 +558,33 @@ function Asking({ question, answers, children }: { question: ReactNode; answers:
   );
 }
 
-function Ask({ game, p, prompt, send }: { game: Game; p: Player; prompt: Prompt; send: (c: Choice) => void }) {
-  const [picked, setPicked] = useState<number>();
-  const [hint, setHint] = useState<{ move?: Move; color?: string; dump?: boolean }>();
-  const hinted = (on: boolean) => (on ? "outline-3 outline-accent" : "");
+const ringed = (on: boolean) => (on ? "outline-3 outline-accent" : "");
+
+function Ask({ game, p, prompt, send, who, deal }: { game: Game; p: Player; prompt: Prompt; send: (c: Choice) => Promise<boolean>; who: (n: number) => string; deal: string }) {
+  const [hint, setHint] = useState<{ color?: string; dump?: boolean }>();
+  const hinted = ringed;
   if (prompt.kind === "color")
     return (
       <Asking
         question="Pick the chip for the next battle:"
         answers={
           <>
-            {COLORS.map((c) => (
-              <button key={c} className={`quiet flex items-center gap-[0.4em] ${hinted(hint?.color === c)}`} onClick={() => send({ kind: "color", seat: p.seat, color: c })}>
-                <Chip color={c} /> {c}
-              </button>
-            ))}
+            {COLORS.map((c) => {
+              const points = gamePoints(game, c);
+              return (
+                <button key={c} aria-label={c} className={`quiet flex items-center gap-[0.4em] ${hinted(hint?.color === c)}`} onClick={() => send({ kind: "color", seat: p.seat, color: c })}>
+                  <Chip color={c} /> {c}
+                  {points.length > 0 && <small className="opacity-70">game point: {points.map(who).join(", ")}</small>}
+                </button>
+              );
+            })}
             <button className="quiet" onClick={() => setHint({ color: defaultPolicy.color(game, p) })}>
               Hint
             </button>
           </>
         }
       >
-        <Hand cards={p.hand} />
+        <Hand cards={p.hand} deal={deal} />
       </Asking>
     );
   if (prompt.kind === "dump")
@@ -478,65 +605,151 @@ function Ask({ game, p, prompt, send }: { game: Game; p: Player; prompt: Prompt;
           </>
         }
       >
-        <Hand cards={p.hand} />
+        <Hand cards={p.hand} deal={deal} />
       </Asking>
     );
-  const card = picked === undefined ? undefined : p.hand[picked];
-  const play = (m: Move) => {
-    setPicked(undefined);
-    send({ kind: "move", seat: p.seat, ...choose(p, m) });
+  return <AskMove game={game} p={p} send={send} deal={deal} />;
+}
+
+/** Where you stand in the battle, in a few words. */
+function reading(s: Standing) {
+  if (s.kind === "win") return "Pass to win the chip";
+  if (s.kind === "lead") return s.by ? `You lead by ${s.by}` : "You lead on the tie";
+  if (s.need !== undefined) return `Need ${s.need}+ · ${s.have ? `your ${label(s.have)}` : "you have none"}`;
+  return s.have ? `${s.by} behind · your ${label(s.have)} leads` : `${s.by} behind · no card leads`;
+}
+
+/** Above a card in your hand: what it would bring you to if it takes the lead, solid on the cheapest that does. */
+function Outcome({ text, solid }: { text: string | number; solid: boolean }) {
+  return (
+    <span
+      className={`absolute -top-[0.95rem] left-0 z-10 animate-pop rounded-full px-[0.35em] text-[0.7rem] leading-[1.4] font-bold whitespace-nowrap ring-1 ring-accent ${solid ? "bg-accent text-white" : "bg-[var(--bar)] text-white"}`}
+      title={solid ? "The cheapest card that takes the lead" : "Takes the lead"}
+    >
+      {text}
+    </span>
+  );
+}
+
+function AskMove({ game, p, send, deal }: { game: Game; p: Player; send: (c: Choice) => Promise<boolean>; deal: string }) {
+  // a play on its way, so a second tap before the table catches up doesn't send another
+  const [sent, setSent] = useState(false);
+  const [baiting, setBaiting] = useState<number>();
+  const [hint, setHint] = useState<ReturnType<typeof advice>>();
+  const [note, setNote] = useState<string>();
+  const [hover, setHover] = useState<number>();
+  const [focus, setFocus] = useState<number>();
+  const pointer = hover ?? focus;
+  const stands = useMemo(() => standing(game, p), [game, p]);
+  const leading = useMemo(() => leaders(game, p), [game, p]);
+  const submit = (m: Move) => {
+    if (sent) return;
+    setSent(true);
+    void send({ kind: "move", seat: p.seat, ...choose(p, m) }).then((ok) => ok || setSent(false));
   };
   // Bait can take back any force card in the row, so one option for each value there
-  const takes = card?.kind === "bait" ? [...new Map(p.row.filter((c) => c.kind === "force").map((c) => [c.value, c])).values()].sort((a, b) => b.value - a.value) : [];
-  const hintIndex = hint?.move ? p.hand.indexOf(hint.move.card) : undefined;
+  const takes = [...new Map(p.row.filter((c) => c.kind === "force").map((c) => [c.value, c])).values()].sort((a, b) => b.value - a.value);
+  const play = (i: number) => {
+    const card = p.hand[i];
+    setNote(undefined);
+    if (!game.playable(p, card)) return setNote(card.kind === "bait" ? "Bait needs a force card in your row to take back." : `You can't play ${label(card)} again this battle.`);
+    if (card.kind !== "bait") return submit({ card });
+    if (takes.length === 1) return submit({ card, take: takes[0] });
+    setBaiting(i);
+  };
+  const toggleHint = () => {
+    if (hint) {
+      setHint(undefined);
+      setBaiting(undefined);
+      return;
+    }
+    const a = advice(game, p);
+    setHint(a);
+    setNote(undefined);
+    setBaiting(a.move?.take ? p.hand.indexOf(a.move.card) : undefined);
+  };
+  // the arrows move between the cards you can play, as the hand shows them; Enter plays, P passes, H hints
+  const keys = useRef<(e: KeyboardEvent) => void>(undefined);
+  useEffect(() => {
+    keys.current = (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.target instanceof HTMLInputElement) return;
+      const playable = p.hand
+        .map((_, i) => i)
+        .sort((a, b) => rank(p.hand[a]) - rank(p.hand[b]))
+        .filter((i) => game.playable(p, p.hand[i]));
+      if ((e.key === "ArrowLeft" || e.key === "ArrowRight") && playable.length) {
+        e.preventDefault();
+        const k = pointer === undefined ? -1 : playable.indexOf(pointer);
+        const next = k < 0 ? (e.key === "ArrowLeft" ? playable.length - 1 : 0) : (k + (e.key === "ArrowLeft" ? -1 : 1) + playable.length) % playable.length;
+        setHover(undefined);
+        setFocus(playable[next]);
+      } else if ((e.key === "Enter" || e.key === " ") && pointer !== undefined) {
+        e.preventDefault();
+        play(pointer);
+      } else if (e.key === "p") submit(null);
+      else if (e.key === "h") toggleHint();
+    };
+  });
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => keys.current?.(e);
+    addEventListener("keydown", key);
+    return () => removeEventListener("keydown", key);
+  }, []);
+  const bait = baiting === undefined ? undefined : p.hand[baiting];
+  const message = note ?? hint?.why;
   return (
     <div className="relative">
       <div className="flex items-end gap-[0.8em] max-sm:flex-col-reverse max-sm:items-stretch max-sm:gap-0">
         <div className="min-w-0 flex-1">
           <Hand
             cards={p.hand}
-            selected={picked}
-            hinted={hintIndex}
+            deal={deal}
+            selected={baiting}
+            focus={focus}
+            hinted={hint?.move ? p.hand.indexOf(hint.move.card) : undefined}
             dim={(c) => !game.playable(p, c)}
-            onClick={(i) => {
-              setHint(undefined);
-              setPicked(i === picked ? undefined : i);
+            onClick={play}
+            onHover={(i) => {
+              setHover(i);
+              if (i !== undefined) setFocus(undefined);
+            }}
+            tag={(i) => {
+              const c = p.hand[i];
+              if (c.kind === "crows" && game.leader() === p.seat) return <Outcome text="wins" solid />;
+              return stands.kind === "behind" && leading.includes(c) ? <Outcome text={after(game, p, c).strength} solid={c === stands.have} /> : null;
             }}
           />
         </div>
-        <div className="flex shrink-0 flex-col items-center justify-center gap-[0.4em] self-stretch pt-[0.8em] max-sm:flex-row max-sm:justify-end max-sm:pt-[0.3em]">
-          <span className="label mr-auto sm:hidden">Your move</span>
-          <button className={hinted(hint?.move === null)} onClick={() => send({ kind: "move", seat: p.seat, card: null })} title="Passing is for the rest of the battle">
-            Pass
-          </button>
-          <button
-            className="quiet"
-            onClick={() => {
-              const m = defaultPolicy.move(game, p);
-              setHint({ move: m });
-              setPicked(m ? p.hand.indexOf(m.card) : undefined);
-            }}
-          >
-            Hint
-          </button>
+        <div className="flex w-[14em] shrink-0 flex-col items-center justify-center gap-[0.4em] self-stretch pt-[0.8em] text-center max-sm:w-auto max-sm:flex-row max-sm:justify-end max-sm:pt-[0.3em] max-sm:text-left">
+          <span className={`min-w-0 text-sm font-bold max-sm:mr-auto ${stands.kind === "behind" ? "" : "text-accent"}`}>{reading(stands)}</span>
+          <div className="flex shrink-0 gap-[0.4em]">
+            <button className={ringed(hint?.move === null)} onClick={() => submit(null)} title="Passing is for the rest of the battle (P)">
+              Pass
+            </button>
+            <button className={`quiet ${hint ? "ring-2 ring-white/50" : ""}`} aria-pressed={!!hint} title="Medium's move, and why (H)" onClick={toggleHint}>
+              Hint
+            </button>
+          </div>
         </div>
       </div>
-      {card && (
-        <div className={`${floating} flex flex-wrap items-center justify-center gap-[0.6em]`}>
-          {!game.playable(p, card) ? (
-            <span>{card.kind === "bait" ? "Bait needs a force card in your row to take back." : `You can't play ${label(card)} again this battle.`}</span>
-          ) : card.kind === "bait" ? (
-            takes.map((t) => (
-              <button key={t.value} className={hinted(hint?.move?.card.kind === "bait" && hint.move.take?.value === t.value)} onClick={() => play({ card, take: t })}>
-                Take back the {t.value}
-              </button>
-            ))
-          ) : (
-            <button className="primary" onClick={() => play({ card })}>
-              Play {label(card)}
+      {bait ? (
+        <div className={`${floating} flex animate-rise flex-wrap items-center justify-center gap-[0.6em]`}>
+          {hint && <span className="w-full text-center">{hint.why}</span>}
+          {takes.map((t) => (
+            <button key={t.value} className={`primary ${ringed(hint?.move?.card.kind === "bait" && hint.move.take?.value === t.value)}`} onClick={() => submit({ card: bait, take: t })}>
+              Take back the {t.value}
             </button>
-          )}
+          ))}
+          <button className="quiet" onClick={() => setBaiting(undefined)}>
+            Cancel
+          </button>
         </div>
+      ) : (
+        message && (
+          <div key={message} className={`${floating} animate-rise text-center`}>
+            {message}
+          </div>
+        )
       )}
     </div>
   );

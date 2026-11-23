@@ -159,17 +159,29 @@ export function Review({ setup, log, seat, show }: { setup: Setup; log: Choice[]
   const item = "cursor-pointer rounded-sm px-[0.3em] hover:bg-white/10";
 
   return (
-    <section className="panel p-[0.8em] text-sm">
+    <section className="panel animate-rise p-[0.8em] text-sm">
       <h2 className="label m-0">How you played</h2>
       {!done && (
-        <p className="my-[0.4em] opacity-70">
+        <div className="my-[0.5em] flex items-center gap-[0.6em] opacity-70">
+          <span className="h-[0.3em] flex-1 animate-pulse rounded-full bg-accent/40" />
           Playing out your decisions… {rows.length} of {total}
-        </p>
+        </div>
       )}
       {scored.length > 0 && peak && (
-        <p className="my-[0.4em]">
-          Your chances: {pct(scored[0].mine.win)} after your first decision, {pct(peak.mine.win)} at their best (battle {peak.battle}), {pct(scored.at(-1)!.mine.win)} after your last.
-        </p>
+        <div className="my-[0.6em] grid grid-cols-3 gap-[0.5em] text-center" aria-label="Your chance of winning">
+          {(
+            [
+              ["after your first decision", scored[0].mine.win],
+              [`at best, battle ${peak.battle}`, peak.mine.win],
+              [done ? "after your last" : "so far", scored.at(-1)!.mine.win],
+            ] as const
+          ).map(([name, win]) => (
+            <div key={name} className="rounded-lg bg-white/5 p-[0.4em]">
+              <div className="text-xl font-extrabold">{pct(win)}</div>
+              <div className="label text-[0.6rem]">{name}</div>
+            </div>
+          ))}
+        </div>
       )}
       {scored.length > 0 && <Chances rows={scored} order={order} fair={1 / setup.players} show={show} />}
       {costly.length > 0 && (

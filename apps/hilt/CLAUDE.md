@@ -163,6 +163,11 @@ Other players' hands aren't hidden from their browsers; it's for friends.
   log themselves.
 - `src/pages/` and `src/components/`: `Game` joins and shows the lobby, `Board` the table and
   the prompt. Playwright specs sit next to components and need `pnpm dev` running.
+- `read.ts` is what the board tells a player. `standing` gives the lowest force card that takes
+  the lead, counting the tie-breaks. `leaders` gives the cards in hand that do. `gamePoints` gives
+  who a chip would win the game for. `advice` is the Hint: Medium's move and its rule in words.
+- A click or a released touch plays a card at once. Only a Bait with more than one card to take
+  back asks which. The arrow keys, Enter, P and H play from the keyboard.
 - Prettier is 220 wide, to match the engine, and leaves Markdown alone.
 - `next dev` under Turbopack goes stale in a long session: a new Tailwind class is on the element
   with no CSS rule for it, or a new export renders as "Element type is invalid … got: undefined".
