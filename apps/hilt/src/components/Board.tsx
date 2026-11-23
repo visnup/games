@@ -181,7 +181,7 @@ export function Board({ game, me }: Props) {
             </>
           )}
         </div>
-        <div className="h-[5.4rem] flex-1 overflow-y-auto text-sm text-white/80 max-sm:h-[3.4rem]" ref={log}>
+        <div className="h-[6.65rem] flex-1 overflow-y-auto text-sm text-white/80 max-sm:h-[4.65rem]" ref={log}>
           {entries(logged, who).map(({ heading, line: first, lines }, i) => (
             <section key={i}>
               {heading && (
