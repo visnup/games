@@ -1,21 +1,21 @@
 # Hilt
 
-Hilt is a card game from CMYK's Magenta line, designed by Dominique Ehrhard, for 3 to 6 players.
-It is a game of battles. Everyone is dealt 10 cards, and in each battle you go around the table
-playing cards into a row in front of you, or passing, until everyone has passed. Whoever has
+Hilt is a card game for 3 to 6 players from CMYK's Magenta line. Dominique Ehrhard designed
+Hilt. It is a game of battles. Everyone is dealt 10 cards. In each battle you go around the
+table playing cards into a row in front of you or passing until everyone has passed. Whoever has
 the highest total strength wins a chip. Three chips of a color, or one of each color, win the
-game. Nobody draws between battles: cards you spend winning one are gone until the round ends,
-when only one player has cards left.
+game. Nobody draws between battles: cards you spend winning one are gone until the round ends.
+A round ends when only one player has cards left.
 
-This repo is a simulator of the game. It plays millions of games by the rules, so it can answer
-the questions that come up at the table: how much the Favor card is worth, which cards matter,
-and above all when to fight for a chip and when to let it go.
+This repo is a simulator of the game. It plays millions of games by the rules. Those games
+answer the questions that come up at the table: how much the Favor card is worth, which cards
+matter, and above all when to fight for a chip and when to let it go.
 
-The answers come from the model, not from real tables. It follows the How to Play booklet, and
-`CLAUDE.md` lists the readings the booklet leaves open. It hasn't been checked against real
-games.
+The answers come from the model. They don't come from real tables. The model follows the How to
+Play booklet. `CLAUDE.md` lists the readings the booklet leaves open. The model hasn't been
+checked against real games.
 
-The simulator and this analysis were written with Claude Opus 5.5, working in Claude Code.
+The simulator and this analysis were written with Claude Opus 5.5 in Claude Code.
 
 ## A quick refresher
 
@@ -23,107 +23,111 @@ The deck is 96 cards: force cards worth 1 (15 of them), 2, 3, 4, 5, 6 and 10 (8 
 cards that change the battle:
 
 - **Bait** (15): discard it to take a force card from your row back into your hand.
-- **Fury** (6): your force cards count double, one Fury a player a battle.
+- **Fury** (6): your force cards count double. Each player can play one Fury a battle.
 - **Legend** (3): 10 strength that nothing changes.
-- **Winter** (3): every force card in the battle is worth 1, once a battle.
-- **Crows** (3): the battle ends at once, and whoever leads wins.
-- **Doves** (3): the battle ends at once with no winner; the chip and the Favor stay where they
+- **Winter** (3): every force card in the battle is worth 1. Only one Winter can be played a
+  battle.
+- **Crows** (3): the battle ends at once. Whoever leads wins.
+- **Doves** (3): the battle ends at once with no winner. The chip and the Favor stay where they
   are.
 
 The Favor card goes to whoever won the last battle. Its holder picks which color of chip the next
 battle is over, has 1 strength in their row before anyone plays, and acts last. Ties go to fewer
 cards played, then the highest card, then clockwise from the Favor holder. Passing is for the
-rest of the battle. When a battle leaves only one player with cards, they discard them, and
-everyone is dealt 10 again, plus one card per chip they hold.
+rest of the battle. When a battle leaves only one player with cards, that player discards them.
+Then everyone is dealt 10 again plus one card per chip they hold.
 
 ## Reading the numbers
 
 Almost every number here is a win rate: the share of games one player wins, out of tens of
 thousands played from different deals. Most tables seat one player of some kind at a table of
-default players and rotate it through every seat, so seat order evens out.
+default players. The tables rotate that player through every seat. That evens out seat order.
 
-- **A fair share** is what a player wins when nobody has an edge: 1 in however many are at the
-  table, so 33.3% at 3 players and 16.7% at 6. A column headed "3 players (fair 33.3%)" says
+- **A fair share** is what a player wins when nobody has an edge. That's 1 in however many are
+  at the table: 33.3% at 3 players and 16.7% at 6. A column headed "3 players (fair 33.3%)" says
   which share to compare with.
 - **Points** are percentage points of win rate. A rule worth "+4 points" takes a player from
   33.3% to 37.3% of games. Points over a fair share are a win rate minus the fair share.
-- **Fair shares** divide a win rate by a fair share instead: 2.0 fair shares wins twice as often
-  as an even player would, 66.7% at 3 players or 33.3% at 6. They compare player counts, where
-  the same points mean more at a bigger table.
+- **Fair shares** divide a win rate by a fair share instead. A player at 2.0 fair shares wins
+  twice as often as an even player would: 66.7% at 3 players or 33.3% at 6. Fair shares compare
+  player counts. The same points mean more at a bigger table.
 - **A card's value** is in points too: how much more often a player wins with one more copy of it
   in their opening hand, in place of a random card, from the same deal played both ways.
 - **Points a decision** (for the learned player) are the win chance one move adds over another at
-  a single decision, from playing each out to the end.
-- **The noise**, from playing a finite number of games: about ±0.5 points at 40,000 games, ±0.3 at
-  100,000, and ±1.5 at 4,000. Differences smaller than that are a tie.
+  a single decision. They come from playing each move out to the end.
+- **The noise** comes from playing a finite number of games. The noise is about ±0.5 points at
+  40,000 games, ±0.3 at 100,000, and ±1.5 at 4,000. Differences smaller than that are a tie.
 
 The charts are drawn from this README's own tables. After `pnpm install`, `node scripts/charts.ts`
 redraws `charts/`.
 
 ## How the default player plays
 
-Every table here is played by or against `defaultPolicy` in `src/game.ts`, a list of rules tried
-in order. Each was found by playing out every legal move at the default's decisions
-(`scripts/decisions.ts`) and adopted when it beat the default head to head (`scripts/variants.ts`):
+Every table here is played by or against `defaultPolicy` in `src/game.ts`. `defaultPolicy` is a
+list of rules tried in order. Each rule was found by playing out every legal move at the
+default's decisions (`scripts/decisions.ts`). A rule was adopted when it beat the default head to
+head (`scripts/variants.ts`):
 
-1. Once everyone else has passed, Bait back the biggest force card that still leaves you ahead,
-   then pass to win. With others still in, Bait back the biggest that leaves you more than 4
+1. Once everyone else has passed, Bait back the biggest force card that still leaves you ahead.
+   Then pass to win. With others still in, Bait back the biggest that leaves you more than 4
    ahead.
 2. Crows when ahead with a card of your own played. Doves when you're behind and the chip would
    win you the game, or would win the leader the game with nobody else still in to stop them.
-3. With nothing played and others still in, play a Fury, or else your strongest card, if you're
-   ahead, as the Favor holder is at first.
+3. If you're ahead with nothing played and others still in, play a Fury, or else your strongest
+   card. The Favor holder is ahead like this at first.
 4. Ahead with something played and others still in, play a Fury, or else your weakest force
-   card, rather than pass: passing is final, and leaves them to overtake with nobody to answer.
+   card. Don't pass: passing is final. A pass leaves them to overtake with nobody to answer.
 5. Don't open a battle while 2 or more others are still in: let them spend their cards. Not
    when the chip would win you the game, or anyone else with fewer than 3 others in. At 3
-   players, deny a chip that would win the other player the game with your strongest card, not
-   your cheapest.
-6. Otherwise open with a 1 or a Fury, the cheapest cards.
+   players, deny a chip that would win the other player the game with your strongest card. Don't
+   deny it with your cheapest.
+6. Otherwise open with a 1 or a Fury. Those are the cheapest cards.
 7. With nobody else left in, play your strongest card if your hand would overtake: nobody can
-   answer, and rule 1 takes back what wasn't needed.
+   answer. Rule 1 takes back what wasn't needed.
 8. Behind with others still in, Bait back a 1: it keeps you in the battle for nothing. Or play
    a 1.
-9. Behind, take the lead with the cheapest card that does it, while the battle has cost you at
-   most 3 cards, or without limit when the chip decides the game.
+9. Behind, take the lead with the cheapest card that does it while the battle has cost you at
+   most 3 cards. When the chip decides the game, there's no limit.
 10. Behind with the chip that wins you the game, play your strongest card even if it doesn't take
     the lead.
 11. Before giving up a battle, Bait back your biggest force card.
 
-Rule 5's strongest card at 3 players came from the learned player too, which plays 10s where the
-default waited or opened with a 1: +6.4 points against the default and +3.5 against the league
-(40,000 games), and a tie with the learned player. At 4 to 6 players it loses up to 3.5 against
-the league.
+Rule 5's strongest card at 3 players came from the learned player too. The learned player plays
+10s where the default waited or opened with a 1. The strongest card is worth +6.4 points against
+the default and +3.5 against the league (40,000 games). Against the learned player, the strongest
+card ties. At 4 to 6 players, the same move loses up to 3.5 against the league.
 
-Rule 4 came from the learned player (below), the first rule that did. Its moves differ from the
-default's at 74% of its decisions at 3 players and 49% at 6, mostly by playing where the default
-passed, and the largest group of those was ahead with a card down and one other still in, where
-the default had no rule and passed. Playing the weakest force card there wins 50.5%, 34.7%,
-26.4% and 21.8% at 3–6 players against the previous default (40,000 games), and 6, 2, 1.4 and
-0.8 points more than it against the league. The strongest card does about as well against the
-default and a little worse against the league. Only one on one gets most of it, 46.2% at 3
-players; a 1 or a Fury instead gains under a point. It holds up against strong players too: with
-quick playouts in every other seat it wins 39.7% at 3 players and 17.9% at 6, against the
-previous default's 34.7% and 16.0% (6,000 games), and at a table of round 9's learned players
-5.9%, 5.8%, 5.3% and 4.5% at 3–6 players, against 3.5%, 3.6%, 3.3% and 2.9% (10,000 games).
-Round 9 itself wins more against it, 67.0%, 53.1%, 47.4% and 42.7% at 3–6 players, against
-41.1%, 43.3%, 37.1% and 32.0% before, perhaps because default players that fight every lead out
-spend more of their cards on each other (untested). The models still take the previous default's pick as one of their inputs, since that's
-what they were trained on.
+Rule 4 came from the learned player (below). Rule 4 was the first rule that did. The learned
+player's moves differ from the default's at 74% of its decisions at 3 players and 49% at 6. Most
+of the differences are plays where the default passed. The largest group of those was ahead with
+a card down and one other still in. There the default had no rule and passed. Playing the
+weakest force card there wins 50.5%, 34.7%, 26.4% and 21.8% at 3–6 players against the previous
+default (40,000 games). Against the league, the same play wins 6, 2, 1.4 and 0.8 points more than
+the previous default. The strongest card does about as well against the default. Against the
+league, the strongest card does a little worse. Playing only one on one gets most of the gain:
+46.2% at 3 players. A 1 or a Fury instead gains under a point. Rule 4 holds up against strong
+players too. With quick playouts in every other seat, the default wins 39.7% at 3 players and
+17.9% at 6, against the previous default's 34.7% and 16.0% (6,000 games). At a table of round
+9's learned players, the default wins 5.9%, 5.8%, 5.3% and 4.5% at 3–6 players, against 3.5%,
+3.6%, 3.3% and 2.9% (10,000 games). Round 9 itself wins more against the new default: 67.0%,
+53.1%, 47.4% and 42.7% at 3–6 players, against 41.1%, 43.3%, 37.1% and 32.0% before. Perhaps
+default players that fight every lead out spend more of their cards on each other (untested).
+The models still take the previous default's pick as one of their inputs. That's what they were
+trained on.
 
-The first default, rules 2, 9 and 11 only, wins 12.4% at 3 players and 4.7% at 6 against a
-field of later defaults. Each rule after it was the best answer to the default before, and
-they don't settle: once everyone waits, opening pays again, and once everyone opens, waiting
-does. So from the fifth round on, rules were also judged against a league, a default from every
-round in each other seat (`variants.ts --field league`), and kept only if they won there too.
-Bait back a 1 while ahead, for one, gains 4 to 7 points against today's default and loses a
-point against the league.
+The first default had only rules 2, 9 and 11. Against a field of later defaults, the first
+default wins 12.4% at 3 players and 4.7% at 6. Each rule after that was the best answer to the
+default before it. The rules don't settle. Once everyone waits, opening pays again. Once everyone
+opens, waiting does. So from the fifth round on, rules were also judged against a league. The
+league seats a default from every round in each other seat (`variants.ts --field league`). A
+rule was kept only if it won there too. Bait back a 1 while ahead, for one, gains 4 to 7 points
+against today's default. Against the league, the same rule loses a point.
 
 ### Against strong players
 
-Each rule again, with playouts on 8 deals in every other seat, which play every move out with
-the default playing on (`variants.ts --field playouts`, 6,000 games). Before rule 4 they beat
-the default; now the default wins 39.7% at 3 players against them:
+Each rule again, with playouts on 8 deals in every other seat (`variants.ts --field playouts`,
+6,000 games). Playouts play every move out with the default playing on. Before rule 4, the
+playouts beat the default. Now the default wins 39.7% at 3 players against them:
 
 ![Wins against playouts without each rule, over today's default, at 3 and 6 players](charts/strong.svg)
 
@@ -146,22 +150,22 @@ the default; now the default wins 39.7% at 3 players against them:
 | the first default | 30.1% | 23.1% |
 
 Two rules are bets on how the others play. Leaving a chip that wins someone the game for the
-others to deny is worth 6 to 16 points among default players, which deny it once fewer than 3
-are left. Among playouts, which expect the others to deny it and so don't, nobody does, and
-denying it yourself is worth 23 points at 6 players. Waiting to open is the same bet at 6
-players: it pays when the others fight, and against players who wait too, opening wins 5.5
-points more. At 3 players waiting now pays against playouts too, by 6.6 points. Rule 7, when it
-counted only your best 4, cost 2.7 points at 3 players here, just past the noise (±1.2 points
-at 3 players, ±1 at 6), yet dropping it loses 1.4 to 4.8 points among default players and 3.9
-to 7.5 against older defaults; counting the whole hand gains 1.1 at 3 players. The rest hold up
-or are within the noise.
+others to deny is worth 6 to 16 points among default players. Default players deny it once
+fewer than 3 are left. Playouts expect the others to deny it. So among playouts, nobody does.
+There, denying it yourself is worth 23 points at 6 players. Waiting to open is the same bet at 6
+players. Waiting pays when the others fight. Against players who wait too, opening wins 5.5
+points more. At 3 players, waiting now pays 6.6 points against playouts too. Rule 7, when it
+counted only your best 4, cost 2.7 points at 3 players here. That's just past the noise: ±1.2
+points at 3 players, ±1 at 6. Yet dropping rule 7 loses 1.4 to 4.8 points among default players
+and 3.9 to 7.5 against older defaults. Counting the whole hand gains 1.1 at 3 players. The rest
+hold up or are within the noise.
 
-Baiting back your strongest force card when you're losing a battle, which the learned player
-does where the default plays a 1, is another bet: it wins 0.9 to 1.7 points against older
-defaults and loses 1.7 at 3 players and 0.7 at 4 to today's.
+The learned player Baits back its strongest force card when it's losing a battle. The default
+plays a 1 there. Baiting back the strongest card is another bet: it wins 0.9 to 1.7 points
+against older defaults. Against today's default, it loses 1.7 at 3 players and 0.7 at 4.
 
-Who should deny is a free-rider problem, and which answer wins depends on the table. One player
-of each kind against a table of the other (40,000 games):
+Who should deny is a free-rider problem. Which answer wins depends on the table. One player of
+each kind against a table of the other (40,000 games):
 
 | one player | table | 4 players | 5 players | 6 players |
 | --- | --- | --- | --- | --- |
@@ -176,11 +180,11 @@ never anyone else to leave it to.
 
 ### Deals
 
-The booklet allows deals, and none are binding. The one this problem asks for is "you stop this
-one": when the chip would win someone the game, one named player denies it and everyone else
-stays out. Two ways to name them, the next player still in after the threat, or the one still in
-who's furthest from winning, play the same. Against a table that has made the deal (10,000 games,
-`variants.ts`, "deal:"):
+The booklet allows deals. None are binding. The one this problem asks for is "you stop this
+one": when the chip would win someone the game, one named player denies it. Everyone else stays
+out. There are two ways to name them: the next player still in after the threat, or the one
+still in who's furthest from winning. Both play the same. Against a table that has made the deal
+(10,000 games, `variants.ts`, "deal:"):
 
 | one player | 3 players | 4 players | 5 players | 6 players |
 | --- | --- | --- | --- | --- |
@@ -190,18 +194,19 @@ who's furthest from winning, play the same. Against a table that has made the de
 | keeps the deal at a table of defaults | 28.6% | 22.3% | 17.0% | 13.3% |
 
 The deal keeps itself: once the others are staying out, the named player who doesn't deny hands
-the threat the game, and loses 3 to 11 points doing it. So it isn't a prisoner's dilemma, where
-everyone is tempted to break their word; it's a matter of agreeing who goes, which is exactly
-what talk can settle, even in the last battle. But a player who never made the deal does better
-still, 1 to 4 points over a fair share at 3 to 5 players, and making the deal alone, at a table
-that hasn't, costs 3 to 5. Offer the deal when the others will take it, and if they've made it
-without you, stay out of it. Letting the others go on playing a battle they've already put cards
-into, and only holding off opening, plays exactly the same (tried with the next player denying):
-the deal's cost is in who opens.
+the threat the game. That player loses 3 to 11 points by not denying. So the deal isn't a
+prisoner's dilemma. In a prisoner's dilemma, everyone is tempted to break their word. The deal is
+a matter of agreeing who goes. Talk can settle exactly that, even in the last battle. But a
+player who never made the deal does better still: 1 to 4 points over a fair share at 3 to 5
+players. Making the deal alone at a table that hasn't costs 3 to 5. Offer the deal when the
+others will take it. If they've made it without you, stay out of it. A looser deal only holds
+off opening. The looser deal lets the others go on playing a battle they've already put cards
+into. The looser deal plays exactly the same (tried with the next player denying): the deal's
+cost is in who opens.
 
 ## Going first
 
-The Favor starts in seat 1, which acts last in the first battle. 100,000 default games
+The Favor starts in seat 1. Seat 1 acts last in the first battle. 100,000 default games
 (`scripts/sim.ts`):
 
 ![Each seat's wins over a fair share, by player count](charts/seats.svg)
@@ -213,13 +218,13 @@ The Favor starts in seat 1, which acts last in the first battle. 100,000 default
 | 5 | 27.6% | 27.8% | 17.9% | 17.3% | 9.4% | | 10.1 | 1.9 |
 | 6 | 23.6% | 27.0% | 14.1% | 12.7% | 15.1% | 7.5% | 11.4 | 1.8 |
 
-The Favor's seat and seat 2, which acts first in the first battle, are best: 1.2 fair shares at
-3 players, and 1.4 to 1.6 at 6. The last seat is worst, at about half a fair share. Before the
-default held its lead (rule 4), seat 2 was best at 3 players too, with 41.5% to the Favor seat's
-34.5%. The first default, which fought every battle, gave the Favor seat 40.5% at 3 players and
-29.3% at 6 and seat 2 the worst share but one: who the first battle favors depends on how
-people play it. Most games end in the first round: a player with
-three or four chips is one battle from winning before anyone runs out.
+Seat 2 acts first in the first battle. The Favor's seat and seat 2 are best: 1.2 fair shares at
+3 players, and 1.4 to 1.6 at 6. The last seat is worst: about half a fair share. Before the
+default held its lead (rule 4), seat 2 was best at 3 players too: 41.5% to the Favor seat's
+34.5%. The first default fought every battle. Under the first default, the Favor seat won 40.5%
+at 3 players and 29.3% at 6. Seat 2 got the worst share but one. So who the first battle favors
+depends on how people play it. Most games end in the first round: a player with three or four
+chips is one battle from winning before anyone runs out.
 
 ## What each card is worth
 
@@ -244,21 +249,21 @@ played both ways (`scripts/cards.ts`, 200,000 deals each):
 | 1 | −2.9 | −3.3 | −2.7 | −2.6 |
 | Doves | −3.2 | −2.9 | −2.9 | −3.0 |
 
-These are against a random card, so a card worth nothing is about average. What a card is worth
-depends on how it's played. Against the first default, which fought every battle and played
-Crows whenever it led, a 10 or a Legend was worth 8 to 12 points and Crows −6.5 to −10. Played
-as the default plays now, which holds a lead by playing its weakest force card, force cards are
-worth about their value: a 10 and a Legend the most, a 1 near the bottom. Before that rule, a 1
-was worth more than a 6, as a free way to stay in, and Fury and Crows were worth the most.
+These are against a random card. A card worth nothing is about average. What a card is worth
+depends on how it's played. The first default fought every battle and played Crows whenever it
+led. Against the first default, a 10 or a Legend was worth 8 to 12 points. Crows was worth −6.5
+to −10. The default now holds a lead by playing its weakest force card. Played that way, force
+cards are worth about their value: a 10 and a Legend the most, a 1 near the bottom. Before that
+rule, a 1 was worth more than a 6 as a free way to stay in. Fury and Crows were worth the most.
 
 ## Playing the fate cards
 
 Most of what the rules say is about cards as a budget. The 1s, Furies and Baits are cheap ways to
-stay in a battle without spending anything that matters, and passing is final, so you play one
-rather than pass. That holds when you're ahead, too: a pass with others still in leaves them free
-to overtake you, so keep adding your weakest card until they give up. The 10s and Legends decide
-battles, so you spend them only when nobody can answer, and take them back with Bait when you
-can.
+stay in a battle without spending anything that matters. Passing is final. So when you could
+pass, you play one of those instead. That holds when you're ahead, too: a pass with others still
+in leaves them free to overtake you. So keep adding your weakest card until they give up. The
+10s and Legends decide battles. Spend them only when nobody can answer. Take them back with Bait
+when you can.
 
 The table above says what a card is worth to be dealt. This one says what it's worth to play
 well: the default against the same player that plays as if the card weren't in its hand
@@ -273,42 +278,43 @@ well: the default against the same player that plays as if the card weren't in i
 | Winter | 2.5 / 0.8 / 1.1 / 1.3 | 2.8 / 1.4 / 1.6 / 1.3 |
 | Doves, before rule 2 changed (below) | 0.4 / −0.5 / −0.3 / −0.1 | 0.4 / 0.0 / −0.1 / −0.3 |
 
-**Fury** is the card to play first. It doubles every force card in your row, including the ones
-played after it: as the Favor holder with nothing down, lead with it before
-your strongest card (rule 3, 4 to 5 points over the strongest card alone), and when you open
-behind, a Fury is as cheap as a 1 (rule 6). Once you lead with something down and others still
-in, play it before your weakest card (rule 4). Under Winter it still makes your force cards 2 each.
-Played well it's worth more than any other card, most of all at 3 players.
+**Fury** is the card to play first. Fury doubles every force card in your row, including the ones
+played after it. As the Favor holder with nothing down, lead with a Fury before your strongest
+card (rule 3, 4 to 5 points over the strongest card alone). When you open behind, a Fury is as
+cheap as a 1 (rule 6). Once you lead with something down and others still in, play it before
+your weakest card (rule 4). Under Winter it still makes your force cards 2 each. Played well, a
+Fury is worth more than any other card. Fury is worth the most at 3 players.
 
-**Bait** is a poor card to be dealt, worse than a random one, and an essential one to use. It
-can only take back a force card from your own row, so it's never a way into a battle, only a way
-to spend less in one. Four uses: once everyone else has passed, Bait back the biggest card that
-still leaves you ahead (rule 1, 2 to 4 points), so a 10 that won the battle comes home; leading
-by more than 4 with others still in, Bait back the biggest card that keeps that lead (rule 1); while
-behind with others still in, Bait back a 1 to stay in without spending anything (rule 8, 4.5 to 7
-points); and before giving up a battle, Bait back your biggest card (rule 11). It's worth two to
-three times as much against the league as against today's default.
+**Bait** is a poor card to be dealt: worse than a random one. Bait is also an essential card to
+use. Bait can only take back a force card from your own row. So Bait is never a way into a
+battle. Bait is only a way to spend less in one. Bait has four uses. Once everyone else has
+passed, Bait back the biggest card that still leaves you ahead (rule 1, 2 to 4 points). That
+brings home a 10 that won the battle. Leading by more than 4 with others still in, Bait back the
+biggest card that keeps that lead (rule 1). While behind with others still in, Bait back a 1 to
+stay in without spending anything (rule 8, 4.5 to 7 points). Before giving up a battle, Bait back
+your biggest card (rule 11). Bait is worth two to three times as much against the league as
+against today's default.
 
 **Legend** is a 10 that Winter can't touch and Fury doesn't double. Spend it like a 10: as the
 Favor holder's strong opener, to finish a battle nobody else is still in (rule 7), or when the chip
 decides the game. In a Winter battle it's the strongest card at the table by far.
 
-**Crows** wins the battle on the spot for whoever leads, so play it only when that's you, and
-only with a card of your own down, not on the Favor's 1 strength alone (rule 2, 2 to 5 points
-over Crows whenever ahead). It's worth more to be dealt the more players there are, from 0.7
-points at 3 players to 3.8 at 6.
+**Crows** wins the battle on the spot for whoever leads. So play Crows only when that's you.
+Play it only with a card of your own down. The Favor's 1 strength alone isn't enough (rule 2, 2
+to 5 points over Crows whenever ahead). Crows is worth more to be dealt the more players there
+are: from 0.7 points at 3 players to 3.8 at 6.
 
-**Winter** turns every force card into a 1 for the rest of the battle, so it helps whoever has
-more cards down, or a Legend. The default plays it only when it takes the lead outright, counting
-it as cheap as a 3. That's worth a point or two, and a Winter in hand is worth a little less than a
-random card.
+**Winter** turns every force card into a 1 for the rest of the battle. So Winter helps whoever
+has more cards down, or a Legend. The default plays Winter only when Winter takes the lead
+outright. The default counts Winter as cheap as a 3. That's worth a point or two. A Winter in
+hand is worth a little less than a random card.
 
-**Doves** ends the battle with no winner. Everything played in it is gone, the chip is fought over
-again next battle, and the Favor stays where it is. It's the worst card to be dealt, 3 points
-below a random one, and the default used to play it whenever someone else led with a chip that
-would win them the game, which was worth nothing measurable. So what is it for? At every chance
-to play it on someone else's lead in 16,000 default games, Doves against the move you'd make
-without it, played out on 64 deals each (`scripts/fates.ts` as of 75b7650):
+**Doves** ends the battle with no winner. Everything played in it is gone. The chip is fought
+over again next battle. The Favor stays where it is. Doves is the worst card to be dealt: 3
+points below a random one. The default used to play Doves whenever someone else led with a chip
+that would win them the game. That was worth nothing measurable. So what is it for? Here is
+Doves against the move you'd make without it, at every chance to play it on someone else's lead
+in 16,000 default games. Each was played out on 64 deals (`scripts/fates.ts` as of 75b7650):
 
 | when you could play Doves | how often, a game | Doves gains, points | Doves better |
 | --- | --- | --- | --- |
@@ -322,20 +328,21 @@ without it, played out on 64 deals each (`scripts/fates.ts` as of 75b7650):
 | the chip would win the leader the game | 0.39 | −0.8 | 24% |
 | nobody else is still in | 0.17 | −8.0 | 37% |
 
-Doves is a second chance at your own winning chip: you're losing the battle for the chip that
-would end the game in your favor, so void it, and the same chip is up again next battle, with
-the Favor's holder unchanged. That's rule 2 now, along with voiding someone else's winning chip
-once nobody else is left to stop it: +2.6 points at 3 players against the default, +0.3 at 4 to
-6, and a little better against the league and the learned player too (40,000 games). It also
-pays to keep the Favor, and to wipe out a battle the others have poured cards into, though not
-once the leader is nearly out of cards. Adding either to the rule gains nothing more, likely
-because a Doves spent there isn't in your hand when your own winning chip comes up (untested).
-Don't play it on someone else's winning chip while others are still in, nor when nobody else is
-in, where you can overtake with nobody to answer.
+Doves is a second chance at your own winning chip. Say you're losing the battle for the chip
+that would end the game in your favor. Void it with Doves. The same chip is up again next
+battle. The Favor's holder is unchanged. That's rule 2 now. Rule 2 also voids someone else's
+winning chip once nobody else is left to stop it. Together they gain +2.6 points at 3 players
+against the default and +0.3 at 4 to 6 (40,000 games). They do a little better against the
+league and the learned player too. Doves also pays to keep the Favor. Doves pays to wipe out a
+battle the others have poured cards into. That stops paying once the leader is nearly out of
+cards. Adding either to the rule gains nothing more. Likely a Doves spent there isn't in your
+hand when your own winning chip comes up (untested). Don't play Doves on someone else's winning
+chip while others are still in. Don't play it when nobody else is in, either. There you can
+overtake with nobody to answer.
 
-The same playouts for every fate card, at every chance to play it in 16,000 default games
-(`scripts/fates.ts --card <fate>`), split by whether the default already plays it there. Where it
-doesn't, the gain over its move:
+The same playouts ran for every fate card at every chance to play it in 16,000 default games
+(`scripts/fates.ts --card <fate>`). The chances are split by whether the default already plays
+the card there. Where it doesn't, the gain over its move:
 
 | card | chances a game the default passes up | gain there, points | where it gains most |
 | --- | --- | --- | --- |
@@ -347,21 +354,21 @@ doesn't, the gain over its move:
 | Crows | 4.1 | −16.4 | nowhere |
 
 Crows, Winter and Doves are played right: every other chance loses. Bait and Fury while leading
-became rules 1 and 4. Together, +3.4, +1.0, +1.3 and +1.1 points at 3–6 players against the
-default, +2.4, +0.9, +0.6 and +0.7 against the league (40,000 games), and a tie with the learned
-player; the Fury alone gains only at
-3 players (+2.7). Legend's gains are spread thin, with nothing yet to make a rule of.
+became rules 1 and 4. Together they gain +3.4, +1.0, +1.3 and +1.1 points at 3–6 players
+against the default. Against the league they gain +2.4, +0.9, +0.6 and +0.7 (40,000 games).
+They tie with the learned player. The Fury alone gains only at 3 players (+2.7). Legend's gains
+are spread thin. There's nothing yet to make a rule of.
 
 ## A learned player
 
-The rules above top out well short of playouts, which play every legal move out to the end and
-make the best one, but cost thousands of games a decision. So a player learned to predict what
-playouts would say. `scripts/dataset.ts` plays default games and, at every decision of one player, plays every
-legal move out to the end on 32 shared deals: about 250,000 decisions at each player count, in 10
-minutes. `scripts/learn.py` fits gradient-boosted trees (LightGBM, 1,000 trees) to predict each
-move's value from 40 numbers about the board and 19 about the move, and `src/learned.ts` plays
-the move they rank first. On held-out games, this first model's pick gains 3.1 to 3.6 points of
-win chance a decision over the default's:
+The rules above top out well short of playouts. Playouts play every legal move out to the end
+and make the best one. But playouts cost thousands of games a decision. So a player learned to
+predict what playouts would say. `scripts/dataset.ts` plays default games. At every decision of
+one player, the script plays every legal move out to the end on 32 shared deals. That's about
+250,000 decisions at each player count, in 10 minutes. `scripts/learn.py` fits gradient-boosted
+trees (LightGBM, 1,000 trees) to predict each move's value from 40 numbers about the board and
+19 about the move. `src/learned.ts` plays the move the trees rank first. On held-out games, this
+first model's pick gains 3.1 to 3.6 points of win chance a decision over the default's:
 
 | learned player | 3 players | 4 players | 5 players | 6 players |
 | --- | --- | --- | --- | --- |
@@ -370,14 +377,15 @@ win chance a decision over the default's:
 | against playouts on 8 deals | 53.6% | | | 27.9% |
 | the default, against learned players | 8.8% | 6.7% | 7.9% | 8.8% |
 
-It plays as well as playouts on 128 deals at a tiny fraction of the cost, and it isn't just
-exploiting the default: it holds up against every earlier default and against playouts.
+The learned player plays as well as playouts on 128 deals. The learned player costs a tiny
+fraction as much. The learned player isn't just exploiting the default: it holds up against
+every earlier default and against playouts.
 
-A learned player reaches boards the default never does, so each round after the first trains
-on games the last round's learned player played, labeled the same way, with default players
-inside the playouts (`dataset.ts --play`), and adds them to the earlier rounds' data. Each model
-is then played against the default and against tables of the earlier models' players, 20,000
-games each:
+A learned player reaches boards the default never does. So each round after the first trains on
+games the last round's learned player played (`dataset.ts --play`). Those games are labeled the
+same way, with default players inside the playouts. Each round adds them to the earlier rounds'
+data. Each model is then played against the default and against tables of the earlier models'
+players (20,000 games each):
 
 | model | against the default, 3 / 4 / 5 / 6 players | against round 0 | against rounds 0–1 |
 | --- | --- | --- | --- |
@@ -385,14 +393,14 @@ games each:
 | rounds 0–1: and the learned player's | 77.0 / 61.9 / 54.8 / 50.6 | 37.5 / 27.6 / 24.6 / 22.2 | 33.2 / 24.9 / 20.2 / 17.0 |
 | rounds 0–2 | 77.5 / 62.0 / 55.6 / 51.6 | | 34.4 / 25.4 / 20.3 / 16.9 |
 
-Round 1 gains 3 to 5 points against round 0's players, from seeing the boards a learned player
-reaches. Round 2 ties it: the labels still ask which move is best if default players play on, and
-the loop converges on the best answer to them.
+Round 1 gains 3 to 5 points against round 0's players. The gain comes from seeing the boards a
+learned player reaches. Round 2 ties round 1: the labels still ask which move is best if default
+players play on. The loop converges on the best answer to them.
 
-So round 3 asks which move is best if learned players play on: rounds 0–1's learned player plays
-the games, and a 200-tree version of it plays inside the playouts (`dataset.ts --rollout`), on 16
-deals instead of 32. That costs 25 times as much a decision, so it's 3,000 games a player count,
-about 55,000 decisions, in 33 minutes. Against 20,000 games each:
+So round 3 asks which move is best if learned players play on. Rounds 0–1's learned player plays
+the games. A 200-tree version of it plays inside the playouts (`dataset.ts --rollout`). The
+playouts use 16 deals instead of 32. That costs 25 times as much a decision. So round 3 is 3,000
+games a player count: about 55,000 decisions, in 33 minutes. Against 20,000 games each:
 
 | model | against the default | against rounds 0–1 | against round 3 |
 | --- | --- | --- | --- |
@@ -400,9 +408,10 @@ about 55,000 decisions, in 33 minutes. Against 20,000 games each:
 | round 3 | 58.6 / 48.1 / 41.8 / 35.3 | 53.6 / 42.3 / 33.8 / 28.5 | 33.2 / 24.6 / 20.0 / 16.7 |
 | rounds 0, 1 and 3 together | 75.6 / 60.8 / 53.3 / 47.6 | 34.5 / 25.6 / 19.4 / 16.6 | 21.4 / 20.0 / 18.1 / 15.4 |
 
-At 3 to 6 players. Round 3's player beats a table of rounds 0–1's by 12 to 20 points, and wins
-less against the default: what the labels assume about the others decides whom the player
-beats, as with the rules. Mixed in with the default-labeled rounds, round 3's labels wash out.
+At 3 to 6 players. Round 3's player beats a table of rounds 0–1's by 12 to 20 points. Round 3's
+player wins less against the default. What the labels assume about the others decides whom the
+player beats. The same was true of the rules. Mixed in with the default-labeled rounds, round
+3's labels wash out.
 
 Round 4 does it again with round 3's player in the games and the playouts (`dataset/model-r3s`):
 
@@ -411,10 +420,10 @@ Round 4 does it again with round 3's player in the games and the playouts (`data
 | round 4's games alone | 49.8 / 51.8 / 43.8 / 38.8 | 44.5 / 30.1 / 19.9 / 14.6 | 43.5 / 41.2 / 39.8 / 36.4 |
 | rounds 3 and 4 together | 56.3 / 53.9 / 48.2 / 44.5 | 53.9 / 40.9 / 31.7 / 25.4 | 44.6 / 41.3 / 39.6 / 36.7 |
 
-Rounds 3 and 4 together beat round 3's players by 11 to 20 points, keep round 3's edge over
-rounds 0–1's, and do better against the default at 4 to 6 players, so from here on each round's
-model is fit to every round's games from round 3 on, and "round 4" means that model. It holds up
-elsewhere too:
+Rounds 3 and 4 together beat round 3's players by 11 to 20 points. They keep round 3's edge over
+rounds 0–1's. They do better against the default at 4 to 6 players. So from here on, each
+round's model is fit to every round's games from round 3 on. "Round 4" means that model. Round 4
+holds up elsewhere too:
 
 | round 4 | 3 players | 4 players | 5 players | 6 players |
 | --- | --- | --- | --- | --- |
@@ -423,8 +432,8 @@ elsewhere too:
 | rounds 0–1, against them | 11.3% | 11.2% | 7.2% | 5.2% |
 | the default, against them | 2.8% | 4.6% | 4.5% | 3.8% |
 
-Each round after that does the same again from the model before it, adding its games to the
-data so far. One player of each model at a table of the model before it, 20,000 games each:
+Each round after that does the same again from the model before it. Each round adds its games to
+the data so far. One player of each model at a table of the model before it (20,000 games each):
 
 ![Each round's model at a table of the one before it, and against the default, in points over a fair share](charts/rounds.svg)
 
@@ -452,26 +461,27 @@ And each against the default:
 | 9 | 41.1% | 43.3% | 37.1% | 32.0% |
 | 10 | 43.0% | 43.3% | 36.8% | 31.6% |
 
-Every round still beats the one before, by less each time: round 7 by 1.3 to 2.3 points over a
-fair share, against round 6's 1.7 to 3.8. Each also beats the older models by more than the one
-before it did: round 7 beat a table of round 5's 38.8%, 29.0%, 24.6% and 20.0%, where round 6
-managed 37.1%, 26.7%, 22.1% and 18.7%. Against the default they've won less since round 4, as
-they learn to beat learned players instead, and round 7 about holds there.
+Every round still beats the one before. Each beats it by less: round 7 by 1.3 to 2.3 points over
+a fair share, against round 6's 1.7 to 3.8. Each also beats the older models by more than the
+one before it did: round 7 beat a table of round 5's 38.8%, 29.0%, 24.6% and 20.0%. Round 6
+managed 37.1%, 26.7%, 22.1% and 18.7%. Against the default they've won less since round 4. They
+learn to beat learned players instead. Round 7 about holds there.
 
-Round 8 gains 1.0 to 1.7 points over round 7, less again, and beats every older model by more
-than round 7 did: a table of round 6 wins it 35.4%, 29.0%, 23.4% and 19.6%, round 5 38.7%,
-30.7%, 25.1% and 21.1%, and round 4 45.6%, 33.1%, 27.5% and 24.3%. Against the default it loses
-another 1 to 3.5 points.
+Round 8 gains 1.0 to 1.7 points over round 7. That's less again. Round 8 beats every older model
+by more than round 7 did: a table of round 6 wins it 35.4%, 29.0%, 23.4% and 19.6%, round 5
+38.7%, 30.7%, 25.1% and 21.1%, and round 4 45.6%, 33.1%, 27.5% and 24.3%. Against the default
+round 8 loses another 1 to 3.5 points.
 
-Round 9 gains 0.5 to 0.9 points over round 8 at 4 to 6 players and ties it at 3 (33.4%). Against
-older models it does about as well as round 8 did, within half a point either way, so the rounds
-are levelling off. Against the default it wins 2.4 points more at 3 players and about a point less
-at 4 to 6. Round 9 is `src/packed/model.ts` now.
+Round 9 gains 0.5 to 0.9 points over round 8 at 4 to 6 players. Round 9 ties round 8 at 3
+(33.4%). Against older models, round 9 does about as well as round 8 did: within half a point
+either way. So the rounds are levelling off. Against the default, round 9 wins 2.4 points more at
+3 players. Round 9 wins about a point less at 4 to 6. Hard now plays a model fit to round 9's
+data and the mixed rounds together (see "Knowing the table").
 
-Round 10 played twice the games (6,000 a player count) and gains only 0.3 to 0.7 points over
-round 9, within the noise, so it wasn't adopted. Against older models it does a little better than
-round 9 did (a table of round 8 wins it 34.7%, 26.2%, 20.6% and 17.4%), but by less than a point.
-More games of the same kind don't restart the gains.
+Round 10 played twice the games (6,000 a player count). Round 10 gains only 0.3 to 0.7 points
+over round 9. That's within the noise. So round 10 wasn't adopted. Against older models, round
+10 does less than a point better than round 9 did: a table of round 8 wins it 34.7%, 26.2%, 20.6%
+and 17.4%. More games of the same kind don't restart the gains.
 
 ## Which chip to fight over
 
@@ -489,16 +499,16 @@ Against the default (`variants.ts`, 40,000 games):
 | our own progress only | 29.3% | 23.1% | 18.8% | 15.4% |
 | at random | 25.9% | 18.2% | 14.5% | 11.8% |
 
-The pick is worth 5 to 8 points, and the default's rule gets most of it: playing each chip out
-gains 1 to 2 points more, up from under half a point before the default held its lead. Your own
-progress comes first, but ignoring everyone else's costs 2 to 4 points.
+The pick is worth 5 to 8 points. The default's rule gets most of that: playing each chip out
+gains 1 to 2 points more. Before the default held its lead, playing each chip out gained under
+half a point. Your own progress comes first. But ignoring everyone else's costs 2 to 4 points.
 
 ## Discarding a hand with no force cards
 
 A player who passes with no force cards in hand may show it and discard it. Nobody draws until
-only one player has cards left, so emptying your hand brings the next deal closer, when you get
-10 fresh cards and one more a chip. The default always does. Against the default (`variants.ts`,
-40,000 games):
+only one player has cards left. So emptying your hand brings the next deal closer. At the next
+deal you get 10 fresh cards and one more a chip. The default always does. Against the default
+(`variants.ts`, 40,000 games):
 
 | on passing with no force cards | 3 players | 4 players | 5 players | 6 players |
 | --- | --- | --- | --- | --- |
@@ -531,21 +541,22 @@ games; playouts 4,000):
 | random | 2.2% | 1.6% | 1.2% | 1.0% |
 | passive: never play | 0.0% | 0.0% | 0.0% | 0.0% |
 
-Playouts play out every legal move to the end of the game on deals of the cards they can't see,
-with the default playing on, and make the one that wins most. Against the first default, 32
-deals won 84% at 3 players and 76% at 6; each round of rules took some of that away, and rule 4
-took 3.5 to 5.5 points more, leaving 8-deal playouts at or below a fair share. More deals still help
-a lot, so there's plenty more to how Hilt should be played than the default's rules. Rounds 0–1
-and 5, 128 deals and the racing table below were played against the default before rule 4.
-Spending to win every battle is ruinous, and so is never taking a card back with Bait. The
-learned players are in "A learned player": rounds 0–1 learned to beat default players, round 5
-to beat learned ones, and at a table of each other round 5 wins. The later rounds are in
-"A learned player"'s tables.
+Playouts play out every legal move to the end of the game on deals of the cards they can't see.
+The default plays on in those playouts. Playouts make the move that wins most. Against the first
+default, 32 deals won 84% at 3 players and 76% at 6. Each round of rules took some of that away.
+Rule 4 took 3.5 to 5.5 points more. That left 8-deal playouts at or below a fair share. More
+deals still help a lot. So there's plenty more to how Hilt should be played than the default's
+rules. Rounds 0–1 and 5, 128 deals and the racing table below were played against the default
+before rule 4. Spending to win every battle is ruinous. So is never taking a card back with
+Bait. The learned players are in "A learned player". Rounds 0–1 learned to beat default players.
+Round 5 learned to beat learned ones. At a table of each other, round 5 wins. The later rounds
+are in "A learned player"'s tables.
 
-Playouts can also race: play the moves out 8 deals at a time on the same deals, and drop a move
-once it's 2 standard errors behind the leader, until each move left has had its full number of
-deals. That spends the deals on the moves still in contention. They can also play out only the
-3 moves the learned model ranks highest. Against the default (4,000 games):
+Playouts can also race. Racing plays the moves out 8 deals at a time on the same deals. It drops
+a move once that move is 2 standard errors behind the leader. Racing stops when each move left
+has had its full number of deals. That spends the deals on the moves still in contention.
+Playouts can also play out only the 3 moves the learned model ranks highest. Against the default
+(4,000 games):
 
 | playouts | 3 players | 4 players | 5 players | 6 players |
 | --- | --- | --- | --- | --- |
@@ -554,13 +565,13 @@ deals. That spends the deals on the moves still in contention. They can also pla
 | racing, up to 512 deals | 75.7% | 64.1% | 58.5% | 56.7% |
 | racing, up to 512 deals, the model's top 3 moves | 70.3% | 63.2% | 54.8% | 52.0% |
 
-Racing on 128 deals costs 0.6 times as much as 128 full deals and wins about a point less.
+Racing on 128 deals costs 0.6 times as much as 128 full deals. Racing wins about a point less.
 Pruning to the model's top 3 loses 1 to 5 points (±1.5 is noise here): the best move is often
-one the model ranks lower, and playouts would have found it.
+one the model ranks lower. Playouts would have found that move.
 
 ### Knowing the table
 
-Playouts guess how the others will play on, and so far they've guessed the default. How much is
+Playouts guess how the others will play on. So far they've guessed the default. How much is
 a better guess worth? At a table of past defaults (each other seat one from every round so far,
 at random), playouts guessing three ways (`variants.ts --field league`, 4,000 games):
 
@@ -574,18 +585,18 @@ at random), playouts guessing three ways (`variants.ts --field league`, 4,000 ga
 | 8 deals, like the past default actually in each seat | 52.8% | 41.8% | 36.0% | 32.8% |
 | today's default, for comparison | 51.8% | 36.1% | 29.3% | 24.1% |
 
-Knowing how each player plays is worth 24 to 31 points at 32 deals, as much as quadrupling the
-deals and more. About half of it is knowing what kinds of players are at the table (11 to 14
-points), and the other half knowing who's who (13 to 18). The last row is an upper bound: a real
-player has to work out who's who from a few battles' play, and the defaults differ most in
-exactly what you can see (who waits, who opens with a 1, who chases every battle). For people:
-watch who passes early and who spends, and answer them, not an imagined opponent who plays like
-you. Every learned player so far was trained at tables of itself, so this is room none of them
-uses.
+Knowing how each player plays is worth 24 to 31 points at 32 deals. That's as much as
+quadrupling the deals and more. About half of it is knowing what kinds of players are at the
+table (11 to 14 points). The other half is knowing who's who (13 to 18). The last row is an upper
+bound: a real player has to work out who's who from a few battles' play. The defaults differ most
+in exactly what you can see (who waits, who opens with a 1, who chases every battle). For
+people: watch who passes early and who spends. Answer those players. Don't answer an imagined
+opponent who plays like you. Every learned player so far was trained at tables of itself. So
+none of them uses this room.
 
-So one round (`o1`) trained at mixed tables instead: round 9's player in one seat, and each other
-seat a past default or, a third of the time, round 9's player again, with every move's playouts
-playing each seat on as it really plays (`round.sh` with `MIXED=1`, 4,000 games a player count).
+So one round (`o1`) trained at mixed tables instead. Round 9's player sat in one seat. Each other
+seat was a past default or, a third of the time, round 9's player again. Every move's playouts
+played each seat on as it really plays (`round.sh` with `MIXED=1`, 4,000 games a player count).
 The model also saw what each other player had shown so far this game: how often they waited,
 opened and with what, held a lead, chased past 3 cards, and gave up (since removed).
 Then the same data fit without those (20,000 games each):
@@ -597,34 +608,36 @@ Then the same data fit without those (20,000 games each):
 | `o1` without what the others have shown | 74.0 / 66.5 / 59.8 / 52.8 | 61.1 / 50.4 / 40.8 / 33.9 | |
 
 At 3 / 4 / 5 / 6 players. Training at the league's tables gains 19 to 29 points against the
-league, as much as playouts that know who sits where, and 1 to 21 against the default. Seeing
-what each player has shown adds nothing: the trees split on it for 10% of their gain, spread thin,
-and play the same without it. Without it the model already wins about as much as the playouts
-that know who sits where, so the half that knowing who's who seemed to add above was the guessing
-playouts' weakness, not room to read players: learning what the table is made of is enough. And
-the gain is all against the kinds it trained on: at a table of round 9's players, which
-it saw only a third of the time, it wins 7 to 20%, where round 9 wins a fair share. What a model
-learns is how to beat the players it practiced against, and nothing about players it didn't.
+league. That's as much as playouts that know who sits where. Against the default it gains 1 to
+21. Seeing what each player has shown adds nothing. The trees split on it for 10% of their gain.
+Those splits are spread thin. The trees play the same without it. Without it, the model already
+wins about as much as the playouts that know who sits where. So the half that knowing who's who
+seemed to add above was the guessing playouts' weakness. That half wasn't room to read players.
+Learning what the table is made of is enough. And the gain is all against the kinds `o1` trained
+on: at a table of round 9's players, `o1` wins 7 to 20%. Round 9 wins a fair share there. `o1`
+saw round 9's players only a third of the time. What a model learns is how to beat the players
+it practiced against. A model learns nothing about players it didn't.
 
-A second mixed round (`o2`) put round 9's player in half the other seats instead of a third, and
-fit `o1` and `o2` together. It barely moved: 23.5 / 13.3 / 9.8 / 8.4 at a table of round 9's
-players, 72.0 / 65.7 / 59.4 / 53.0 against the league. What was missing was data, not the mix:
-`o1` and `o2` are about 600,000 decisions, and rounds 3 to 9 at learned tables about 12 million
-moves. Fit to all of it together:
+A second mixed round (`o2`) put round 9's player in half the other seats instead of a third. The
+model was fit to `o1` and `o2` together. It barely moved: 23.5 / 13.3 / 9.8 / 8.4 at a table of
+round 9's players, 72.0 / 65.7 / 59.4 / 53.0 against the league. What was missing was data. The
+mix wasn't the problem: `o1` and `o2` are about 600,000 decisions. Rounds 3 to 9 at learned
+tables are about 12 million moves. Fit to all of it together:
 
 | model | at a table of round 9 | against the league | against the default |
 | --- | --- | --- | --- |
 | round 9 | a fair share | 46.0 / 44.6 / 38.1 / 32.3 | 41.1 / 43.3 / 37.1 / 32.0 |
 | rounds 3–9, `o1` and `o2` | 32.9 / 22.2 / 18.0 / 15.8 | 69.5 / 56.2 / 50.3 / 44.8 | 74.5 / 55.7 / 49.9 / 44.9 |
 
-It gives up 0.4 to 2.8 points at a table of round 9's players, and gains 12 to 24 against the
-league and 12 to 33 against the default. Against a table it doesn't know, it's the safer player.
+The combined model gives up 0.4 to 2.8 points at a table of round 9's players. It gains 12 to 24
+against the league and 12 to 33 against the default. Against a table it doesn't know, it's the
+safer player.
 
-A third mixed round (`o3`, 2026-11-21) played against today's league, which now ends with today's
-default, with round 9's player in half the other seats. Alone, it wins 0.6 to 1.6 points more
-than `o2` at a table of round 9's players and 1.1 to 4.1 more against today's default. It ties
-`o2` against the league. Fit with everything else, against today's default and league (20,000
-games each):
+A third mixed round (`o3`, 2026-11-21) played against today's league. Today's league now ends
+with today's default. Round 9's player sat in half the other seats. Alone, `o3` wins 0.6 to 1.6
+points more than `o2` at a table of round 9's players. It wins 1.1 to 4.1 more against today's
+default. It ties `o2` against the league. Fit with everything else, against today's default and
+league (20,000 games each):
 
 | model | at a table of round 9 | against the league | against the default |
 | --- | --- | --- | --- |
@@ -638,5 +651,6 @@ against the league at 4 to 6 players. Hard plays it.
 
 The booklet leaves one thing open that a flag in `Rules` reads either way: whether a Favor holder
 with no cards left still has the Favor's 1 strength. It comes up in 6% of battles at 3 players
-and 13% at 6, and either reading gives the same wins by seat, within half a point, and the same
-game length within a tenth of a battle (`scripts/rules.ts`, 100,000 default games each). The simulator reads it as yes.
+and 13% at 6. Either reading gives the same wins by seat, within half a point. Either reading
+gives the same game length, within a tenth of a battle (`scripts/rules.ts`, 100,000 default
+games each). The simulator reads it as yes.
