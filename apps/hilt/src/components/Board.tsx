@@ -288,7 +288,8 @@ export function Hand({
   deal,
 }: {
   cards: CardType[];
-  onClick?: (i: number) => void;
+  /** Whether the card was played. */
+  onClick?: (i: number) => boolean;
   onHover?: (i: number | undefined) => void;
   selected?: number;
   /** A card chosen from the keyboard, lifted like a hovered one. */
@@ -348,8 +349,8 @@ export function Hand({
       if (!p) return;
       const i = under(e.clientX, e.clientY) === p.i ? p.i : undefined;
       press.current = undefined;
-      hovered(undefined);
-      if (i !== undefined) onClick(i);
+      // a played card stays up until it leaves the hand
+      if (i === undefined || !onClick(i)) hovered(undefined);
     },
     onPointerCancel: () => {
       press.current = undefined;
@@ -361,7 +362,8 @@ export function Hand({
     <div
       ref={ref}
       className={`flex justify-center pt-[1.2em] [--gap:1rem] [--least:2.5rem] [--most:2.5rem] *:hover:z-10 max-sm:@container max-sm:-mb-[2.4em] max-sm:pt-[1em] max-sm:[--gap:0.4rem] max-sm:[--least:0.5rem] max-sm:[--most:2.72rem] ${onClick ? "touch-none" : ""} ${order.length > 8 ? "max-sm:[&>div:not(:last-child)_.big]:opacity-0" : ""}`}
-      onMouseLeave={() => press.current || hovered(undefined)}
+      // a tap's emulated mouse events end in a mouseleave, which would drop the card it just played
+      onMouseLeave={() => press.current || touched.current || hovered(undefined)}
       {...touch}
     >
       {order.map((i, k) => (
@@ -615,15 +617,17 @@ function Ask({ game, p, prompt, send, who, deal }: { game: Game; p: Player; prom
 function reading(s: Standing) {
   if (s.kind === "win") return "Pass to win the chip";
   if (s.kind === "lead") return s.by ? `You lead by ${s.by}` : "You lead on the tie";
-  if (s.need !== undefined) return `Need ${s.need}+ · ${s.have ? `your ${label(s.have)}` : "you have none"}`;
-  return s.have ? `${s.by} behind · your ${label(s.have)} leads` : `${s.by} behind · no card leads`;
+  if (s.have && s.have.kind !== "force" && s.have.kind !== "legend") return `Your ${label(s.have)} takes the lead`;
+  if (s.need === undefined) return `${s.by} behind: no one card leads`;
+  const card = s.need === 10 ? "10" : `${s.need}+`;
+  return s.have ? `${card} takes the lead` : `You'd need ${card} to lead`;
 }
 
 /** Above a card in your hand: what it would bring you to if it takes the lead, solid on the cheapest that does. */
 function Outcome({ text, solid }: { text: string | number; solid: boolean }) {
   return (
     <span
-      className={`absolute -top-[0.95rem] left-0 z-10 animate-pop rounded-full px-[0.35em] text-[0.7rem] leading-[1.4] font-bold whitespace-nowrap ring-1 ring-accent ${solid ? "bg-accent text-white" : "bg-[var(--bar)] text-white"}`}
+      className={`absolute -top-[0.95rem] left-[0.6375rem] z-10 -translate-x-1/2 animate-pop rounded-full px-[0.35em] text-[0.7rem] leading-[1.4] font-bold whitespace-nowrap ring-1 ring-accent ${solid ? "bg-accent text-white" : "bg-[var(--bar)] text-white"}`}
       title={solid ? "The cheapest card that takes the lead" : "Takes the lead"}
     >
       {text}
@@ -652,10 +656,16 @@ function AskMove({ game, p, send, deal }: { game: Game; p: Player; send: (c: Cho
   const play = (i: number) => {
     const card = p.hand[i];
     setNote(undefined);
-    if (!game.playable(p, card)) return setNote(card.kind === "bait" ? "Bait needs a force card in your row to take back." : `You can't play ${label(card)} again this battle.`);
-    if (card.kind !== "bait") return submit({ card });
-    if (takes.length === 1) return submit({ card, take: takes[0] });
-    setBaiting(i);
+    if (!game.playable(p, card)) {
+      setNote(card.kind === "bait" ? "Bait needs a force card in your row to take back." : `You can't play ${label(card)} again this battle.`);
+      return false;
+    }
+    if (card.kind === "bait" && takes.length > 1) {
+      setBaiting(i);
+      return false;
+    }
+    submit(card.kind === "bait" ? { card, take: takes[0] } : { card });
+    return true;
   };
   const toggleHint = () => {
     if (hint) {

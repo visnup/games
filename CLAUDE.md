@@ -31,8 +31,11 @@ don't work here: `dataset/` is ignored and holds every model and shard.
   `git commit -a`, which would take the other sessions' unfinished edits. Pull before pushing.
 
 - Ports: app N's Next is on 30N0 and its round status page on 30N1. monopoly-deal is 3010 and
-  3011, hilt 3020 and 3021, fives 3030 and 3031. Convex's local backends pick free ports
-  themselves.
+  3011, hilt 3020 and 3021, fives 3030 and 3031.
+- Local Convex backends: fives is on 3210 and 3211, and hilt on 3220 and 3221. Each app keeps its
+  ports in its ignored `.convex/local/default/config.json`. Anonymous mode names every backend
+  `anonymous-agent`, so a second app stored on a running app's port fails with "A local backend is
+  still running". A new checkout needs its stored port changed by hand.
 - Rounds run one at a time. Each `round.sh` calls `lock` from `packages/kit/lock.sh` before its
   smoke test, and waits until no other app's round is running. A round's data step stops after
   `HOURS`, so two sharing the cores would each quietly get half the data. A queued round

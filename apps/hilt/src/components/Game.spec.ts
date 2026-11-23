@@ -6,7 +6,7 @@ import { randomUUID } from "crypto";
 test("deals a game against two bots", async ({ page }) => {
   await page.goto(`/${randomUUID()}`);
   await page.getByRole("button", { name: "Deal 3 players" }).click();
-  await expect(page.getByText(/strength$|Waiting for|Pick the chip/).first()).toBeVisible();
+  await expect(page.getByText(/leads? with|Waiting for|Pick the chip/).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: /^You/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: /^Bot/ })).toHaveCount(2);
 });
@@ -18,7 +18,7 @@ test("plays a whole game by passing", async ({ page }) => {
   await page.getByRole("button", { name: "Deal 3 players" }).click();
   const over = page.getByText(/ won!$|Nobody won/);
   while (!(await over.isVisible())) {
-    for (const name of ["Pass", "Discard it", "pink"]) {
+    for (const name of ["Pass", "Discard it", "pink", "Continue"]) {
       const button = page.getByRole("button", { name, exact: true });
       if (await button.isVisible()) await button.click();
     }
