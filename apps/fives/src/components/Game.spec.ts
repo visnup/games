@@ -15,7 +15,7 @@ test("plays a whole game by taking the Hint", async ({ page }) => {
   await page.goto(`/${randomUUID()}`);
   await page.getByRole("button", { name: "Remove bot" }).first().click();
   await page.getByRole("button", { name: "Deal 3 players" }).click();
-  const over = page.getByText(/ won!$| share the win\.$/);
+  const over = page.getByText(/ won$| share the win$/);
   while (!(await over.isVisible())) {
     for (const name of [/^Skip$/, /^Continue$/, /^Hint$/]) {
       const button = page.getByRole("button", { name }).first();

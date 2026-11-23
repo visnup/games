@@ -13,9 +13,7 @@ import { shardName } from "./dataset.ts";
 export function extract(players: number, data: string, features: string, seed: number) {
   const file = `${data}/${shardName(players, seed)}.jsonl`;
   if (!existsSync(file)) return [0, 0]; // a data step stopped by HOURS
-  const lines = readFileSync(file, "utf8")
-    .trim()
-    .split("\n");
+  const lines = readFileSync(file, "utf8").trim().split("\n");
   const x: number[] = [];
   const y: number[] = [];
   const groups: number[] = [];
