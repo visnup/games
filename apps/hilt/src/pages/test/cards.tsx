@@ -83,7 +83,7 @@ export default function Cards() {
       <section>
         <h2 className="label">The corners, three times as big</h2>
         <div className="h-[13em] overflow-x-auto overflow-y-hidden">
-          <div style={{ zoom: 3 }} className="-mt-[1.2em] w-max">
+          <div style={{ zoom: 3 }} className="-mt-[1.2em] w-[17.5rem]">
             <Guides>
               <Hand cards={ALL} />
             </Guides>

@@ -318,7 +318,7 @@ export function Hand({
   const playable = sorted.filter((i) => !dim?.(cards[i]));
   const order = [...playable, ...sorted.filter((i) => dim?.(cards[i]))];
   const groups = playable.length && playable.length < order.length ? 2 : 1;
-  const overlap = `clamp(var(--least), calc((${order.length} * 3.825rem + ${groups - 1} * var(--gap) - 100cqw) / ${Math.max(1, order.length - groups)}), var(--most))`;
+  const overlap = `clamp(0.5rem, calc((${order.length} * 3.825rem + ${groups - 1} * var(--gap) - 100cqw) / ${Math.max(1, order.length - groups)}), 2.72rem)`;
   const lifted = hover ?? focus;
   const at = lifted === undefined ? -1 : order.indexOf(lifted);
   const under = (x: number, y: number) => {
@@ -361,7 +361,7 @@ export function Hand({
   return (
     <div
       ref={ref}
-      className={`flex justify-center pt-[1.2em] [--gap:1rem] [--least:2.5rem] [--most:2.5rem] *:hover:z-10 max-sm:@container max-sm:-mb-[2.4em] max-sm:pt-[1em] max-sm:[--gap:0.4rem] max-sm:[--least:0.5rem] max-sm:[--most:2.72rem] ${onClick ? "touch-none" : ""} ${order.length > 8 ? "max-sm:[&>div:not(:last-child)_.big]:opacity-0" : ""}`}
+      className={`@container flex justify-center pt-[1.2em] [--gap:1rem] *:hover:z-10 max-sm:-mb-[2.4em] max-sm:pt-[1em] max-sm:[--gap:0.4rem] ${onClick ? "touch-none" : ""} ${order.length > 8 ? "@max-[34rem]:[&>div:not(:last-child)_.big]:opacity-0" : ""}`}
       // Chromium ends a tap's emulated mouse events with a mouseleave, which would drop the card it just played. iOS Safari doesn't.
       onMouseLeave={() => press.current || touched.current || hovered(undefined)}
       {...touch}
