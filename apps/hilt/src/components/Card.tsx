@@ -48,8 +48,8 @@ export function Card({ card, selected, hinted, dim, small, onClick }: { card: Ca
     >
       {fate ? (
         <>
-          <span className="text-[1.6em] leading-none">{fate.glyph}</span>
-          <span data-guide="title" className="mt-[0.3em] text-[0.8em] font-extrabold tracking-wide uppercase">
+          <span className="big text-[1.6em] leading-none">{fate.glyph}</span>
+          <span data-guide="title" className="big mt-[0.3em] text-[0.8em] font-extrabold tracking-wide uppercase">
             {fate.title}
           </span>
           {card.kind === "legend" ? (
@@ -65,7 +65,7 @@ export function Card({ card, selected, hinted, dim, small, onClick }: { card: Ca
         </>
       ) : (
         <>
-          <span data-guide="center" className="font-numbers text-[3.2em] leading-none font-bold">
+          <span data-guide="center" className="big font-numbers text-[3.2em] leading-none font-bold">
             {card.value}
           </span>
           <span className={`${corner} top-[0.2em]`}>

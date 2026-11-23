@@ -14,7 +14,7 @@ import { Review } from "./Review";
 type Props = { game: Doc<"games"> & { log: Choice[]; names: (string | null)[] }; me?: Id<"players"> };
 
 /** Floats over the table, just above the bottom bar. */
-const floating = "panel absolute -right-[0.8em] bottom-full -left-[0.8em] mb-[1.2em] p-[0.8em]";
+const floating = "panel absolute -right-[0.8em] bottom-full -left-[0.8em] mb-[1.2em] p-[0.8em] max-sm:right-0 max-sm:left-0 max-sm:mb-[0.4em] max-sm:p-[0.5em]";
 
 /** The game through its first `n` decisions, stopped there even when a bot is next. */
 const until = (game: Props["game"], n: number) => {
@@ -146,19 +146,26 @@ export function Board({ game, me }: Props) {
   }, [stepping, step, shown, game.log, seat, ended]);
   const others = Array.from({ length: g.players.length }, (_, i) => (seat < 0 ? i : seat + 1 + i) % g.players.length).filter((n) => n !== seat);
   return (
-    <div className="mx-auto flex max-w-[90em] flex-col gap-[0.8em] p-[0.8em]">
+    // on a phone, the hand's cards run off the screen's bottom edge, clipped here so the page can't scroll to them
+    <div className="mx-auto flex min-h-dvh max-w-[90em] flex-col gap-[0.8em] p-[0.8em] max-sm:gap-[0.4em] max-sm:overflow-y-clip">
       <Head>
         <title>{up ? "Your move · Hilt" : "Hilt"}</title>
       </Head>
-      <section className="panel sticky top-[0.8em] z-10 flex items-start gap-[1em] p-[0.8em]">
+      <section className="panel sticky top-[0.8em] z-10 flex items-start gap-[1em] p-[0.8em] max-sm:top-0 max-sm:-mx-[0.8em] max-sm:-mt-[0.8em] max-sm:gap-[0.4em] max-sm:rounded-none max-sm:px-[0.4em] max-sm:py-[0.2em]">
         {/* pushed down to the baseline of the log's sticky heading beside it */}
-        <div className="flex w-[9em] shrink-0 flex-col items-center gap-[0.3em] pt-[0.4rem] text-center">
+        <div className="flex w-[9em] shrink-0 flex-col items-center gap-[0.3em] pt-[0.4rem] text-center max-sm:w-[7em] max-sm:gap-[0.1em] max-sm:pt-[0.2rem]">
           {g.fighting && g.color ? (
             <>
               <span className="label">Battle {g.battles}</span>
-              <Chip color={g.color} />
-              <span className="text-sm">the {g.color} chip</span>
-              {g.winter && <span className="text-sm">❄️ Winter: force cards are 1</span>}
+              <span className="flex flex-col items-center gap-[0.3em] max-sm:flex-row">
+                <Chip color={g.color} />
+                <span className="text-sm">the {g.color} chip</span>
+              </span>
+              {g.winter && (
+                <span className="text-sm max-sm:text-xs">
+                  ❄️ Winter<span className="max-sm:hidden">: force cards are 1</span>
+                </span>
+              )}
             </>
           ) : (
             <>
@@ -167,7 +174,7 @@ export function Board({ game, me }: Props) {
             </>
           )}
         </div>
-        <div className="h-[5.4rem] flex-1 overflow-y-auto text-sm text-white/80" ref={log}>
+        <div className="h-[5.4rem] flex-1 overflow-y-auto text-sm text-white/80 max-sm:h-[3.4rem]" ref={log}>
           {entries(logged, who).map(({ heading, line: first, lines }, i) => (
             <section key={i}>
               {heading && (
@@ -191,7 +198,7 @@ export function Board({ game, me }: Props) {
         </div>
       </section>
       {result && seat >= 0 && <Review key={game._id} setup={setup(game)} log={game.log} seat={seat} show={(n) => setPast({ decisions: n, line: until(game, n).lines.length - 1 })} />}
-      <div className="mb-[10em] grid grid-cols-[repeat(auto-fill,minmax(min(28em,100%),1fr))] gap-[0.8em]">
+      <div className="mb-[10em] grid flex-1 grid-cols-[repeat(auto-fill,minmax(min(28em,100%),1fr))] content-start gap-[0.8em] max-sm:mb-[3.5em] max-sm:gap-[0.4em]">
         {(seat >= 0 ? [...others, seat] : others).map((n) => (
           <Seat
             key={n}
@@ -206,8 +213,8 @@ export function Board({ game, me }: Props) {
           />
         ))}
       </div>
-      <section className="panel sticky bottom-0 z-10 text-white">
-        <div className="px-[0.8em] pb-[0.8em]">
+      <section className="panel sticky bottom-0 z-10 text-white max-sm:-mx-[0.8em] max-sm:-mb-[0.8em] max-sm:rounded-none">
+        <div className="px-[0.8em] pb-[0.8em] max-sm:px-[0.4em] max-sm:pb-0">
           {past ? (
             <p className="m-0 flex items-center justify-between pt-[0.8em]">
               Viewing the board after an earlier play.{" "}
@@ -231,12 +238,12 @@ export function Board({ game, me }: Props) {
           ) : !stepping && prompt && prompt.seat === seat ? (
             <Ask key={game.log.length} game={g} p={g.players[seat]} prompt={prompt} send={send} />
           ) : (
-            <div className="flex items-end gap-[0.8em]">
+            <div className="flex items-end gap-[0.8em] max-sm:flex-col-reverse max-sm:items-stretch max-sm:gap-0">
               <div className="min-w-0 flex-1">{seat >= 0 && <Hand cards={g.players[seat].hand} />}</div>
-              <div className="flex shrink-0 flex-col items-center justify-center self-stretch pt-[0.8em]">
+              <div className="flex shrink-0 flex-col items-center justify-center self-stretch pt-[0.8em] max-sm:min-h-[2.3em] max-sm:flex-row max-sm:justify-between max-sm:pt-[0.3em]">
                 <span className="label">Waiting for {view.prompt ? who(view.prompt.seat) : "…"}</span>
                 {stepping && (
-                  <button className="quiet mt-[0.4em] px-3 py-1 text-sm" onClick={() => setShown(game.log.length)}>
+                  <button className="quiet mt-[0.4em] px-3 py-1 text-sm max-sm:mt-0" onClick={() => setShown(game.log.length)}>
                     Skip
                   </button>
                 )}
@@ -253,20 +260,22 @@ export function Board({ game, me }: Props) {
 const ORDER: CardType["kind"][] = ["force", "legend", "fury", "bait", "winter", "crows", "doves"];
 const rank = (c: CardType) => ORDER.indexOf(c.kind) * 100 + c.value;
 
-/** A hand, sorted and overlapped so every card shows its corner without scrolling. `onClick` and the rest take places in the hand as dealt, not as shown. */
+/**
+ * A hand, sorted. On a phone, its cards overlap only as much as they need to fit the width, down to each card's corner. A full hand there shows only the last card's big face.
+ * `onClick` and the rest take places in the hand as dealt, not as shown.
+ */
 export function Hand({ cards, onClick, selected, hinted, dim }: { cards: CardType[]; onClick?: (i: number) => void; selected?: number; hinted?: number; dim?: (c: CardType) => boolean }) {
-  const order = cards.map((_, i) => i).sort((a, b) => rank(cards[a]) - rank(cards[b]));
+  const sorted = cards.map((_, i) => i).sort((a, b) => rank(cards[a]) - rank(cards[b]));
   // the cards that can't be played now, held apart to the right
-  const groups = [order.filter((i) => !dim?.(cards[i])), order.filter((i) => dim?.(cards[i]))].filter((g) => g.length);
+  const playable = sorted.filter((i) => !dim?.(cards[i]));
+  const order = [...playable, ...sorted.filter((i) => dim?.(cards[i]))];
+  const groups = playable.length && playable.length < order.length ? 2 : 1;
+  const overlap = `clamp(var(--least), calc((${order.length} * 3.825rem + ${groups - 1} * var(--gap) - 100cqw) / ${Math.max(1, order.length - groups)}), var(--most))`;
   return (
-    <div className="flex justify-center gap-[1em] pt-[1.2em]">
-      {groups.map((group, g) => (
-        <div key={g} className="flex *:not-first:-ml-[2.5em] *:hover:z-10">
-          {group.map((i) => (
-            <div key={i} className={`relative ${selected === i ? "z-10" : ""}`}>
-              <Card card={cards[i]} selected={selected === i} hinted={hinted === i} dim={dim?.(cards[i])} onClick={onClick && (() => onClick(i))} />
-            </div>
-          ))}
+    <div className={`flex justify-center pt-[1.2em] [--gap:1rem] [--least:2.5rem] [--most:2.5rem] *:hover:z-10 max-sm:@container max-sm:-mb-[2.4em] max-sm:pt-[0.8em] max-sm:[--gap:0.4rem] max-sm:[--least:0.5rem] max-sm:[--most:2.72rem] ${order.length > 8 ? "max-sm:[&>div:not(:last-child)_.big]:opacity-0" : ""}`}>
+      {order.map((i, k) => (
+        <div key={i} className={`relative ${selected === i ? "z-10" : ""}`} style={{ marginLeft: !k ? 0 : k === playable.length ? "var(--gap)" : `calc(-1 * ${overlap})` }}>
+          <Card card={cards[i]} selected={selected === i} hinted={hinted === i} dim={dim?.(cards[i])} onClick={onClick && (() => onClick(i))} />
         </div>
       ))}
     </div>
@@ -482,7 +491,7 @@ function Ask({ game, p, prompt, send }: { game: Game; p: Player; prompt: Prompt;
   const hintIndex = hint?.move ? p.hand.indexOf(hint.move.card) : undefined;
   return (
     <div className="relative">
-      <div className="flex items-end gap-[0.8em]">
+      <div className="flex items-end gap-[0.8em] max-sm:flex-col-reverse max-sm:items-stretch max-sm:gap-0">
         <div className="min-w-0 flex-1">
           <Hand
             cards={p.hand}
@@ -495,7 +504,8 @@ function Ask({ game, p, prompt, send }: { game: Game; p: Player; prompt: Prompt;
             }}
           />
         </div>
-        <div className="flex shrink-0 flex-col items-center justify-center gap-[0.4em] self-stretch pt-[0.8em]">
+        <div className="flex shrink-0 flex-col items-center justify-center gap-[0.4em] self-stretch pt-[0.8em] max-sm:flex-row max-sm:justify-end max-sm:pt-[0.3em]">
+          <span className="label mr-auto sm:hidden">Your move</span>
           <button className={hinted(hint?.move === null)} onClick={() => send({ kind: "move", seat: p.seat, card: null })} title="Passing is for the rest of the battle">
             Pass
           </button>
