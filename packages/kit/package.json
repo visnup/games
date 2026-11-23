@@ -4,6 +4,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "node --test"
   }
 }

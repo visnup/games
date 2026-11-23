@@ -1,11 +1,18 @@
 import { expect, test } from "@playwright/test";
 import { randomUUID } from "crypto";
 
-// Needs pnpm dev, Convex included.
-
 test("deals a game against three bots", async ({ page }) => {
   await page.goto(`/${randomUUID()}`);
   await page.getByRole("button", { name: "Deal 4 players" }).click();
+  await expect(page.getByRole("heading", { name: /^You/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Bot/ })).toHaveCount(3);
+});
+
+test("a reload keeps your seat", async ({ page }) => {
+  await page.goto(`/${randomUUID()}`);
+  await page.getByRole("button", { name: "Deal 4 players" }).click();
+  await expect(page.getByRole("heading", { name: /^You/ })).toBeVisible();
+  await page.reload();
   await expect(page.getByRole("heading", { name: /^You/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: /^Bot/ })).toHaveCount(3);
 });

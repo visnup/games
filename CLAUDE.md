@@ -9,8 +9,9 @@ with `fnm exec --using=26 pnpm install`, and run an app's scripts from its own d
 - The toolchain lives at the root, once: its `devDependencies` (TypeScript, ESLint, Prettier,
   Playwright, Tailwind, concurrently, jsdom, vercel), `eslint.config.mjs`, `.prettierrc.json`,
   `.prettierignore` and `tsconfig.base.json`, which each package's `tsconfig.json` extends. An
-  app's `package.json` lists only what it runs. At the root, `pnpm lint` and `pnpm check` (tsc)
-  run in every package, and `pnpm format` runs Prettier over everything.
+  app's `package.json` lists only what it runs. At the root, `pnpm lint`, `pnpm check` (tsc) and
+  `pnpm test` run in every package, and `pnpm format` runs Prettier over everything. Playwright
+  starts each app's `pnpm dev`, Convex included, unless it's already running.
 - `packages/kit` is what the apps share, imported as `kit/<file>.ts`: `parallel.ts` and
   `worker.ts` (seeded chunks over a worker per core), `rng.ts` (the seeded generator), `trees.ts`
   (LightGBM trees as typed arrays and base64), `status.ts` (a round's status page, which each

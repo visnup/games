@@ -162,7 +162,7 @@ Other players' hands aren't hidden from their browsers; it's for friends.
   a choice by replaying with it, then plays the bots up to the next person. Clients replay the
   log themselves.
 - `src/pages/` and `src/components/`: `Game` joins and shows the lobby, `Board` the table and
-  the prompt. Playwright specs sit next to components and need `pnpm dev` running.
+  the prompt. Playwright specs sit next to components.
 - `read.ts` is what the board tells a player. `standing` gives the lowest force card that takes
   the lead, counting the tie-breaks. `leaders` gives the cards in hand that do. `gamePoints` gives
   who a chip would win the game for. `advice` is the Hint: Medium's move and its rule in words.

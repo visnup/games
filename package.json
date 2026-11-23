@@ -5,6 +5,7 @@
   "scripts": {
     "lint": "pnpm -r lint",
     "check": "pnpm -r exec tsc --noEmit",
+    "test": "pnpm -r --workspace-concurrency=1 test",
     "format": "prettier --write ."
   },
   "devDependencies": {

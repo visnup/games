@@ -13,9 +13,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "next dev -p 3020",
+    command: "pnpm dev",
+    env: { CONVEX_AGENT_MODE: "anonymous" },
     url: "http://localhost:3020",
     reuseExistingServer: !process.env.CI,
-    timeout: 10_000,
+    timeout: 60_000,
   },
 });
