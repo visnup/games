@@ -52,7 +52,14 @@ function entries(lines: string[], who: (n: number) => string) {
                   .map((s) => s.match(/(\d): (\d+) ([+-]\d+)/)!)
                   .map(([, s, t, g]) => `${who(+s)} ${t} (${g})`)
                   .join(", ")}${m[3] ? `; ${m[3]} in the pot` : ""}.`
-              : line.trim();
+              : (m = line.match(/^(\d(?: and \d)*) (?:wins|share) with (\d+) chips/))
+                ? m[1].includes("and")
+                  ? `${m[1]
+                      .split(" and ")
+                      .map((s) => who(+s))
+                      .join(" and ")} share the win with ${m[2]} chips.`
+                  : `${verb(+m[1], "wins")} with ${m[2]} chips.`
+                : line.trim();
       if (!groups.length) groups.push({ heading: "", line: i, lines: [] });
       groups.at(-1)!.lines.push({ text, line: i });
     }
