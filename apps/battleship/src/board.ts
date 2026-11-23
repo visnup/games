@@ -1,3 +1,4 @@
+import { mulberry32 } from "kit/rng.ts";
 /** The 10×10 board and the five ships of the Hasbro rules. A cell is `row * 10 + col`. */
 export const SIZE = 10;
 export const CELLS = SIZE * SIZE;
@@ -50,13 +51,6 @@ export function around(cell: number): number[] {
 /** Whether `cell` is on the outer ring. */
 export const onEdge = (cell: number) => rowOf(cell) === 0 || rowOf(cell) === SIZE - 1 || colOf(cell) === 0 || colOf(cell) === SIZE - 1;
 
-export function mulberry32(seed: number) {
-  return () => {
-    seed = (seed + 0x6d2b79f5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+export { mulberry32 };
 
 export const pick = <T>(xs: readonly T[], rng: () => number) => xs[Math.floor(rng() * xs.length)];

@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "monopoly-deal",
-      "runtimeExecutable": "fnm",
-      "runtimeArgs": ["exec", "--using=26", "pnpm", "-C", "apps/monopoly-deal", "dev"],
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["CONVEX_AGENT_MODE=anonymous", "fnm", "exec", "--using=26", "pnpm", "-C", "apps/monopoly-deal", "dev"],
       "port": 3010
     },
     {
@@ -40,7 +40,7 @@
     {
       "name": "battleship",
       "runtimeExecutable": "fnm",
-      "runtimeArgs": ["exec", "--using=26", "pnpm", "-C", "apps/battleship", "cheat", "--port", "8137", "--strictPort"],
+      "runtimeArgs": ["exec", "--using=26", "pnpm", "-C", "apps/battleship", "dev", "--port", "8137", "--strictPort"],
       "port": 8137
     }
   ]

@@ -72,7 +72,7 @@ from photos of one card of each property color and each wild (`rules/properties.
   serves the newest round's progress and ETA at localhost:3011, from those two files.
   `scripts/field.ts` plays one player against learned players, and
   `scripts/plan.ts` tests looking ahead to the end of the turn.
-- `trees.ts` flattens LightGBM's trees into typed arrays and packs them as base64;
+- `kit/trees.ts` flattens LightGBM's trees into typed arrays and packs them as base64;
   `scripts/pack.ts` writes a model to `src/packed/`, which `learned.ts` reads by default and
   `hard.ts` imports for the online game's hard bots without a file system. Rerun it after
   retraining a model. The models' JSON stays in `dataset/` (`model-rN.json`, `model-pay.json`,
@@ -126,8 +126,9 @@ mistake costs minutes, not the night:
 
 ## Playing online
 
-A Next.js (pages router) and Convex app laid out like `../poker`: `pnpm dev` runs both, against
-the Convex dev deployment in `.env.local`. `vercel.json` deploys Convex to production as part of
+A Next.js (pages router) and Convex app laid out like `../poker`: `pnpm dev` runs both. Locally it
+runs against an anonymous local Convex backend (`CONVEX_AGENT_MODE=anonymous`, as
+`.claude/launch.json` starts it), which needs no Convex account. `vercel.json` deploys Convex to production as part of
 Vercel's build, so a local `pnpm build` never does. Other players' hands aren't hidden from
 their browsers; it's for friends.
 
@@ -145,8 +146,8 @@ their browsers; it's for friends.
   ways on a quarter of the deals, each a replay of the game to that moment, as
   `scripts/midturn.ts` does. `Review.tsx` splits it across a web worker per core
   (`review.worker.ts`). The Hard bot's pick each play is compared with, and a Hard bot's plays
-  in the playouts, come from `src/packed/light.ts`, a 200-tree model
-  (`node scripts/pack.ts dataset/model-r10-200.json src/packed/light.ts`), the only model a
+  in the playouts, come from `src/packed/rollout.ts`, a 200-tree model
+  (`node scripts/pack.ts dataset/model-r10-200.json src/packed/rollout.ts`), the only model a
   browser loads; the Hard bot itself plays on Convex.
 - `src/pages/` and `src/components/`: `Game` joins and shows the lobby, `Board` the table and
   the prompt. Playwright specs sit next to components and need `pnpm dev` running.

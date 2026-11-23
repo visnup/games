@@ -1,6 +1,8 @@
 import { useMutation } from "convex/react";
 import Head from "next/head";
 import { type ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { chime } from "kit/chime.ts";
+import { SPEEDS, stepSpeed } from "kit/speed.ts";
 import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import type { bot } from "../../convex/schema";
@@ -64,24 +66,6 @@ function entries(lines: string[], who: (n: number) => string) {
 }
 
 /** Two soft rising notes. Browsers keep audio off until the page has been clicked, which joining a table does. */
-function chime() {
-  try {
-    const audio = new AudioContext();
-    [660, 880].forEach((hz, i) => {
-      const at = audio.currentTime + i * 0.12;
-      const tone = audio.createOscillator();
-      const volume = audio.createGain();
-      tone.frequency.value = hz;
-      volume.gain.setValueAtTime(0.08, at);
-      volume.gain.exponentialRampToValueAtTime(0.001, at + 0.3);
-      tone.connect(volume).connect(audio.destination);
-      tone.start(at);
-      tone.stop(at + 0.3);
-    });
-    setTimeout(() => audio.close(), 1000);
-  } catch {}
-}
-
 export function Board({ game, me }: Props) {
   const decide = useMutation(api.games.decide);
   const [error, setError] = useState<string>();
@@ -392,26 +376,6 @@ const aside = (d: number) => (d === 0 ? 0 : Math.sign(d) * 1.2 * Math.max(0, 1 -
 
 /** The last hand dealt in, by game and round, so a hand animates its deal once however often it's drawn again. */
 let lastDeal: string | undefined;
-
-/** How long each of others' plays shows before the next, in ms, or 0 for all at once. */
-const SPEEDS = { off: 0, fast: 400, slow: 900 };
-export type Speed = keyof typeof SPEEDS;
-
-/** This browser's speed, as last chosen in the lobby. */
-export function stepSpeed(): Speed {
-  try {
-    const s = localStorage.getItem("step");
-    return s && s in SPEEDS ? (s as Speed) : "fast";
-  } catch {
-    return "fast";
-  }
-}
-
-export function setStepSpeed(s: Speed) {
-  try {
-    localStorage.setItem("step", s);
-  } catch {}
-}
 
 /** A bot's kind of player, as the lobby and its seat name it. */
 export type Level = Infer<typeof bot>;

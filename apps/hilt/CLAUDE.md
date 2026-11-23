@@ -26,7 +26,7 @@ Its last page has the card list and each fate card's rule.
   against `--field` (`default`, `league`, `playouts`, `learned` or any variant). "The loop" below
   says how they fit together.
 - `learned.ts`: the learned player. `board` and `move` turn a decision into numbers, and the
-  LightGBM trees in `src/packed/model.ts` (flattened by `trees.ts`, copied from monopoly-deal) rank the moves.
+  LightGBM trees in `src/packed/model.ts` (flattened by `kit/trees.ts`) rank the moves.
   One of a move's numbers is whether it's the default's pick, and `hint` is the default the
   models were trained with (before `hold`). It matters little: today's model reading today's
   default's pick instead wins 0.2 to 1.7 points less (2026-11-21, 10,000 games). A plain round never

@@ -4,7 +4,7 @@ import discard from "./packed/discard.ts";
 import model from "./packed/model.ts";
 import pay from "./packed/pay.ts";
 import sayno from "./packed/sayno.ts";
-import { unpack } from "./trees.ts";
+import { unpack } from "kit/trees.ts";
 
 let player: Policy | undefined;
 

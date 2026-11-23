@@ -4,7 +4,7 @@
     {
       "name": "cheat",
       "runtimeExecutable": "fnm",
-      "runtimeArgs": ["exec", "--using=26", "pnpm", "cheat", "--port", "8137", "--strictPort"],
+      "runtimeArgs": ["exec", "--using=26", "pnpm", "dev", "--port", "8137", "--strictPort"],
       "port": 8137
     }
   ]

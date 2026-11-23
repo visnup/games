@@ -2,6 +2,8 @@ import { useMutation } from "convex/react";
 import type { Infer } from "convex/values";
 import Head from "next/head";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { chime } from "kit/chime.ts";
+import { SPEEDS, stepSpeed } from "kit/speed.ts";
 import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import type { bot } from "../../convex/schema";
@@ -68,24 +70,6 @@ function entries(lines: string[], who: (n: number) => string) {
 }
 
 /** Two soft rising notes. Browsers keep audio off until the page has been clicked, which joining a table does. */
-function chime() {
-  try {
-    const audio = new AudioContext();
-    [660, 880].forEach((hz, i) => {
-      const at = audio.currentTime + i * 0.12;
-      const tone = audio.createOscillator();
-      const volume = audio.createGain();
-      tone.frequency.value = hz;
-      volume.gain.setValueAtTime(0.08, at);
-      volume.gain.exponentialRampToValueAtTime(0.001, at + 0.3);
-      tone.connect(volume).connect(audio.destination);
-      tone.start(at);
-      tone.stop(at + 0.3);
-    });
-    setTimeout(() => audio.close(), 1000);
-  } catch {}
-}
-
 /** Where each seat sits around the table, by how far clockwise it is from the bottom: in the grid's rows and columns. */
 const PLACES: Record<number, string[]> = {
   3: ["col-start-2 row-start-3", "col-start-1 row-start-1 row-span-2", "col-start-3 row-start-1 row-span-2"],
@@ -473,26 +457,6 @@ export function Hand({
       ))}
     </div>
   );
-}
-
-/** How long each of others' plays shows before the next, in ms, or 0 for all at once. */
-const SPEEDS = { off: 0, fast: 500, slow: 1000 };
-export type Speed = keyof typeof SPEEDS;
-
-/** This browser's speed, as last chosen in the lobby. */
-export function stepSpeed(): Speed {
-  try {
-    const s = localStorage.getItem("step");
-    return s && s in SPEEDS ? (s as Speed) : "fast";
-  } catch {
-    return "fast";
-  }
-}
-
-export function setStepSpeed(s: Speed) {
-  try {
-    localStorage.setItem("step", s);
-  } catch {}
 }
 
 /** Whether this browser asked, in the lobby, to have cards counted for it: which of your cards are sure to take a trick. */

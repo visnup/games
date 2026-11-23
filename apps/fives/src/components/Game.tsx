@@ -1,8 +1,9 @@
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useRef, useState } from "react";
+import { setStepSpeed, type Speed, stepSpeed } from "kit/speed.ts";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-import { Board, counting, type Level, LEVELS, setCounting, setStepSpeed, type Speed, stepSpeed } from "./Board";
+import { Board, counting, type Level, LEVELS, setCounting } from "./Board";
 
 const notice = "m-0 grid min-h-dvh place-items-center text-xl font-semibold tracking-wide opacity-80";
 
@@ -14,14 +15,14 @@ export function Game({ table }: { table: string }) {
   const game = useQuery(api.games.get, { table });
 
   useEffect(() => {
-    if (player) sessionStorage.setItem("player", JSON.stringify(player));
-  }, [player]);
+    if (player) sessionStorage.setItem(`player ${table}`, player.id);
+  }, [player, table]);
 
   useEffect(() => {
     if (!player && !joining.current) {
       joining.current = true;
-      const stored = JSON.parse(sessionStorage.getItem("player") || "null");
-      const id = stored?.table === table ? (stored.id as Id<"players">) : undefined;
+      // kept by table, so visiting another table in this tab doesn't give up a seat at this one
+      const id = (sessionStorage.getItem(`player ${table}`) as Id<"players"> | null) ?? undefined;
       join({ table, id }).then(setPlayer);
     }
   }, [join, table, player]);
@@ -38,7 +39,7 @@ export function Game({ table }: { table: string }) {
     return game ? (
       <>
         <p className="m-0 pt-[0.8em] text-center text-sm opacity-80">Every seat is taken, so you&apos;re watching.</p>
-        <Board game={game} />
+        <Board key={game._id} game={game} />
       </>
     ) : (
       <p className={notice}>Every seat is taken.</p>
@@ -46,7 +47,7 @@ export function Game({ table }: { table: string }) {
   const playing = game && !game.winners && game.seats.some((s) => "player" in s && s.player === player.id);
   return (
     <>
-      {game && <Board game={game} me={player.id} />}
+      {game && <Board key={game._id} game={game} me={player.id} />}
       {!playing && <Lobby table={table} me={player.id} alone={!game} />}
     </>
   );

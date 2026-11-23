@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { flatten, pack, score, unpack } from "../src/trees.ts";
+import { flatten, pack, score, unpack } from "kit/trees.ts";
 
 // Packs a model's JSON into a module of base64, and checks the packed model scores like its JSON
 // on random rows. `node scripts/pack.ts in.json [out]`: into src/packed/model.ts, the learned

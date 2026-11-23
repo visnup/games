@@ -318,7 +318,7 @@ with. Tap the cell you fired at. Then say miss, hit, or which ship sank. The pag
 answers no fleet could give. The page shades the board by the algorithm you pick. It lists every
 algorithm's next shot. Beside each tuned shooter, it shows adaptive's odds on that shooter's
 habit. To keep the download small, the page's adaptive uses 20,000 sample fleets per habit. That
-costs a few tenths of a shot. `pnpm cheat` serves the page with Vite. `pnpm build` builds it into
+costs a few tenths of a shot. `pnpm dev` serves the page with Vite. `pnpm build` builds it into
 `cheat/dist/`.
 
 ## Next

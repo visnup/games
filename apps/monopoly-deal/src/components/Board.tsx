@@ -1,6 +1,8 @@
 import { useMutation } from "convex/react";
 import Head from "next/head";
 import { type ReactNode, useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { chime } from "kit/chime.ts";
+import { SPEEDS, stepSpeed } from "kit/speed.ts";
 import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { BIRTHDAY, type Card as CardType, COLORS, DEBT } from "../cards.ts";
@@ -71,24 +73,6 @@ const until = (game: Props["game"], n: number) => {
 };
 
 /** Two soft rising notes. Browsers keep audio off until the page has been clicked, which joining a table does. */
-function chime() {
-  try {
-    const audio = new AudioContext();
-    [660, 880].forEach((hz, i) => {
-      const at = audio.currentTime + i * 0.12;
-      const tone = audio.createOscillator();
-      const volume = audio.createGain();
-      tone.frequency.value = hz;
-      volume.gain.setValueAtTime(0.08, at);
-      volume.gain.exponentialRampToValueAtTime(0.001, at + 0.3);
-      tone.connect(volume).connect(audio.destination);
-      tone.start(at);
-      tone.stop(at + 0.3);
-    });
-    setTimeout(() => audio.close(), 1000);
-  } catch {}
-}
-
 /** The cards in `after`'s banks, sets, buildings and discard pile that weren't there in `before`. */
 function arrivals(before: Game, after: Game) {
   const out = new Set<CardType>();
@@ -371,26 +355,6 @@ function Pickable({ pick, children }: { pick?: Pick; children: ReactNode }) {
       <span className={`absolute top-[0.25em] right-[0.3em] size-[0.9em] rounded-full border-2 border-gold shadow-[0_0_2px_black] ${pick.on ? "bg-gold" : "bg-white"}`} />
     </div>
   );
-}
-
-/** How long each of others' plays shows before the next, in ms, or 0 for all at once. */
-export const SPEEDS = { off: 0, fast: 400, slow: 900 };
-export type Speed = keyof typeof SPEEDS;
-
-/** This browser's speed, as last chosen in the lobby. */
-export function stepSpeed(): Speed {
-  try {
-    const s = localStorage.getItem("step");
-    return s && s in SPEEDS ? (s as Speed) : "fast";
-  } catch {
-    return "fast";
-  }
-}
-
-export function setStepSpeed(s: Speed) {
-  try {
-    localStorage.setItem("step", s);
-  } catch {}
 }
 
 /** A bot's kind of player, as the lobby and its seat name it. */

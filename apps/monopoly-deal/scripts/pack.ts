@@ -1,10 +1,10 @@
 import { readFileSync, writeFileSync } from "node:fs";
-import { flatten, pack, score, unpack } from "../src/trees.ts";
+import { flatten, pack, score, unpack } from "kit/trees.ts";
 
 // Packs a model's JSON into src/packed/, which the learned player and the online game's bots
 // load, and checks the packed model scores like its JSON on random rows. Rerun after a model is
 // retrained: `node scripts/pack.ts dataset/model-rN.json src/packed/model.ts`, and the same for
-// pay, sayno and discard, or a 200-tree model into src/packed/light.ts, which a game's review
+// pay, sayno and discard, or a 200-tree model into src/packed/rollout.ts, which a game's review
 // ranks moves by in the browser.
 
 const [input, out] = process.argv.slice(2);

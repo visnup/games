@@ -1,5 +1,5 @@
 import { type Card, COLORS, type Fate } from "./cards.ts";
-import { type Forest, flatten, score, unpack } from "./trees.ts";
+import { type Forest, flatten, score, unpack } from "kit/trees.ts";
 import { decisive, defaultPolicy, doveTheirs, finishIn, type Game, heuristic, type Move, moves, needed, others, type Player, type Policy, STEPS } from "./game.ts";
 
 /** The default every model so far was trained on, before `keep`, `fury`, `hold`, `deny`, today's `doves` and `finish` counting the whole hand: its pick is one of a move's numbers. */

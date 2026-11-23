@@ -3,7 +3,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "cheat": "vite cheat",
+    "dev": "vite cheat",
     "build": "vite build cheat",
     "lint": "eslint .",
     "test": "node --test"

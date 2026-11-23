@@ -1,8 +1,9 @@
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useRef, useState } from "react";
+import { setStepSpeed, type Speed, stepSpeed } from "kit/speed.ts";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-import { Board, type Level, LEVELS, setStepSpeed, type Speed, stepSpeed } from "./Board";
+import { Board, type Level, LEVELS } from "./Board";
 
 const notice = "m-0 grid min-h-dvh place-items-center text-xl font-semibold tracking-wide opacity-80";
 

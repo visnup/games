@@ -35,7 +35,7 @@ last page has the components and a summary.
   (taking or under the trick, face up or down, trump, led or off color), where playouts clearly
   prefer another. "The loop" below says what to do with one.
 - `learned.ts`: the learned player. `board` and `move` turn a decision into numbers, and the
-  LightGBM trees (flattened by `trees.ts`, copied from hilt) rank the plays. The features are
+  LightGBM trees (flattened by `kit/trees.ts`) rank the plays. The features are
   versioned: `dataset.ts` writes `VERSION` into each row, `learn.py` into the model, and
   `learned()` reads a model's version to pick `features(v)`, so models fit to older versions keep
   playing. Version 2 adds card counting (`board2`, `move2`). A new version can't train on older

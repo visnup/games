@@ -5,7 +5,7 @@ import { ACTIONS, memory } from "./memory.ts";
 import { payment, payments } from "./paying.ts";
 import { refusal } from "./refusing.ts";
 import { encode, key, observe } from "./replay.ts";
-import { type Forest, flatten, score, unpack } from "./trees.ts";
+import { type Forest, flatten, score, unpack } from "kit/trees.ts";
 
 // A move scorer learned from the dataset: gradient-boosted trees (`scripts/learn.py`) over what
 // the mover sees and what each move does, fitted to its two-round playout value.

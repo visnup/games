@@ -1,4 +1,4 @@
-import { type Forest, flatten, scoreAll, unpack } from "./trees.ts";
+import { type Forest, flatten, scoreAll, unpack } from "kit/trees.ts";
 import { BACK, type Card, COLORS as HUES } from "./cards.ts";
 import { beats, defaultPolicy, face, type Game, HANDS, others, type Play, type Player, type Policy, sure, TARGET, top, total, TRUMP, unseen, winning } from "./game.ts";
 

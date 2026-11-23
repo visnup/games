@@ -15,7 +15,7 @@ scripts need `pnpm install` (DuckDB, hyparquet-writer, Observable Plot, and the 
   is how the "tuned" shooters know a placer's habits. `posterior` samples the exact posterior;
   `adaptive` infers the placer from `model`s of sampled fleets. `lineup` names every shooter
   with a note; `games.ts` and the cheat sheet both play from it.
-- `cheat/`: the cheat sheet page, served and built by Vite (`pnpm cheat`, `pnpm build`), which
+- `cheat/`: the cheat sheet page, served and built by Vite (`pnpm dev`, `pnpm build`), which
   is what lets it import `src/`'s TypeScript. `fleet.html` plays every shooter in the lineup
   against a fleet you place. `public/library.bin` is 20,000 fleets per placer
   from `scripts/library.ts`, a byte per ship in `PLACERS` order.

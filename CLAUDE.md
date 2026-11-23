@@ -12,12 +12,13 @@ with `fnm exec --using=26 pnpm install`, and run an app's scripts from its own d
   app's `package.json` lists only what it runs. At the root, `pnpm lint` and `pnpm check` (tsc)
   run in every package, and `pnpm format` runs Prettier over everything.
 - `packages/kit` is what the apps share, imported as `kit/<file>.ts`: `parallel.ts` and
-  `worker.ts` (seeded chunks over a worker per core), `table.ts` (the markdown table header
+  `worker.ts` (seeded chunks over a worker per core), `rng.ts` (the seeded generator), `trees.ts`
+  (LightGBM trees as typed arrays and base64), `status.ts` (a round's status page, which each
+  app's `scripts/status.ts` configures), `chime.ts`, `speed.ts` (how fast others' plays show), `table.ts` (the markdown table header
   scripts print under) and `words.ts` (table names). The Next apps list it in
   `transpilePackages`.
 - A file moves to the kit once it's the same in every app that has it. Still copied, and
-  drifting: `trees.ts` (fives' packs a features version), `status.ts`, `round.sh`, `learn.py`,
-  `Game.tsx`, `Review.tsx` and `convex/`.
+  drifting: `round.sh`, `learn.py`, `Game.tsx`, `Review.tsx` and `convex/`.
 - Each app is its own Vercel project, rooted at `apps/<name>`, and each Next app has its own
   Convex deployment.
   `pnpm exec vercel` from an app's directory acts on its project.
@@ -32,7 +33,8 @@ don't work here: `dataset/` is ignored and holds every model and shard.
 
 - Ports: app N's Next is on 30N0 and its round status page on 30N1. monopoly-deal is 3010 and
   3011, hilt 3020 and 3021, fives 3030 and 3031.
-- Local Convex backends: fives is on 3210 and 3211, and hilt on 3220 and 3221. Each app keeps its
+- Local Convex backends: fives is on 3210 and 3211, hilt on 3220 and 3221, and monopoly-deal on
+  3230 and 3231. Each app keeps its
   ports in its ignored `.convex/local/default/config.json`. Anonymous mode names every backend
   `anonymous-agent`, so a second app stored on a running app's port fails with "A local backend is
   still running". A new checkout needs its stored port changed by hand.
