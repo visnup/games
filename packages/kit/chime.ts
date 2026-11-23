@@ -1,3 +1,4 @@
+/** Two soft rising notes. Browsers keep audio off until the page has been clicked, which joining a table does. */
 export function chime() {
   try {
     const audio = new AudioContext();

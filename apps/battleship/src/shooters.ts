@@ -21,7 +21,7 @@ export function random(rng: () => number): Shooter {
  * Hunts at random, then after a hit fires at the hit's neighbors until it runs out of them.
  * With `parity` it hunts only on one color of a checkerboard, since every ship covers both.
  */
-export function huntTarget(rng: () => number, parity = false): Shooter {
+function huntTarget(rng: () => number, parity = false): Shooter {
   const shot = new Uint8Array(CELLS);
   const stack: number[] = [];
   const hunt = Array.from({ length: CELLS }, (_, i) => i).filter((c) => !parity || (rowOf(c) + colOf(c)) % 2 === 0);

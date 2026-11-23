@@ -73,7 +73,7 @@ from photos of one card of each property color and each wild (`rules/properties.
   `scripts/field.ts` plays one player against learned players, and
   `scripts/plan.ts` tests looking ahead to the end of the turn.
 - `kit/trees.ts` flattens LightGBM's trees into typed arrays and packs them as base64;
-  `scripts/pack.ts` writes a model to `src/packed/`, which `learned.ts` reads by default and
+  `kit/pack.ts` writes a model to `src/packed/`, which `learned.ts` reads by default and
   `hard.ts` imports for the online game's hard bots without a file system. Rerun it after
   retraining a model. The models' JSON stays in `dataset/` (`model-rN.json`, `model-pay.json`,
   `model-sayno.json`, `model-discard.json`), out of git.
@@ -147,7 +147,7 @@ their browsers; it's for friends.
   `scripts/midturn.ts` does. `Review.tsx` splits it across a web worker per core
   (`review.worker.ts`). The Hard bot's pick each play is compared with, and a Hard bot's plays
   in the playouts, come from `src/packed/rollout.ts`, a 200-tree model
-  (`node scripts/pack.ts dataset/model-r10-200.json src/packed/rollout.ts`), the only model a
+  (`node ../../packages/kit/pack.ts dataset/model-r10-200.json src/packed/rollout.ts`), the only model a
   browser loads; the Hard bot itself plays on Convex.
 - `src/pages/` and `src/components/`: `Game` joins and shows the lobby, `Board` the table and
   the prompt. Playwright specs sit next to components and need `pnpm dev` running.

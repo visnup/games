@@ -13,7 +13,7 @@ import { chance, playout } from "./strategies.ts";
 export type Reviewed = { n: number; kind: Choice["kind"]; turn: number; chose: string; hint: string; hard?: string; options: { key: string; win: number }[] };
 
 /** Every legal move and ending the turn, best first, as `ranked()` in `learned.ts` gives them: its first is a play's `hard`. */
-export type Rank = (game: Game, p: Player, left: number) => (Move | null)[];
+type Rank = (game: Game, p: Player, left: number) => (Move | null)[];
 
 /** The deals each move is played out on in a game's review, and a quarter as many for the rest: fewer with Hard bots, which cost many times as much a game. */
 export const deals = (setup: Setup) => (setup.bots.includes("learned") ? HARD_DEALS : 400);

@@ -14,7 +14,8 @@ with `fnm exec --using=26 pnpm install`, and run an app's scripts from its own d
   starts each app's `pnpm dev`, Convex included, unless it's already running.
 - `packages/kit` is what the apps share, imported as `kit/<file>.ts`: `parallel.ts` and
   `worker.ts` (seeded chunks over a worker per core), `rng.ts` (the seeded generator), `trees.ts`
-  (LightGBM trees as typed arrays and base64), `status.ts` (a round's status page, which each
+  (LightGBM trees as typed arrays and base64), `pack.ts` (a model's JSON into `src/packed/`),
+  `markdown.ts` (the README tables `charts.ts` draws from), `status.ts` (a round's status page, which each
   app's `scripts/status.ts` configures), `chime.ts`, `speed.ts` (how fast others' plays show), `table.ts` (the markdown table header
   scripts print under) and `words.ts` (table names). The Next apps list it in
   `transpilePackages`.

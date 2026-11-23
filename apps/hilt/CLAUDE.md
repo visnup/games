@@ -150,11 +150,11 @@ Other players' hands aren't hidden from their browsers; it's for friends.
   they couldn't see (200 with Hard bots), each bot at its level, for the "How you played" report
   at a game's end. `Review.tsx` splits it across a web worker per core (`review.worker.ts`).
   Hard bots there play by the 200-tree model in `src/packed/rollout.ts`, 181 KB gzipped, which
-  only the worker loads, and only for a game with one: `node scripts/pack.ts
+  only the worker loads, and only for a game with one: `node ../../packages/kit/pack.ts
   dataset/model-rN-200.json src/packed/rollout.ts` after a new model is adopted. `replay()` takes its `settle` wrapper
   back off the game it returns, or the game's clones would settle it instead of themselves.
 - `hard.ts` loads `src/packed/model.ts`, the model as base64 that Convex can bundle;
-  `node scripts/pack.ts dataset/model-rN.json` rewrites it after a model is adopted. `learned.ts` reads JSON
+  `node ../../packages/kit/pack.ts dataset/model-rN.json` rewrites it after a model is adopted. `learned.ts` reads JSON
   models through `process.getBuiltinModule` and finds `src/packed/model.ts` lazily, since Convex's
   bundler can't take `node:fs` or `import.meta` at load.
 - `convex/`: `players` is the join and ping. `games` holds the seed, the Favor's first seat and

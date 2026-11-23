@@ -10,7 +10,7 @@ import { type Forest, flatten, score, unpack } from "kit/trees.ts";
 // A move scorer learned from the dataset: gradient-boosted trees (`scripts/learn.py`) over what
 // the mover sees and what each move does, fitted to its two-round playout value.
 
-export type Obs = ReturnType<typeof observe>;
+type Obs = ReturnType<typeof observe>;
 export type Enc = ReturnType<typeof encode>;
 
 const KINDS = ["money", "property", "wild", "rent", "action"];
@@ -128,9 +128,9 @@ function network({ mean, std, layers }: { mean: number[]; std: number[]; layers:
 
 // from the repo's root, where scripts run, since Convex can't load a module that uses import.meta
 export const MODEL = "src/packed/model.ts";
-export const PAY = "src/packed/pay.ts";
-export const NO = "src/packed/sayno.ts";
-export const DISCARD = "src/packed/discard.ts";
+const PAY = "src/packed/pay.ts";
+const NO = "src/packed/sayno.ts";
+const DISCARD = "src/packed/discard.ts";
 const loaded: Record<string, (x: number[]) => number> = {};
 
 // fetched here rather than imported, so Convex and browsers can load this module, given trees
@@ -148,7 +148,7 @@ function load(file: string) {
 }
 
 /** A model to score by: a JSON file's path, or packed trees (`src/packed`). */
-export type Model = string | Forest;
+type Model = string | Forest;
 
 /** `model` as a function of `board` and `move`'s numbers. */
 export const scorer = (model: Model = MODEL) => (typeof model === "string" ? (loaded[model] ??= load(model)) : (x: number[]) => score(model, x));

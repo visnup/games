@@ -382,7 +382,7 @@ chance. Hard makes the play it scores highest.
   round's playouts at about 8 times Medium's cost. The full model costs 200 times Medium's.
   `scripts/status.ts` serves a round's progress.
 - **Serving.** `kit/trees.ts` flattens the trees into typed arrays. `scoreAll` scores all of a
-  decision's plays at once, walking each tree's situation-only branches once. `scripts/pack.ts`
+  decision's plays at once, walking each tree's situation-only branches once. `kit/pack.ts`
   packs the model as base64 into `src/packed/model.ts`. Convex bundles that file for the online
   game. The end-of-game review plays out every option at your decisions in a web worker per core.
   The review's Hard seats use the small model.

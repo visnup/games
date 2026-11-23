@@ -65,7 +65,6 @@ function entries(lines: string[], who: (n: number) => string) {
   return groups;
 }
 
-/** Two soft rising notes. Browsers keep audio off until the page has been clicked, which joining a table does. */
 export function Board({ game, me }: Props) {
   const decide = useMutation(api.games.decide);
   const [error, setError] = useState<string>();

@@ -46,7 +46,7 @@ export function observe(game: Game, p: Player, left: number) {
 export type Ref = { pile: "bank" | "props" | "built"; i: number };
 
 /** A move by position: `card` and `doubles` index the hand, `take` the target's props, `give` the mover's. */
-export type MoveChoice = { type: Move["type"]; card: number; color?: string; target?: number; doubles?: number[]; take?: number; give?: number };
+type MoveChoice = { type: Move["type"]; card: number; color?: string; target?: number; doubles?: number[]; take?: number; give?: number };
 
 export type Choice =
   { kind: "move"; seat: number; move: MoveChoice | null } | { kind: "pay"; seat: number; paid: Ref[] } | { kind: "sayNo"; seat: number; no: boolean } | { kind: "discard"; seat: number; cards: number[] };
@@ -55,7 +55,7 @@ export type Prompt =
   { kind: "move"; seat: number; left: number } | { kind: "pay"; seat: number; amount: number; to: number } | { kind: "sayNo"; seat: number; move: Move; from: number } | { kind: "discard"; seat: number; n: number };
 
 /** A decision as saved: the choice, whether a bot made it, and every hand when it was made. */
-export type Decision = { choice: Choice; bot: boolean; hands: string[][] };
+type Decision = { choice: Choice; bot: boolean; hands: string[][] };
 
 /** A game to replay, with each seat's kind of bot, or false for a person. */
 export type Setup = { players: number; seed: number; first: number; bots: (string | false)[] };

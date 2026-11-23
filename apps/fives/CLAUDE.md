@@ -136,8 +136,8 @@ players' hands aren't hidden from their browsers; it's for friends.
   seats as they come up: `face up` (Easy), `default` (Medium) or `learned` (Hard, `hard.ts`).
 - `hard.ts` loads `src/packed/model.ts`, the model as base64 that Convex can bundle, and the
   review's Hard bots `src/packed/rollout.ts`, its 50-tree version, which only the review's workers
-  load: `node scripts/pack.ts dataset/model-rN.json src/packed/model.ts` and
-  `node scripts/pack.ts dataset/model-rN-rollout.json src/packed/rollout.ts` after a model is
+  load: `node ../../packages/kit/pack.ts dataset/model-rN.json` and
+  `node ../../packages/kit/pack.ts dataset/model-rN-rollout.json src/packed/rollout.ts` after a model is
   adopted. `learned.ts` reads JSON models through `process.getBuiltinModule`, since Convex's
   bundler can't take `node:fs`.
 - `review.ts` plays out every option at each decision with a choice, for the "How you played"

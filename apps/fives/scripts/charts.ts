@@ -1,31 +1,12 @@
 import * as Plot from "@observablehq/plot";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { JSDOM } from "jsdom";
+import { num, type Row, tables } from "kit/markdown.ts";
 
 /** Draws the charts in README.md into charts/, from the README's own tables, as in monopoly-deal. */
-type Row = Record<string, string>;
-
 const dir = new URL("../charts/", import.meta.url);
-const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
+const table = tables(readFileSync(new URL("../README.md", import.meta.url), "utf8"));
 const { document } = new JSDOM("").window;
-
-/** The markdown table whose first header cell is `first`, as rows keyed by header. */
-function table(first: string): Row[] {
-  const lines = readme.split("\n");
-  const start = lines.findIndex((l) => l.startsWith(`| ${first} |`));
-  if (start < 0) throw new Error(`no table starting with "${first}"`);
-  const cells = (l: string) =>
-    l
-      .split("|")
-      .slice(1, -1)
-      .map((c) => c.trim());
-  const head = cells(lines[start]);
-  const rows: Row[] = [];
-  for (let i = start + 2; lines[i]?.startsWith("|"); i++) rows.push(Object.fromEntries(cells(lines[i]).map((c, j) => [head[j], c])));
-  return rows;
-}
-/** A cell's leading number: "56.8%", "+2.1" or "−0.3". */
-const num = (cell: string) => Number(cell.replace("−", "-").match(/^[-+]?[\d.]+/)?.[0]);
 
 /** The booklet's inks: the magenta of the Magenta line, and its blue. */
 const art = { magenta: "#de35a2", blue: "#2f5db1", paper: "#ffffff", ink: "#1a1a1a", gray: "#8c8c8c" };

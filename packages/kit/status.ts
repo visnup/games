@@ -10,12 +10,12 @@ import { parseArgs } from "node:util";
 // recent rate. It only reads the round's files, so it can't disturb it. An app's
 // `scripts/status.ts` calls `serve` with what differs.
 
-export type Run = { round: string; prev: string; start: number; games: number; trees: number; stages: string[]; data?: string; compares?: number; shards?: number; strong?: number };
+type Run = { round: string; prev: string; start: number; games: number; trees: number; stages: string[]; data?: string; compares?: number; shards?: number; strong?: number };
 type Event = { t: number; stage: string; state: "start" | "done" | "skipped" | "failed" };
 type Usage = { t: number; cores: number; load: number; done?: number; temp?: number; watts?: number };
 type Point = { t: number; v: number };
 
-export type Config = {
+type Config = {
   port: number;
   /** Each player count, and what its games weigh in the labeling. */
   counts: readonly (readonly [players: number, weight: number])[];

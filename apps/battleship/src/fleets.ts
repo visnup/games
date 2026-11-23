@@ -1,7 +1,7 @@
 import { around, CELLS, type Fleet, neighbors, onEdge, pick, shipPlacements, SHIPS } from "./board.ts";
 
 /** Ways to hide a fleet. Each returns a placement index per ship. */
-export type Placer = (rng: () => number) => Fleet;
+type Placer = (rng: () => number) => Fleet;
 
 /** Tries random fleets from `candidates` until one has no overlaps and passes `ok`: uniform over those that do. */
 function rejection(candidates: (ship: number) => number[], ok: (cells: number[][]) => boolean = () => true): Placer {

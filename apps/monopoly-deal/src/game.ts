@@ -6,7 +6,7 @@ export const COLOR_NAMES = Object.keys(COLORS) as Color[];
 export const size = (color: Color) => COLORS[color].rent.length;
 const INDEX = Object.fromEntries(COLOR_NAMES.map((c, i) => [c, i])) as Record<Color, number>;
 const SIZES = COLOR_NAMES.map(size);
-export const buildable = (color: Color) => color !== "railroad" && color !== "utility";
+const buildable = (color: Color) => color !== "railroad" && color !== "utility";
 
 /** A property or wild card on the table, and the color it's being used as. */
 export type Placed = { card: Card; color: Color };
@@ -82,7 +82,7 @@ const remove = <T>(xs: T[], x: T) => {
   xs.splice(i, 1);
 };
 
-export type GameOptions = {
+type GameOptions = {
   players: number;
   rng?: () => number;
   /** One per seat, or one for everyone. */

@@ -72,7 +72,6 @@ const until = (game: Props["game"], n: number) => {
   return replay({ ...s, bots: s.bots.map(() => false) }, game.log.slice(0, n));
 };
 
-/** Two soft rising notes. Browsers keep audio off until the page has been clicked, which joining a table does. */
 /** The cards in `after`'s banks, sets, buildings and discard pile that weren't there in `before`. */
 function arrivals(before: Game, after: Game) {
   const out = new Set<CardType>();

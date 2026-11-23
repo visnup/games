@@ -69,7 +69,6 @@ function entries(lines: string[], who: (n: number) => string) {
   return groups;
 }
 
-/** Two soft rising notes. Browsers keep audio off until the page has been clicked, which joining a table does. */
 /** Where each seat sits around the table, by how far clockwise it is from the bottom: in the grid's rows and columns. */
 const PLACES: Record<number, string[]> = {
   3: ["col-start-2 row-start-3", "col-start-1 row-start-1 row-span-2", "col-start-3 row-start-1 row-span-2"],

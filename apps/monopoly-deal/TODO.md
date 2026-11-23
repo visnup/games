@@ -124,7 +124,7 @@
 - [ ] Online play (Next and Convex, `pnpm dev`): works with bots at three levels, deployed at
       monopoly.visnup.com (Vercel project `visnu/monopoly-deal`, 2026-11-17). Bots come in three
       levels (2026-11-18): Easy is `builder`, Medium the default, Hard the learned player from
-      `src/packed` (`scripts/pack.ts`, rerun after retraining), which a Convex mutation runs in
+      `src/packed` (`kit/pack.ts`, rerun after retraining), which a Convex mutation runs in
       about 70 ms a turn.
       - [ ] Rename the site if Hasbro objects to the name: "Monopoly Deal" is their trademark, and
             the start page says the site isn't affiliated with them. Planned name Landlord's Hand

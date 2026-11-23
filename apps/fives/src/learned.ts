@@ -73,7 +73,7 @@ const after = (game: Game, p: Player) => others(game, p).slice(0, game.players.l
  * highest, the cards in hand nothing unseen beats, and each other player's place in the trick and
  * the colors they're out of.
  */
-export function board2(game: Game, p: Player): number[] {
+function board2(game: Game, p: Player): number[] {
   const out = unseen(game, p);
   const led = game.led();
   const rest = others(game, p);
@@ -97,7 +97,7 @@ export function board2(game: Game, p: Player): number[] {
 }
 
 /** Version 2's card counting for a play, added to `move`: what's unseen above it, and who still to play could beat it. */
-export function move2(game: Game, p: Player, play: Play): number[] {
+function move2(game: Game, p: Player, play: Play): number[] {
   const f = face(play);
   const out = unseen(game, p);
   const led = game.led() ?? f.color;

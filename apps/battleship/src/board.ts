@@ -20,7 +20,7 @@ export function placements(length: number, size = SIZE): number[][] {
 }
 
 /** Placements by length, shared so a placement's index means the same thing everywhere. */
-export const PLACEMENTS = new Map([...new Set(LENGTHS)].map((n) => [n, placements(n)]));
+const PLACEMENTS = new Map([...new Set(LENGTHS)].map((n) => [n, placements(n)]));
 export const shipPlacements = (ship: number) => PLACEMENTS.get(LENGTHS[ship])!;
 
 /** A fleet is a placement index per ship. */
