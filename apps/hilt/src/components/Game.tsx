@@ -75,7 +75,7 @@ function Lobby({ table, me, alone }: { table: string; me: Id<"players">; alone: 
     return () => clearTimeout(timeout);
   }, [rename, me, name]);
   const [now, setNow] = useState(() => Math.floor(Date.now() / 5e3) * 5e3);
-  const [bots, setBots] = useState<Level[]>(["default", "default"]);
+  const [bots, setBots] = useState<Level[]>(["default", "default", "default"]);
   const [step, setStep] = useState(stepSpeed);
   // each new `now` is a new query, so keep showing the last list while it loads
   const active = useQuery(api.players.active, { table, now });
