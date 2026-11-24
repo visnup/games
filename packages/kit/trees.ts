@@ -61,6 +61,33 @@ export function scoreAll({ roots, feature, threshold, right }: Forest, xs: Float
   return out;
 }
 
+/**
+ * `forest` as JavaScript, a function per 50 trees summing in `score`'s order, so it scores
+ * identically: 2.5× faster than `score` at 200 trees. At 1,000 trees the code outgrows the cache
+ * and it loses to `scoreAll` (hilt, 2026-11-23).
+ */
+export function compile({ roots, feature, threshold, right }: Forest): (x: ArrayLike<number>) => number {
+  const tree = (i: number): string => (feature[i] < 0 ? `(${threshold[i]})` : `(x[${feature[i]}] <= ${threshold[i]} ? ${tree(i + 1)} : ${tree(right[i])})`);
+  const chunks: ((x: ArrayLike<number>, s: number) => number)[] = [];
+  for (let t = 0; t < roots.length; t += 50) chunks.push(new Function("x", "s", `return s + ${Array.from(roots.subarray(t, t + 50), tree).join(" + ")};`) as (x: ArrayLike<number>, s: number) => number);
+  return (x) => {
+    let s = 0;
+    for (const c of chunks) s = c(x, s);
+    return s;
+  };
+}
+
+const compiled = new WeakMap<Forest, (x: ArrayLike<number>) => number>();
+
+/** `scoreAll`, or for a forest of up to 300 trees the same scores by `compile`. */
+export function scoreFast(forest: Forest, xs: Float64Array[], shared: number, out = new Float64Array(xs.length)) {
+  if (forest.roots.length > 300) return scoreAll(forest, xs, shared, out);
+  let f = compiled.get(forest);
+  if (!f) compiled.set(forest, (f = compile(forest)));
+  for (let k = 0; k < xs.length; k++) out[k] = f(xs[k]);
+  return out;
+}
+
 /** `forest` as base64: node and tree counts and the features' version, then thresholds, roots, right children and features. */
 export function pack({ roots, feature, threshold, right, v }: Forest) {
   const bytes = new Uint8Array(16 + threshold.byteLength + roots.byteLength + right.byteLength + feature.byteLength);

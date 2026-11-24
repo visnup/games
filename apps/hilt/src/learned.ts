@@ -1,9 +1,11 @@
 import { type Card, COLORS, type Fate } from "./cards.ts";
-import { type Forest, flatten, score, unpack } from "kit/trees.ts";
+import { type Forest, flatten, scoreFast, unpack } from "kit/trees.ts";
 import { crowsBefore, decisive, defaultPolicy, doveTheirs, finishIn, type Game, heuristic, type Move, moves, needed, others, type Player, type Policy, STEPS } from "./game.ts";
 
 /** The default every model so far was trained on, before `keep`, `fury`, `hold`, `deny`, today's `doves` and `finish` counting the whole hand: its pick is one of a move's numbers. */
-export const hint = heuristic(...(Object.keys(STEPS) as (keyof typeof STEPS)[]).filter((s) => !["hold", "deny", "keep", "fury"].includes(s)).map((s) => (s === "finish" ? finishIn(4) : s === "doves" ? doveTheirs : s === "crows" ? crowsBefore : s)));
+export const hint = heuristic(
+  ...(Object.keys(STEPS) as (keyof typeof STEPS)[]).filter((s) => !["hold", "deny", "keep", "fury"].includes(s)).map((s) => (s === "finish" ? finishIn(4) : s === "doves" ? doveTheirs : s === "crows" ? crowsBefore : s)),
+);
 
 const KINDS: (Fate | number)[] = [1, 2, 3, 4, 5, 6, 10, "bait", "fury", "legend", "winter", "crows", "doves"];
 const kindOf = (c: Card) => (c.kind === "force" ? c.value : c.kind);
@@ -86,12 +88,20 @@ export const same = (a: Move, b: Move) => a === b || (!!a && !!b && a.card === b
 /** Every legal move, best first by the model at the path `model`, or a forest already loaded. */
 export function ranked(model: string | Forest = MODEL()) {
   const forest = typeof model === "string" ? load(model) : model;
+  const xs: Float64Array[] = [];
   return (game: Game, p: Player): Move[] => {
     const options = moves(game, p);
     if (options.length === 1) return options;
     const b = board(game, p);
     const pick = hint.move(game, p);
-    const scores = options.map((m) => score(forest, [...b, ...move(game, p, m, same(m, pick))]));
+    const rows = options.map((m, k) => {
+      const y = move(game, p, m, same(m, pick));
+      const x = (xs[k] ??= new Float64Array(b.length + y.length));
+      x.set(b);
+      x.set(y, b.length);
+      return x;
+    });
+    const scores = scoreFast(forest, rows, b.length);
     return options
       .map((m, i) => [m, scores[i]] as const)
       .sort((a, b) => b[1] - a[1])

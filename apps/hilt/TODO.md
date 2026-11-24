@@ -71,6 +71,14 @@
 - [x] Headroom (2026-11-23): 16-deal playouts among Hard's 200-tree rollout players win 19.6% at
       3 players and 5.6% at 6 against Hard (3,000 games). The labels cap the model, so another
       round needs a new lever, not more games.
+- [x] Faster learned moves, same moves (2026-11-23): `ranked` scores through `kit/trees.ts`'s
+      `scoreFast` into reused buffers. A 200-tree game went from 3.05 to 1.9 ms once warm, a
+      full Hard game from 8.7 to 6.6 ms, and 16-deal playouts among rollout players from 4.0 to
+      2.4 s a game. Trees are still about 70% of a learned game.
+- [ ] Only if playouts need 10× more: the engine and playouts in Rust. A guess of 5–20×, since
+      the engine allocates arrays and objects per move. The site, Convex and the review worker
+      all run the TypeScript engine, so it'd exist twice or go to WASM for the browser. A Rust or
+      WASM scorer alone caps at about 1.5× more: the trees are compiled already.
 - [ ] More from the learned player: at 6 players it passes on 1s the default opens with, and
       plays 10s where it plays 1s.
 - [x] Use the model to prune playouts to its top moves, and race on more deals, 2026-11-19:

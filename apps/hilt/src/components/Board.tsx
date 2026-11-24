@@ -121,7 +121,14 @@ export function Board({ game, me }: Props) {
   const log = useRef<HTMLDivElement>(null);
   const height = useRef(0);
   // the whole log while looking back, so later lines can be clicked too
-  const logged = past ? state.lines : ended && g.fighting ? view.lines.slice(0, view.lines.findLastIndex((l) => l.startsWith("battle "))) : view.lines;
+  const logged = past
+    ? state.lines
+    : ended && g.fighting
+      ? view.lines.slice(
+          0,
+          view.lines.findLastIndex((l) => l.startsWith("battle ")),
+        )
+      : view.lines;
   const lines = logged.length;
   // follow new lines only when already at the bottom, so scrolling back through it stays put
   useLayoutEffect(() => {
@@ -153,7 +160,9 @@ export function Board({ game, me }: Props) {
                 <Chip color={ended.color} />
                 {ended.color}
               </span>
-              <span className="max-w-full truncate text-xs opacity-80">{ended.winner === null ? "Nobody wins" : `${who(ended.winner)} ${ended.winner === seat ? "win" : "wins"} with ${ended.strengths[ended.winner]}`}</span>
+              <span className="max-w-full truncate text-xs opacity-80">
+                {ended.winner === null ? "Nobody wins" : `${who(ended.winner)} ${ended.winner === seat ? "win" : "wins"} with ${ended.strengths[ended.winner]}`}
+              </span>
             </>
           ) : g.fighting && g.color ? (
             <>
