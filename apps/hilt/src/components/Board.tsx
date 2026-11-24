@@ -207,7 +207,7 @@ export function Board({ game, me }: Props) {
         </div>
       </section>
       {result && seat >= 0 && <Review key={game._id} setup={setup(game)} log={game.log} seat={seat} show={(n) => setPast({ decisions: n, line: until(game, n).lines.length - 1 })} />}
-      <div className="mb-[10em] grid flex-1 grid-cols-[repeat(auto-fill,minmax(min(28em,100%),1fr))] content-start gap-[0.8em] max-sm:mb-[3.5em] max-sm:gap-[0.4em]">
+      <div className="mb-[10em] grid flex-1 sm:grid-cols-2 min-[88em]:grid-cols-3 content-start gap-[0.8em] max-sm:mb-[3.5em] max-sm:gap-[0.4em]">
         {(seat >= 0 ? [...others, seat] : others).map((n) => (
           <Seat
             key={n}

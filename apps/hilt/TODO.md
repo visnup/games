@@ -70,8 +70,10 @@
       0.6 to 0.9 against the league (4,000 games): a bet, not adopted.
 - [x] Headroom (2026-11-23): 16-deal playouts among Hard's 200-tree rollout players win 19.6% at
       3 players and 5.6% at 6 against Hard (3,000 games). On 64 deals they win 33.4% and 10.4%:
-      even with Hard at 3 and still short at 6. The deals behind each label cap the model, so
-      another round needs more deals a label, not more games. 256 deals at 6 players is next.
+      even with Hard at 3 and still short at 6. On 256 deals they win 17.6% at 6 players
+      (2026-11-24), even with Hard within the noise (±1.4). Playouts only catch up to Hard,
+      at 16 times the cost a label, so another round on more deals wouldn't beat it. The bots are
+      done unless the rollout players or the re-deals get better.
 - [x] Faster learned moves, same moves (2026-11-23): `ranked` scores through `kit/trees.ts`'s
       `scoreFast` into reused buffers. A 200-tree game went from 3.05 to 1.9 ms once warm, a
       full Hard game from 8.7 to 6.6 ms, and 16-deal playouts among rollout players from 4.0 to
