@@ -493,7 +493,7 @@ function Seat({
         {strength !== undefined && (fighting || last) && (
           <span className={`flex min-w-[3em] sm:min-w-[4.5em] flex-col items-center gap-[0.2em] whitespace-nowrap ${muted}`}>
             <span className={`text-xl leading-none font-extrabold ${leads ? "text-accent" : ""}`}>{strength}</span>
-            <span className="label">{leads ? (fighting ? "leads" : "won") : " "}</span>
+            <span className="label">{leads ? (fighting ? "leads" : "won") : fighting && p.passed ? "passed" : " "}</span>
           </span>
         )}
         <div className={`flex *:not-first:-ml-[calc(var(--small)*1.9/0.65)] ${muted}`}>
@@ -502,11 +502,7 @@ function Seat({
           ))}
         </div>
         {played.length > 0 && <Played played={played} className={muted} />}
-        {fighting && p.passed && (
-          <span className={`label ${muted}`} title="Passed for the rest of the battle; their cards still count">
-            Passed
-          </span>
-        )}
+        {fighting && p.passed && (row.length > 0 || played.length > 0) && <span className={`label ${muted}`}>passed</span>}
         {point && (
           <span className="animate-pop rounded-full bg-white px-[0.6em] py-[0.1em] text-xs font-bold whitespace-nowrap text-black" title="Winning this battle wins them the game">
             Game point
