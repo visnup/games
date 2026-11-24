@@ -30,7 +30,7 @@ export type Battle = { battle: number; color: Color; rows: Card[][]; strengths: 
  */
 export function onBoard(game: Game, lines: string[]) {
   const starts = lines.flatMap((l, i) => (l.startsWith("battle ") ? [i] : []));
-  const begun = game.fighting && lines.slice(starts.at(-1)! + 1).some((l) => / plays /.test(l));
+  const begun = game.fighting && lines.slice(starts.at(-1)! + 1).some((l) => / (plays|passes)/.test(l));
   const [from, to] = begun || !game.fighting ? [starts.at(-1), lines.length] : [starts.at(-2), starts.at(-1)];
   return { current: begun, lines: from === undefined ? [] : lines.slice(from + 1, to) };
 }

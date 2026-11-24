@@ -634,9 +634,16 @@ it practiced against. A model learns nothing about players it didn't.
 
 A second mixed round (`o2`) put round 9's player in half the other seats instead of a third. The
 model was fit to `o1` and `o2` together. It barely moved: 23.5 / 13.3 / 9.8 / 8.4 at a table of
-round 9's players, 72.0 / 65.7 / 59.4 / 53.0 against the league. What was missing was data. The
-mix wasn't the problem: `o1` and `o2` are about 600,000 decisions. Rounds 3 to 9 at learned
-tables are about 12 million moves. Fit to all of it together:
+round 9's players, 72.0 / 65.7 / 59.4 / 53.0 against the league. So the mix of seats wasn't what
+was missing. What was missing was labels from tables of round 9's players. Rounds 3 to 9 have
+those labels: 1.6 million decisions at learned tables. `o1` and `o2` are 0.6 million.
+
+Fitting them together means pooling them. Every move from every round goes into one training
+set. Each move is labeled with its playout win rate, and the trees learn to predict it. Nothing
+weights one round over another. The two kinds of label can disagree about the same board and
+move. A round 9 label assumes the others play like round 9. A mixed label assumes they're league
+defaults. Where the board can't tell those tables apart, the trees land between the two labels,
+weighted by how often each comes up. That's the hedge. Fit to all of it together:
 
 | model | at a table of round 9 | against the league | against the default |
 | --- | --- | --- | --- |

@@ -53,7 +53,7 @@ test("a person's seat waits for them, and a bad choice is refused", () => {
   assert.equal(after.prompt?.seat, 0);
 });
 
-test("the board keeps a battle Doves ended in view until the next one has a card in it", () => {
+test("the board keeps a battle Doves ended in view until someone moves in the next one", () => {
   // find a default game where a battle ends on Doves, and replay it up to just after
   for (let seed = 1; seed < 500; seed++) {
     const setup: Setup = { players: 4, seed, first: 0, bots: Array(4).fill("default") };
