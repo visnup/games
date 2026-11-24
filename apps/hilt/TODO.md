@@ -69,8 +69,9 @@
       The biggest, Bait where rule 8 plays a 1, loses 0.4 to 1.2 against the default and gains
       0.6 to 0.9 against the league (4,000 games): a bet, not adopted.
 - [x] Headroom (2026-11-23): 16-deal playouts among Hard's 200-tree rollout players win 19.6% at
-      3 players and 5.6% at 6 against Hard (3,000 games). The labels cap the model, so another
-      round needs a new lever, not more games.
+      3 players and 5.6% at 6 against Hard (3,000 games). On 64 deals they win 33.4% and 10.4%:
+      even with Hard at 3 and still short at 6. The deals behind each label cap the model, so
+      another round needs more deals a label, not more games. 256 deals at 6 players is next.
 - [x] Faster learned moves, same moves (2026-11-23): `ranked` scores through `kit/trees.ts`'s
       `scoreFast` into reused buffers. A 200-tree game went from 3.05 to 1.9 ms once warm, a
       full Hard game from 8.7 to 6.6 ms, and 16-deal playouts among rollout players from 4.0 to

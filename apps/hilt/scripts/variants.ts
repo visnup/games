@@ -205,6 +205,9 @@ const VARIANTS: Record<string, (seed: number) => Policy> = {
   ),
   "the learned player": () => learned(),
   "playouts on 16 deals among Hard's rollout players": (seed) => playouts(16, seed, learned("src/packed/rollout.ts")),
+  "playouts on 16 deals among Hard players": (seed) => playouts(16, seed, learned()),
+  "playouts on 64 deals among Hard's rollout players": (seed) => playouts(64, seed, learned("src/packed/rollout.ts")),
+  "playouts on 256 deals among Hard's rollout players": (seed) => playouts(256, seed, learned("src/packed/rollout.ts")),
   // every model in dataset/, oldest first, as `learned r34s` for dataset/model-r34s.json
   ...Object.fromEntries(
     (existsSync("dataset") ? readdirSync("dataset") : [])
