@@ -53,7 +53,7 @@
 - [x] Mined the mixed-table Hard model (2026-11-21): at 3 players it denies a winning chip with
       a 10 where the default waits or opens with a 1; adopted as `deny`, +6.4 against the
       default, +3.5 against the league. Holding Doves and Bait back a 1 while ahead are noise.
-- [ ] Rerun the README's tables for the default with `hold`, `deny`, `keep`, `fury`, the new `doves` and the new `finish`.
+- [x] Rerun the README's tables for today's default (`scripts/tables.sh`, 2026-11-23, 206 minutes). The rounds' own tables and the fate-card playouts stay as history.
 - [x] How much knowing the table is worth (README "Knowing the table", 2026-11-20): at a league
       table, 32-deal playouts that know each seat's default win 24 to 31 points more than ones
       that assume today's default; knowing only the league's makeup gets about half.
@@ -69,7 +69,7 @@
       plays 10s where it plays 1s.
 - [x] Use the model to prune playouts to its top moves, and race on more deals, 2026-11-19:
       racing on 512 deals wins 75.7% at 3 players and 56.7% at 6; pruning to the model's top 3
-      loses 1 to 5 points at 128 deals and at 512.
+      loses 1 to 5 points at 128 deals and at 512. Against today's default it ties (2026-11-23).
 - [ ] A smaller model: 1,000 trees are 24 MB; 200 trees lose 3 to 4 points against the default.
 - [ ] A mixed strategy: wait or open at random, at the rate where neither beats the other.
 - [x] Non-binding deals on who denies (README "Deals", 2026-11-21): the named denier who reneges
@@ -84,7 +84,8 @@
       winning chip, or theirs with nobody else in: +2.6 at 3 players. Adding the Favor or spent
       battles to the rule gained nothing more.
 - [x] Every fate card the same way (`scripts/fates.ts --card`, 2026-11-21, README "Playing the
-      fate cards"): Crows, Winter and Doves lose wherever the default doesn't play them. Bait back
+      fate cards"): Crows, Winter and Doves lose wherever the default doesn't play them. Crows
+      gains once it counts as a card (2026-11-23). Bait back
       while leading by more than 4 with others in, and a Fury before the weakest card while
       leading, adopted into rules 1 and 4: +3.4 to +1.0 against the default, +2.4 to +0.6 against
       the league.
