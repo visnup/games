@@ -64,7 +64,6 @@ const stallAhead =
   };
 
 const oneIn = (game: Game, p: Player) => others(game, p).filter((q) => !q.passed).length === 1;
-
 /**
  * Playouts on `n` deals with each other seat played on by the default `--field league` actually
  * seated there (`headToHead` seeds seat j's field player with the hero's seed + j): an opponent
@@ -266,6 +265,7 @@ const VARIANTS: Record<string, (seed: number) => Policy> = {
       }, "one"),
     ]),
   ),
+  "behind a rival's winning chip, a 1 or a wait before taking the lead (previous)": without("rival"),
 };
 
 /** Every default so far, each adopted as the best answer to the one before. */
@@ -278,12 +278,13 @@ export const LEAGUE: Policy[] = [
   heuristic("harvest", "stop", crowsBefore, doveTheirs, "press", "wait", "open", "chase", "allIn", "bait"),
   heuristic("harvest", "stop", crowsBefore, doveTheirs, "press", "wait", "open", finishIn(4), "chase", "allIn", "bait"),
   heuristic("harvest", "stop", crowsBefore, doveTheirs, ahead(["top"], 0), "wait", "open", finishIn(4), "stall", "one", "chase", "allIn", "bait"),
-  past(["hold", "deny", "keep", "fury"], { finish: finishIn(4), doves: doveTheirs }),
-  past(["deny", "keep", "fury"], { finish: finishIn(4), doves: doveTheirs }),
-  past(["deny", "keep", "fury"], { doves: doveTheirs }),
-  past(["keep", "fury"], { doves: doveTheirs }),
-  past(["keep", "fury"], {}),
-  past([], {}),
+  past(["hold", "deny", "keep", "fury", "rival"], { finish: finishIn(4), doves: doveTheirs }),
+  past(["deny", "keep", "fury", "rival"], { finish: finishIn(4), doves: doveTheirs }),
+  past(["deny", "keep", "fury", "rival"], { doves: doveTheirs }),
+  past(["keep", "fury", "rival"], { doves: doveTheirs }),
+  past(["keep", "fury", "rival"], {}),
+  past(["rival"], {}),
+  without("rival")(),
   defaultPolicy,
 ];
 

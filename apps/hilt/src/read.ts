@@ -50,6 +50,7 @@ const WHY: Record<keyof typeof STEPS, string> = {
   fury: "You lead. A Fury doubles what you've played.",
   hold: "You lead. Play your weakest force card: a pass would leave them to overtake you.",
   deny: "This chip wins someone else the game. Deny it with your strongest card.",
+  rival: "The leader wins the game with this chip, and few are left to stop them. Take the lead with the cheapest card that does it.",
   wait: "Two or more others are still in. Pass and let them spend their cards.",
   open: "Open with what costs least: a 1 or a Fury.",
   finish: "Nobody else is in, and your hand can overtake. Play your strongest card.",

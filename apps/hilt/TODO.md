@@ -71,9 +71,9 @@
 - [x] Headroom (2026-11-23): 16-deal playouts among Hard's 200-tree rollout players win 19.6% at
       3 players and 5.6% at 6 against Hard (3,000 games). On 64 deals they win 33.4% and 10.4%:
       even with Hard at 3 and still short at 6. On 256 deals they win 17.6% at 6 players
-      (2026-11-24), even with Hard within the noise (±1.4). Playouts only catch up to Hard,
-      at 16 times the cost a label, so another round on more deals wouldn't beat it. The bots are
-      done unless the rollout players or the re-deals get better.
+      (2026-11-24), even with Hard within the noise (±1.4). Playouts only catch up to Hard
+      at 16 times the cost a label. Hard beats the 16-deal playouts it learned from, so this doesn't
+      say whether labels on more deals would make a better Hard: untested.
 - [x] Faster learned moves, same moves (2026-11-23): `ranked` scores through `kit/trees.ts`'s
       `scoreFast` into reused buffers. A 200-tree game went from 3.05 to 1.9 ms once warm, a
       full Hard game from 8.7 to 6.6 ms, and 16-deal playouts among rollout players from 4.0 to
@@ -88,7 +88,8 @@
       racing on 512 deals wins 75.7% at 3 players and 56.7% at 6; pruning to the model's top 3
       loses 1 to 5 points at 128 deals and at 512. Against today's default it ties (2026-11-23).
 - [ ] A smaller model: 1,000 trees are 24 MB; 200 trees lose 3 to 4 points against the default.
-- [ ] A mixed strategy: wait or open at random, at the rate where neither beats the other.
+- [x] A mixed strategy: waiting 25%, 50% or 75% of the time loses 1.6 to 7.3 points against the
+      default and up to 3.6 against the league (2026-11-24, 4,000 games).
 - [x] Non-binding deals on who denies (README "Deals", 2026-11-21): the named denier who reneges
       loses 3 to 11 points, so the deal keeps itself; a player outside it gains 1 to 4 at 3 to 5
       players, and making it alone costs 3 to 5.
@@ -110,9 +111,12 @@
       something else. Too thin and scattered for a rule yet.
 - [ ] Doves as an option to keep: playouts value a Doves held for a later winning chip? Check
       whether holding it when it would only gain 2 to 4 now pays later.
-- [ ] The default's waiting leaves stopping a rival to the others, and when everyone waits nobody
+- [x] The default's waiting leaves stopping a rival to the others, and when everyone waits nobody
       does. In `onyx` (2026-11-19), passing with a chip that would win Bot 1 the game cost 54 and
-      66 points, and passing on a chip that would have set up a win of our own cost 44.
+      66 points. Adopted as `rival` (2026-11-24): take the lead from a leader on game point with
+      fewer than 3 others in, +1.9 to +3.9 against the default, +0.3 to +1.9 against the league.
+- [ ] Passing on a chip that would have set up a win of our own cost 44 in `onyx`.
+- [ ] Rerun the README's tables for the `rival` default (`scripts/tables.sh`, about 3.5 hours).
 
 ## Analysis
 

@@ -418,6 +418,19 @@ export const STEPS = {
     return card ? { card } : undefined;
   },
   /**
+   * Behind someone the chip wins the game for, with fewer than 3 others in, take the lead with the
+   * cheapest card that does, rather than a 1 that leaves them ahead. A person's costly passes on a
+   * rival's winning chip pointed at the situation, and the rule came from reading what the
+   * default did there: +3.4, +3.9, +2.7 and +1.9 points at 3–6
+   * players against the default, +1.9, +0.4, +0.3 and +0.4 against every default so far (40,000
+   * games), +1.8 to +2.5 against the learned player and +2.5 to +6.3 against playouts (4,000).
+   */
+  rival(game, p): Move | undefined {
+    const leader = game.players[game.leader()];
+    if (leader === p || !decisive(game, leader) || others(game, p).filter((q) => !q.passed).length >= 3) return undefined;
+    return STEPS.chase(game, p);
+  },
+  /**
    * Don't open a battle while 2 or more others are still in: let them spend their cards. Against
    * the first default, which chased, this won 58.8% at 3 players and 70–72% at 4–6 (40,000
    * games). Not when the chip would win `p` the game, nor anyone else with fewer than 3 others

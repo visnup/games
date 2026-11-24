@@ -81,7 +81,9 @@ head (`scripts/variants.ts`):
 5. Don't open a battle while 2 or more others are still in: let them spend their cards. Not
    when the chip would win you the game, or anyone else with fewer than 3 others in. At 3
    players, deny a chip that would win the other player the game with your strongest card. Don't
-   deny it with your cheapest.
+   deny it with your cheapest. When the leader would win the game with this chip and fewer than
+   3 others are in, take the lead with the cheapest card that does it. Don't open with a 1 that
+   leaves them ahead.
 6. Otherwise open with a 1 or a Fury. Those are the cheapest cards.
 7. With nobody else left in, play your strongest card if your hand would overtake: nobody can
    answer. Rule 1 takes back what wasn't needed.
@@ -97,6 +99,21 @@ Rule 5's strongest card at 3 players came from the learned player too. The learn
 10s where the default waited or opened with a 1. The strongest card is worth +6.4 points against
 the default and +3.5 against the league (40,000 games). Against the learned player, the strongest
 card ties. At 4 to 6 players, the same move loses up to 3.5 against the league.
+
+Taking the lead from a leader on game point started with a person's game. There, the person's
+passes on a chip that won Bot 1 the game cost 54 and 66 points. That pointed at the situation, so
+we looked at what the default did there. With fewer than 3 others in, it opened with a 1, and a 1
+rarely takes the lead. Taking the lead instead wins 3.4, 3.9, 2.7 and 1.9 points more at 3–6
+players against the previous default. Against the league it wins 1.9 more at 3 players and 0.3
+to 0.4 more at 4–6 (40,000 games). It isn't a bet on weak players. It gains 1.8 to 2.5 points
+against the learned player and 2.5 to 6.3 against playouts (4,000 games). Doing it with 3 or more
+others in loses 0.4 to 3.6 points against the league at 4–6 players. Doing it only with 1 other in
+gains at most a point (4,000 games).
+
+Waiting or opening at random doesn't help. A rule that wins as a bet on the table invites a mix:
+wait some of the time and open the rest, so no table can exploit you. Waiting 25%, 50% or 75% of
+the time lost 1.6 to 7.3 points against the default and up to 3.6 against the league (4,000
+games). Waiting every time stays.
 
 Rule 4 came from the learned player (below). Rule 4 was the first rule that did. The learned
 player's moves differ from the default's at 74% of its decisions at 3 players and 49% at 6. Most
