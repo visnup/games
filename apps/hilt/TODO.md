@@ -65,6 +65,12 @@
       `o2`, adopted in ae34a09. A third mixed round against today's league (`o3`), fit with the
       rest, ties at round 9's tables and against the default, and gains 1.5 to 1.9 against the
       league at 4 to 6 players. Adopted.
+- [x] Mined Hard against today's default (2026-11-23): no pattern is over 3.1% of decisions.
+      The biggest, Bait where rule 8 plays a 1, loses 0.4 to 1.2 against the default and gains
+      0.6 to 0.9 against the league (4,000 games): a bet, not adopted.
+- [x] Headroom (2026-11-23): 16-deal playouts among Hard's 200-tree rollout players win 19.6% at
+      3 players and 5.6% at 6 against Hard (3,000 games). The labels cap the model, so another
+      round needs a new lever, not more games.
 - [ ] More from the learned player: at 6 players it passes on 1s the default opens with, and
       plays 10s where it plays 1s.
 - [x] Use the model to prune playouts to its top moves, and race on more deals, 2026-11-19:

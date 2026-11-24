@@ -204,6 +204,7 @@ const VARIANTS: Record<string, (seed: number) => Policy> = {
     ]),
   ),
   "the learned player": () => learned(),
+  "playouts on 16 deals among Hard's rollout players": (seed) => playouts(16, seed, learned("src/packed/rollout.ts")),
   // every model in dataset/, oldest first, as `learned r34s` for dataset/model-r34s.json
   ...Object.fromEntries(
     (existsSync("dataset") ? readdirSync("dataset") : [])
@@ -252,6 +253,16 @@ const VARIANTS: Record<string, (seed: number) => Policy> = {
   "Doves whenever the chip wins the leader the game (previous)": replace("doves", doveTheirs),
   "don't open with 1 other in at 5+ players": replace("open", (game, p) => (game.players.length >= 5 && oneIn(game, p) ? undefined : STEPS.open(game, p))),
   "no Bait back or Fury while leading with others in (previous)": without("keep", "fury"),
+  ...Object.fromEntries(
+    (["strongest", "weakest"] as const).map((which) => [
+      `behind with others in, Bait back the ${which} force card before a 1`,
+      insert((game, p) => {
+        const bait = p.hand.find((c) => c.kind === "bait");
+        const row = p.row.filter((c) => c.kind === "force").sort((a, b) => (which === "strongest" ? b.value - a.value : a.value - b.value));
+        return bait && row.length && game.leader() !== p.seat && others(game, p).some((q) => !q.passed) ? { card: bait, take: row[0] } : undefined;
+      }, "one"),
+    ]),
+  ),
 };
 
 /** Every default so far, each adopted as the best answer to the one before. */

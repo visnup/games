@@ -160,8 +160,9 @@ too, opening wins 10.8 points more. At 3 players, waiting pays 7.2 points agains
 Rule 7, when it counted only your best 4, cost 2.7 points at 3 players here. The noise is ±1.2
 points at 3 players and ±1 at 6. Yet dropping rule 7 loses 1.4 to 4.8 points among default
 players and 3.9 to 7.5 against older defaults. Counting the whole hand gains 1.1 at 3 players.
-Two rows beat today's default just past the noise: no 1 once something's played at 3 players
-(+1.5), and no Bait back of a 1 at 6 (+1.3). Neither is a rule change yet.
+Rule 8 is a bet too. Against playouts, playing no 1 once something's played gains 1.5 points at
+3 players, and not Baiting back a 1 gains 1.2 at 6 (24,000 games, noise ±0.6). Rule 8 still
+gains 3.5 to 7.5 points among default players and 2.5 to 6 against older defaults, so it stays.
 
 The learned player Baits back its strongest force card when it's losing a battle. The default
 plays a 1 there. Baiting back the strongest card is another bet: it wins 0.9 to 1.7 points
