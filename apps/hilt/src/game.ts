@@ -316,6 +316,12 @@ export const doveTheirs: Step = (game, p) => {
   return c && leader !== p && decisive(game, leader) ? { card: c } : undefined;
 };
 
+/** Crows while leading before it's played, even if its card loses the tie: every default's before 2026-11-23. */
+export const crowsBefore: Step = (game, p) => {
+  const c = p.hand.find((c) => c.kind === "crows");
+  return c && p.row.length && game.leader() === p.seat ? { card: c } : undefined;
+};
+
 export const STEPS = {
   /** Once everyone else has passed, Bait back the biggest force card that still leaves the lead: +2 to +4 points. */
   harvest(game, p) {
@@ -355,11 +361,11 @@ export const STEPS = {
   /**
    * Crows while ahead ends the battle with a win before anyone can answer. Only with a card of
    * our own played, not on the Favor's 1 strength alone: +2 to +5 points over Crows whenever
-   * ahead, and never playing it is +1 to +3.
+   * ahead, and never playing it is +1 to +3. Crows is itself a card played, so it can lose a tie.
    */
   crows(game, p) {
     const c = p.hand.find((c) => c.kind === "crows");
-    return c && p.row.length && game.leader() === p.seat ? { card: c } : undefined;
+    return c && p.row.length && leadsWith(game, p, c) ? { card: c } : undefined;
   },
   /**
    * Behind, Doves for a chip that would win `p` the game, so it's fought over again, or for one

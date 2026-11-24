@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { type Card, COLORS } from "../src/cards.ts";
-import { decisive, defaultPolicy, doveTheirs, finishIn, type Game, heuristic, mulberry32, needed, oneWithin, openWith, others, type Player, type Policy, STEPS, type Step, waitWhile } from "../src/game.ts";
+import { crowsBefore, decisive, defaultPolicy, doveTheirs, finishIn, type Game, heuristic, mulberry32, needed, oneWithin, openWith, others, type Player, type Policy, STEPS, type Step, waitWhile } from "../src/game.ts";
 import { parallel } from "kit/parallel.ts";
 import { learned } from "../src/learned.ts";
 import { colorPlayouts, crowsAhead, dumpPlayouts, headToHead, playouts, STRATEGIES } from "../src/strategies.ts";
@@ -149,7 +149,7 @@ const deal =
 const bump = (chips: number[], i: number) => chips.map((c, j) => c + +(i === j));
 
 /** A default from before today's: the steps without `drop`, and with `swap`'s steps in place of today's. */
-const past = (drop: (keyof typeof STEPS)[], swap: Partial<Record<keyof typeof STEPS, Step>>) => heuristic(...steps.filter((s) => !drop.includes(s)).map((s) => swap[s] ?? s));
+const past = (drop: (keyof typeof STEPS)[], swap: Partial<Record<keyof typeof STEPS, Step>>) => heuristic(...steps.filter((s) => !drop.includes(s)).map((s) => swap[s] ?? (s === "crows" ? crowsBefore : s)));
 
 /** The default's steps without `drop`. */
 const without =
@@ -185,6 +185,7 @@ const VARIANTS: Record<string, (seed: number) => Policy> = {
   "open with a 1 or Fury only with 2+ others in": replace("open", openWith(2)),
   "never Crows": without("crows"),
   "Crows whenever ahead (previous)": replace("crows", crowsAhead),
+  "Crows while leading before it's played (previous)": replace("crows", crowsBefore),
   "Crows only for a chip that wins the game": replace("crows", (game, p) => (decisive(game, p) ? STEPS.crows(game, p) : undefined)),
   "never Doves": without("doves"),
   "with nobody else in, only overtake with a single card (previous)": without("finish"),
@@ -260,14 +261,15 @@ export const LEAGUE: Policy[] = [
   heuristic("stop", crowsAhead, doveTheirs, waitWhile(2, 3), oneWithin(0), "chase", "allIn", "bait"),
   heuristic("harvest", "stop", crowsAhead, doveTheirs, "press", "open", "wait", "chase", "allIn", "bait"),
   heuristic("harvest", "stop", crowsAhead, doveTheirs, "press", "wait", "open", "chase", "allIn", "bait"),
-  heuristic("harvest", "stop", "crows", doveTheirs, "press", "wait", "open", "chase", "allIn", "bait"),
-  heuristic("harvest", "stop", "crows", doveTheirs, "press", "wait", "open", finishIn(4), "chase", "allIn", "bait"),
-  heuristic("harvest", "stop", "crows", doveTheirs, ahead(["top"], 0), "wait", "open", finishIn(4), "stall", "one", "chase", "allIn", "bait"),
+  heuristic("harvest", "stop", crowsBefore, doveTheirs, "press", "wait", "open", "chase", "allIn", "bait"),
+  heuristic("harvest", "stop", crowsBefore, doveTheirs, "press", "wait", "open", finishIn(4), "chase", "allIn", "bait"),
+  heuristic("harvest", "stop", crowsBefore, doveTheirs, ahead(["top"], 0), "wait", "open", finishIn(4), "stall", "one", "chase", "allIn", "bait"),
   past(["hold", "deny", "keep", "fury"], { finish: finishIn(4), doves: doveTheirs }),
   past(["deny", "keep", "fury"], { finish: finishIn(4), doves: doveTheirs }),
   past(["deny", "keep", "fury"], { doves: doveTheirs }),
   past(["keep", "fury"], { doves: doveTheirs }),
   past(["keep", "fury"], {}),
+  past([], {}),
   defaultPolicy,
 ];
 

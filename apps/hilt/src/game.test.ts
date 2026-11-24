@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { type Card, DECK } from "./cards.ts";
-import { defaultPolicy, Game, type Move, mulberry32, needed, type Policy, won } from "./game.ts";
+import { defaultPolicy, Game, type Move, mulberry32, needed, type Policy, STEPS, won } from "./game.ts";
 
 const force = (value: number) => DECK.find((c) => c.kind === "force" && c.value === value)!;
 const fate = (kind: Card["kind"]) => DECK.find((c) => c.kind === kind)!;
@@ -99,6 +99,21 @@ test("Crows ends the battle, and whoever leads wins it", () => {
   assert.deepEqual(g.players[0].chips, [1, 0, 0]);
   assert.equal(g.favor, 0);
   assert.ok(g.players[2].hand.includes(force(10)));
+});
+
+test("the default doesn't play Crows when its card would lose the tie", () => {
+  const g = new Game({ players: 2, rng: mulberry32(1), first: 1 });
+  g.color = "pink";
+  g.begin();
+  const [me, them] = g.players;
+  me.row = [force(1)];
+  them.row = [fate("fury")];
+  me.hand = [fate("crows")];
+  assert.equal(g.leader(), 0);
+  assert.equal(STEPS.crows(g, me), undefined);
+  them.row = [fate("fury"), force(1)];
+  me.row = [force(3)];
+  assert.deepEqual(STEPS.crows(g, me), { card: fate("crows") });
 });
 
 test("Doves ends the battle with no winner, and the Favor and chip stay", () => {

@@ -110,10 +110,18 @@ export function Board({ game, me }: Props) {
     if (up && !wasUp.current) chime();
     wasUp.current = up;
   }, [up]);
+  const g = view.game;
+  const battle = onBoard(g, view.lines);
+  // A battle that Doves or Crows ended holds the playback, and your next move, until you've seen
+  // it, since it's over in a moment; not the ones before the page opened.
+  const [seen, setSeen] = useState(() => state.last?.battle ?? 0);
+  const ended = !past && !battle.current && view.last?.ended && view.last.battle > seen ? view.last : undefined;
+  const endedBy = ended && battle.lines.map((l) => l.match(/^ {2}(\d) plays (?:doves|crows)/)).find(Boolean);
+  const cleared = !past && !view.result && !battle.current && !ended && !!view.last?.ended;
   const log = useRef<HTMLDivElement>(null);
   const height = useRef(0);
   // the whole log while looking back, so later lines can be clicked too
-  const logged = (past ? state : view).lines;
+  const logged = past ? state.lines : ended && g.fighting ? view.lines.slice(0, view.lines.findLastIndex((l) => l.startsWith("battle "))) : view.lines;
   const lines = logged.length;
   // follow new lines only when already at the bottom, so scrolling back through it stays put
   useLayoutEffect(() => {
@@ -122,17 +130,10 @@ export function Board({ game, me }: Props) {
     if (el.scrollTop + el.clientHeight >= height.current - 4) el.scrollTo({ top: el.scrollHeight });
     height.current = el.scrollHeight;
   }, [lines]);
-  const g = view.game;
-  const battle = onBoard(g, view.lines);
-  // A battle that Doves or Crows ended holds the playback, and your next move, until you've seen
-  // it, since it's over in a moment; not the ones before the page opened.
-  const [seen, setSeen] = useState(() => state.game.battles);
-  const ended = !past && !battle.current && view.last?.ended && view.last.battle > seen ? view.last : undefined;
-  const endedBy = ended && battle.lines.map((l) => l.match(/^ {2}(\d) plays (?:doves|crows)/)).find(Boolean);
   useEffect(() => {
     if (!stepping || ended) return;
-    const jump = !step || game.log.length - shown > 40;
-    const t = setTimeout(() => setShown((n) => (jump ? game.log.length : n + 1)), jump || game.log[shown].seat === seat ? 0 : step);
+    const jump = game.log.length - shown > 40;
+    const t = setTimeout(() => setShown((n) => (jump ? game.log.length : n + 1)), jump || !step || game.log[shown].seat === seat ? 0 : step);
     return () => clearTimeout(t);
   }, [stepping, step, shown, game.log, seat, ended]);
   const others = Array.from({ length: g.players.length }, (_, i) => (seat < 0 ? i : seat + 1 + i) % g.players.length).filter((n) => n !== seat);
@@ -145,7 +146,16 @@ export function Board({ game, me }: Props) {
       <section className="panel sticky top-[0.8em] z-10 flex items-start gap-[1em] p-[0.8em] max-sm:top-0 max-sm:-mx-[0.8em] max-sm:-mt-[0.8em] max-sm:gap-[0.4em] max-sm:rounded-none max-sm:px-[0.4em] max-sm:py-[0.2em]">
         {/* pushed down to the baseline of the log's sticky heading beside it */}
         <div className="flex w-[9em] shrink-0 flex-col items-center gap-[0.3em] pt-[0.4rem] text-center max-sm:w-[7em] max-sm:gap-[0.1em] max-sm:pt-[0.2rem]">
-          {g.fighting && g.color ? (
+          {ended ? (
+            <>
+              <span className="label">Battle {ended.battle}</span>
+              <span className="flex items-center gap-[0.3em] text-sm font-semibold capitalize">
+                <Chip color={ended.color} />
+                {ended.color}
+              </span>
+              <span className="max-w-full truncate text-xs opacity-80">{ended.winner === null ? "Nobody wins" : `${who(ended.winner)} ${ended.winner === seat ? "win" : "wins"} with ${ended.strengths[ended.winner]}`}</span>
+            </>
+          ) : g.fighting && g.color ? (
             <>
               <span className="label">Battle {g.battles}</span>
               <span className="flex items-center gap-[0.3em] text-sm font-semibold capitalize">
@@ -197,10 +207,10 @@ export function Board({ game, me }: Props) {
             name={`${who(n)}${view.result?.winner === n ? " 🏆" : ""}`}
             level={"bot" in game.seats[n] ? game.seats[n].bot : undefined}
             current={!view.result && view.prompt?.seat === n}
-            point={g.fighting && !view.result && decisive(g, g.players[n])}
-            fighting={battle.current}
-            last={view.last}
-            played={discarded(battle.lines).get(n) ?? []}
+            point={g.fighting && !view.result && !ended && decisive(g, g.players[n])}
+            fighting={battle.current || (cleared && g.fighting)}
+            last={cleared ? undefined : view.last}
+            played={cleared ? [] : (discarded(battle.lines).get(n) ?? [])}
           />
         ))}
       </div>
@@ -688,7 +698,7 @@ function AskMove({ game, p, send, deal }: { game: Game; p: Player; send: (c: Cho
             }}
             tag={(i) => {
               const c = p.hand[i];
-              if (c.kind === "crows" && game.leader() === p.seat) return <Outcome text="wins" solid />;
+              if (c.kind === "crows" && after(game, p, c).leads) return <Outcome text="wins" solid />;
               return stands.kind === "behind" && leading.includes(c) ? <Outcome text={after(game, p, c).strength} solid={c === stands.have} /> : null;
             }}
           />

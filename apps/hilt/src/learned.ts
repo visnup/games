@@ -1,9 +1,9 @@
 import { type Card, COLORS, type Fate } from "./cards.ts";
 import { type Forest, flatten, score, unpack } from "kit/trees.ts";
-import { decisive, defaultPolicy, doveTheirs, finishIn, type Game, heuristic, type Move, moves, needed, others, type Player, type Policy, STEPS } from "./game.ts";
+import { crowsBefore, decisive, defaultPolicy, doveTheirs, finishIn, type Game, heuristic, type Move, moves, needed, others, type Player, type Policy, STEPS } from "./game.ts";
 
 /** The default every model so far was trained on, before `keep`, `fury`, `hold`, `deny`, today's `doves` and `finish` counting the whole hand: its pick is one of a move's numbers. */
-export const hint = heuristic(...(Object.keys(STEPS) as (keyof typeof STEPS)[]).filter((s) => !["hold", "deny", "keep", "fury"].includes(s)).map((s) => (s === "finish" ? finishIn(4) : s === "doves" ? doveTheirs : s)));
+export const hint = heuristic(...(Object.keys(STEPS) as (keyof typeof STEPS)[]).filter((s) => !["hold", "deny", "keep", "fury"].includes(s)).map((s) => (s === "finish" ? finishIn(4) : s === "doves" ? doveTheirs : s === "crows" ? crowsBefore : s)));
 
 const KINDS: (Fate | number)[] = [1, 2, 3, 4, 5, 6, 10, "bait", "fury", "legend", "winter", "crows", "doves"];
 const kindOf = (c: Card) => (c.kind === "force" ? c.value : c.kind);
