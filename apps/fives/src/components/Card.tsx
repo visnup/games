@@ -6,7 +6,7 @@ export const PAINT: Record<Color, string> = { blue: "#2f5db1", green: "#3db389",
 /** How far right of center a number's ink sits in Futura Bold, in em, where it shows: a leading 1's bearing, and the 7's. */
 const OFF: Record<number, number> = { 7: 0.05, 10: 0.08, 12: 0.065, 13: 0.065 };
 
-/** The corner index: the number, and a dot under it, as printed. */
+/** The corner index. */
 const corner = "absolute top-[0.25em] left-[0.2em] flex flex-col items-center font-numbers text-[0.85em] leading-none font-bold tracking-tighter";
 
 /**
@@ -28,7 +28,6 @@ export function Card({ card, down, hinted, dim, small, className = "", onClick }
     >
       <span className={corner}>
         {value}
-        <span className="mt-[0.15em] size-[0.18em] rounded-full bg-current" />
         {back && card && (
           <span className="mt-[0.3em] rounded-[0.2em] px-[0.15em] py-[0.1em] text-[0.8em] text-white" style={{ background: PAINT[card.color] }}>
             {card.value}
