@@ -54,6 +54,12 @@
         Ducking by flipping your highest silver tied; not leading face down once everyone else is
         out of magenta lost 1.4 and 2.0 (2,000 games). Hard told the new pick ties Hard told the
         old one (33.3% and 25.2%, 10,000 games).
+  - [x] Medium's costliest decisions (`scripts/costly.ts`), 2026-11-24: 200 four-player games,
+        the top 10 a hand read by a subagent. Of six rules from it, five lost or tied at 2,000
+        games. Leading your last card face down unless it fits gained +0.2 and +1.1 (40,000), and
+        −0.4 and +1.4 against the league, but lost 1.4 and 0.4 against the learned player
+        (10,000). Taking sure tricks when last, the top-ranked, lost 3.3 and 1.1. Single costly
+        decisions don't make rules: each fits the decisions shown and costs elsewhere.
   - [x] Two patterns a subagent saw in Hard's play, 2026-11-24: leading face down within 4 of 25,
         and taking to exactly 25 with 2+ cards left when it could duck. Hand playouts among Hard's
         rollout players (1,000 games a player count) put Hard's pick ahead of its best

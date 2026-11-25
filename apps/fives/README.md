@@ -378,7 +378,12 @@ What lost (2,000 games each, or 40,000 where close): leading the lowest card fac
 highest face up; 3, 7 or 10 to go as the cutoff for leading face down; flipping the lowest silver;
 keeping your last silver to trump a late run of magenta 5s; when every card takes the trick,
 avoiding a total of 23 or 24 with more than 3 or 6 cards left; ducking by flipping your highest
-silver; not leading face down once everyone else is out of magenta;
+silver; not leading face down once everyone else is out of magenta; and six rules from Medium's
+costliest decisions in playouts (`scripts/costly.ts`): taking a sure trick when last to play,
+flipping a high silver when leading within 5 of 25, keeping or leading the card that makes exactly
+25, leading your last card face down unless it fits, and taking with a silver you'd flip to duck.
+Leading your last card face down gained 1.1 points at 4 players against Medium but lost 1.4 at 3
+against Hard;
 ducking with your lowest losing card when last early in a hand; taking with your highest card of
 the led color when second to play early; taking sure tricks only within 6 to 16 of 25, or only in
 a hand's last 4 or 8 cards; and six rules from shallow decision trees fit to Hard's choices

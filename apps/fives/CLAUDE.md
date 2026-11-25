@@ -89,7 +89,11 @@ The steps:
      (`scripts/overrules.ts`). It found `leadDown` and `take`'s wait (since dropped).
    - `scripts/decisions.ts`: where playouts clearly prefer another play.
    - A person's game: a review that shows a costly play (`TODO.md` has some).
-   - A game against the bots with `scripts/play.ts`. It found flipping a lone high magenta first.
+   - A game against the bots with `scripts/play.ts`. It found flipping a lone high magenta first,
+     and two subagent games against Medium found leaving 5 when forced to take.
+   - `scripts/costly.ts`: Medium's costliest decisions in playouts, written to
+     `dataset/costly-Np.md` for a reader. Its first six rules all lost: each fit the decisions
+     shown and cost elsewhere.
    - Hard reads Medium's pick as a feature, so changing `STEPS` changes Hard too. Check Hard told
      the new pick against Hard told the old one.
 2. **Write it as a variant** in `scripts/variants.ts`, with a few alternatives (cheapest card or
