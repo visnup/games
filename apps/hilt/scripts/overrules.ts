@@ -5,7 +5,7 @@ import { defaultPolicy, Game, type Move, moves, mulberry32, others, type Policy,
 import { learned, ranked } from "../src/learned.ts";
 
 const KINDS = ["1", "2", "3", "4", "5", "6", "10", "bait", "fury", "legend", "winter", "crows", "doves"];
-/** The numbers `board` and `move` in `learned.ts` make, in order. */
+/** The numbers `board` and `move` in `learned.ts` make, in order, for version 1 of the features. */
 const FEATURES = [
   "players",
   ...KINDS.map((k) => `hand ${k}`),
@@ -43,6 +43,8 @@ const FEATURES = [
   "move: strength gain",
   "move: is default's",
 ];
+/** Version 2's: card counting after the board, and a move number before the default's pick. */
+const FEATURES2 = [...FEATURES.slice(0, FEATURES.indexOf("move: pass")), ...KINDS.map((k) => `unseen ${k}`), ...FEATURES.slice(FEATURES.indexOf("move: pass"), -1), "move: stronger unseen", FEATURES.at(-1)!];
 
 const label = (m: Move) => (m ? (m.take ? "bait" : name(m.card)) : "pass");
 
@@ -56,9 +58,11 @@ function importance(model: string) {
     walk(t.left_child);
     walk(t.right_child);
   };
-  for (const t of JSON.parse(readFileSync(model, "utf8")).tree_info) walk(t.tree_structure);
+  const json = JSON.parse(readFileSync(model, "utf8"));
+  for (const t of json.tree_info) walk(t.tree_structure);
+  const names = json.v === 2 ? FEATURES2 : FEATURES;
   const total = [...gain.values()].reduce((a, b) => a + b, 0);
-  return [...gain].sort((a, b) => b[1] - a[1]).map(([f, g]) => [FEATURES[f], g / total] as const);
+  return [...gain].sort((a, b) => b[1] - a[1]).map(([f, g]) => [names[f], g / total] as const);
 }
 
 /**

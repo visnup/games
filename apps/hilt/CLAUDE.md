@@ -27,6 +27,11 @@ Its last page has the card list and each fate card's rule.
   says how they fit together.
 - `learned.ts`: the learned player. `board` and `move` turn a decision into numbers, and the
   LightGBM trees in `src/packed/model.ts` (flattened by `kit/trees.ts`) rank the moves.
+  The features are versioned, as in `../fives`. `dataset.ts` writes `VERSION` into each row, and
+  `learn.py` writes it into the model. `ranked()` reads a model's version to pick `features(v)`, so
+  older models keep playing. Version 2 adds card counting: how many of each kind are unseen, and
+  how many unseen cards are stronger than the card played. `V1=1 uv run scripts/learn.py` fits
+  version 2's rows without those numbers, for an A/B on the same games.
   One of a move's numbers is whether it's the default's pick, and `hint` is the default the
   models were trained with (before `hold`). It matters little: today's model reading today's
   default's pick instead wins 0.2 to 1.7 points less (2026-11-21, 10,000 games). A plain round never

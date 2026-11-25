@@ -7,6 +7,7 @@ last directory's last 8 shards of each player count, and reports the playout val
 pick gains over the default's there. LightGBM needs `brew install libomp`."""
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -19,14 +20,24 @@ dirs = [Path(d) for d in sys.argv[3:]] or [Path(__file__).parent.parent / "datas
 data = dirs[-1]
 
 
+version = 1
+# version 2's rows fit as version 1, without card counting: its 13 unseen counts and 1 move number
+as_v1 = os.environ.get("V1") == "1"
+
+
 def read(files):
+    global version
     X, Y, groups = [], [], []
     for f in files:
         for line in f.open():
             r = json.loads(line)
-            groups.append(len(r["moves"]))
-            for m, v in zip(r["moves"], r["values"]):
-                X.append(r["board"] + m)
+            version = r.get("v", 1)
+            board, moves = r["board"], r["moves"]
+            if as_v1 and version == 2:
+                version, board, moves = 1, board[:-13], [m[:-2] + m[-1:] for m in moves]
+            groups.append(len(moves))
+            for m, v in zip(moves, r["values"]):
+                X.append(board + m)
                 Y.append(v)
     return np.array(X, dtype=np.float32), np.array(Y, dtype=np.float32), groups
 
@@ -49,7 +60,7 @@ model = lgb.train(
     valid_sets=[lgb.Dataset(Xh, Yh, reference=train)],
     callbacks=[lgb.early_stopping(20), lgb.log_evaluation(50)],
 )
-out.write_text(json.dumps({"tree_info": [{"tree_structure": t["tree_structure"]} for t in model.dump_model(num_iteration=model.best_iteration)["tree_info"]]}))
+out.write_text(json.dumps({"v": version, "tree_info": [{"tree_structure": t["tree_structure"]} for t in model.dump_model(num_iteration=model.best_iteration)["tree_info"]]}))
 
 default = len(X[0]) - 1
 print("\nheld out, points of win chance a decision over the default's pick (model's pick, and the best move's, which is noisy):")

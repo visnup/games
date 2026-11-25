@@ -1,4 +1,4 @@
-import { type Card, COLORS, type Fate } from "./cards.ts";
+import { type Card, COLORS, DECK, type Fate } from "./cards.ts";
 import { type Forest, flatten, scoreFast, unpack } from "kit/trees.ts";
 import { crowsBefore, decisive, defaultPolicy, doveTheirs, finishIn, type Game, heuristic, type Move, moves, needed, others, type Player, type Policy, STEPS } from "./game.ts";
 
@@ -50,6 +50,29 @@ export function board(game: Game, p: Player): number[] {
   ];
 }
 
+const IN_DECK = counts([...DECK]);
+
+/** How many of each kind `p` hasn't seen: not in their hand, a row, or played or discarded since the deal. */
+function unseen(game: Game, p: Player): number[] {
+  const out = [...IN_DECK];
+  const see = (c: Card) => out[KINDS.indexOf(kindOf(c))]--;
+  p.hand.forEach(see);
+  game.pile.forEach(see);
+  for (const q of game.players) q.row.forEach(see);
+  return out;
+}
+
+/** Version 2's numbers for a decision: card counting. */
+const board2 = (game: Game, p: Player) => unseen(game, p);
+
+/** Version 2's numbers for a move: how many unseen cards are stronger than the card played. */
+function move2(game: Game, p: Player, m: Move): number[] {
+  if (!m || (m.card.kind !== "force" && m.card.kind !== "legend")) return [0];
+  const out = unseen(game, p);
+  const v = m.card.value;
+  return [KINDS.reduce<number>((s, k, i) => s + ((typeof k === "number" && k > v) || (k === "legend" && v < 10) ? out[i] : 0), 0)];
+}
+
 /** `move` as numbers: what it is, and where it leaves `p`. */
 export function move(game: Game, p: Player, m: Move, isDefault: boolean): number[] {
   const kind = m ? KINDS.indexOf(kindOf(m.card)) : -1;
@@ -68,6 +91,24 @@ export function move(game: Game, p: Player, m: Move, isDefault: boolean): number
   }
   return [+!m, ...KINDS.map((_, i) => +(i === kind)), m?.take ? m.take.value : 0, leads, strength, strength - game.strength(p), +isDefault];
 }
+
+/** The numbers each version of the features gives for a decision and for each move; a model says which it was fit to. */
+const FEATURES = {
+  1: { board, move },
+  2: {
+    board: (game: Game, p: Player) => [...board(game, p), ...board2(game, p)],
+    move: (game: Game, p: Player, m: Move, isDefault: boolean) => {
+      // whether it's the default's pick stays last, where `learn.py` looks for it
+      const y = move(game, p, m, isDefault);
+      const last = y.pop()!;
+      y.push(...move2(game, p, m), last);
+      return y;
+    },
+  },
+};
+/** The version `dataset.ts` writes. */
+export const VERSION = 2;
+export const features = (v: number = VERSION) => FEATURES[v as keyof typeof FEATURES];
 
 const forests = new Map<string, Forest>();
 const load = (path: string) => {
@@ -92,6 +133,7 @@ export function ranked(model: string | Forest = MODEL()) {
   return (game: Game, p: Player): Move[] => {
     const options = moves(game, p);
     if (options.length === 1) return options;
+    const { board, move } = features(forest.v);
     const b = board(game, p);
     const pick = hint.move(game, p);
     const rows = options.map((m, k) => {

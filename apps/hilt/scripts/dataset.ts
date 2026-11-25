@@ -1,7 +1,9 @@
 import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { defaultPolicy, Game, moves, mulberry32, type Policy } from "../src/game.ts";
-import { board, hint, learned, move, same } from "../src/learned.ts";
+import { features, hint, learned, same, VERSION } from "../src/learned.ts";
+
+const { board, move } = features();
 import { LEAGUE } from "./variants.ts";
 import { parallel } from "kit/parallel.ts";
 import { playout } from "../src/strategies.ts";
@@ -38,7 +40,7 @@ export function shard(players: number, deals: number, out: string, play: string,
         const values = options.map((m) => playout(game, p, m, seeds, rollouts) / deals);
         const mean = values.reduce((a, b) => a + b, 0) / values.length;
         const b = board(game, p);
-        rows.push(JSON.stringify({ game: i, board: b, moves: options.map((m) => move(game, p, m, same(m, pick))), values: values.map((v) => v - mean) }));
+        rows.push(JSON.stringify({ v: VERSION, game: i, board: b, moves: options.map((m) => move(game, p, m, same(m, pick))), values: values.map((v) => v - mean) }));
         return choice;
       },
     };
