@@ -181,6 +181,17 @@ const without =
 /** The default's steps with `step` in place of `old`. */
 const replace = (old: keyof typeof STEPS, step: Step) => (): Policy => heuristic(...steps.map((s) => (s === old ? step : s)));
 
+/** Whether the battle's chip would leave `q` one chip from winning. */
+const setup = (game: Game, q: Player) => !decisive(game, q) && needed(q.chips.map((c, i) => c + +(COLORS[i] === game.color))) === 1;
+/** `rival`, for a leader whose chip wins or sets up their game, at `players` or more. */
+const rivalSetup =
+  (players: number): Step =>
+  (game, p) => {
+    const leader = game.players[game.leader()];
+    if (game.players.length < players || leader === p || !setup(game, leader)) return STEPS.rival(game, p);
+    return others(game, p).filter((q) => !q.passed).length >= 3 ? undefined : STEPS.chase(game, p);
+  };
+
 const VARIANTS: Record<string, (seed: number) => Policy> = {
   "the default": () => defaultPolicy,
   "the first default (previous)": STRATEGIES["first default"],
@@ -289,6 +300,8 @@ const VARIANTS: Record<string, (seed: number) => Policy> = {
   ),
   "behind a rival's winning chip, a 1 or a wait before taking the lead (previous)": without("rival"),
   "chase only while the battle has cost fewer than 3 cards (previous)": replace("chase", chase3),
+  "setup chip: take the lead from a rival's too": replace("rival", rivalSetup(3)),
+  "setup chip: take the lead from a rival's too, at 4+ players": replace("rival", rivalSetup(4)),
 };
 
 /** Every default so far, each adopted as the best answer to the one before. */

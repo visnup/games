@@ -115,15 +115,21 @@
       does. In `onyx` (2026-11-19), passing with a chip that would win Bot 1 the game cost 54 and
       66 points. Adopted as `rival` (2026-11-24): take the lead from a leader on game point with
       fewer than 3 others in, +1.9 to +3.9 against the default, +0.3 to +1.9 against the league.
-- [ ] Passing on a chip that would have set up a win of our own cost 44 in `onyx`.
+- [ ] Passing on a chip that would have set up a win of our own cost 44 in `onyx`. Not waiting
+      for your own setup chip loses 3.7 to 6.5 points against the default, and a 10 there loses
+      2.4 to 4.6. Denying another's setup chip loses 3.3 to 8.6 (2026-11-24, 4,000 games). `rival`
+      for a leader's setup chip too gains 0.7 to 1.2 at 4–6 players and loses 0.9 at 3, within
+      the noise. It's queued at 40,000.
 - [x] Played the bots by hand with `scripts/play.ts` (2026-11-24). Medium gave up after 3 cards
       one on one; `chase` without the limit gains 1.5 to 3.3 against the default and 0.6 to 1.7
       against the league, adopted. Hard leaves a rival's game point to the others; making it
       stop the rival itself loses 2.1 at a table of two Hards and Medium, and up to 8.7 against
       the league. Forcing it only when it's the last one in changes nothing: the same win count
       at every table and player count (52,000 games).
-- [ ] Hard hoards: against three Hards, one passed four battles at once and won the last two chips
-      with a full hand. Is passing early with a full hand a habit people can punish?
+- [x] Hard hoards: against three Hards, one passed four battles at once and won the last two chips
+      with a full hand. The punishment is being left with cards when a round ends. Among three
+      Mediums, Hard is left holding cards in 15.3% of rounds, twice Medium's rate. It throws away
+      3.1 cards then, 4.4% of what it's dealt, and still wins 49.7% (2026-11-24, 3,000 games).
 - [ ] Rerun the README's tables for the `rival` default (`scripts/tables.sh`, about 3.5 hours).
 
 ## Analysis
