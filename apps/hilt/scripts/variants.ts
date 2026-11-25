@@ -17,6 +17,7 @@ import {
   others,
   type Player,
   type Policy,
+  stall,
   STEPS,
   type Step,
   waitWhile,
@@ -32,6 +33,8 @@ const steps = Object.keys(STEPS) as (keyof typeof STEPS)[];
 const chase3 = chaseWithin(3);
 /** `open` in every default before 2026-11-24, after `wait`. */
 const open1 = openWith(1);
+/** Steps with `stall` back before `one`, as in every default before 2026-11-25. */
+const withStall = (list: (keyof typeof STEPS | Step)[]) => list.flatMap((s) => (s === "one" ? [stall, s] : [s]));
 
 /** The default's steps with `step` before `before`. */
 const insert = (step: Step, before: keyof typeof STEPS) => (): Policy => {
@@ -173,7 +176,7 @@ const bump = (chips: number[], i: number) => chips.map((c, j) => c + +(i === j))
 
 /** A default from before today's: the steps without `drop`, and with `swap`'s steps in place of today's. */
 const past = (drop: (keyof typeof STEPS)[], swap: Partial<Record<keyof typeof STEPS, Step>>) =>
-  heuristic(...steps.filter((s) => !drop.includes(s)).flatMap((s) => (s === "wait" ? ["wait" as const, open1] : [swap[s] ?? (s === "crows" ? crowsBefore : s)])));
+  heuristic(...withStall(steps.filter((s) => !drop.includes(s)).flatMap((s) => (s === "wait" ? ["wait" as const, open1] : [swap[s] ?? (s === "crows" ? crowsBefore : s)]))));
 
 /** The default's steps without `drop`. */
 const without =
@@ -189,7 +192,7 @@ const CHEAT_SHEET: Record<string, (keyof typeof STEPS)[]> = {
   "ahead, keep playing": ["press", "fury", "hold"],
   "let the others spend first": ["wait"],
   "stop a chip that wins someone the game": ["deny", "rival"],
-  "stay in cheaply": ["stall", "one"],
+  "stay in cheaply": ["one"],
   "behind, take the lead with the cheapest card": ["chase", "allIn"],
   "alone, finish it": ["finish"],
   "take back what you don't need": ["harvest", "keep", "bait"],
@@ -209,9 +212,7 @@ const VARIANTS: Record<string, (seed: number) => Policy> = {
   ...Object.fromEntries([1, 3].map((k) => [`pass with an empty row while ${k}+ others are in`, replace("wait", waitWhile(k, 3))])),
   "wait even against a winning chip": replace("wait", waitWhile(2, 0)),
   "no 1 once something's played (previous)": without("one"),
-  "no Bait back of a 1 while others are in (previous)": without("stall"),
-  "neither (previous)": without("one", "stall"),
-  "a 1 before Bait back": () => heuristic(...steps.filter((s) => s !== "one").flatMap((s) => (s === "stall" ? ["one" as const, s] : [s]))),
+  "behind with others in, Bait back a 1 (previous)": insert(stall, "one"),
   "give up one on one with an empty row": insert(giveUp(1), "chase"),
   "pass when ahead with something played (previous)": without("hold"),
   "ahead with something played, a 1 or Fury instead of the weakest force card": replace("hold", ahead(["one", "fury"])),
@@ -320,16 +321,17 @@ export const LEAGUE: Policy[] = [
   heuristic("harvest", "stop", crowsAhead, doveTheirs, "press", "wait", open1, chase3, "allIn", "bait"),
   heuristic("harvest", "stop", crowsBefore, doveTheirs, "press", "wait", open1, chase3, "allIn", "bait"),
   heuristic("harvest", "stop", crowsBefore, doveTheirs, "press", "wait", open1, finishIn(4), chase3, "allIn", "bait"),
-  heuristic("harvest", "stop", crowsBefore, doveTheirs, ahead(["top"], 0), "wait", open1, finishIn(4), "stall", "one", chase3, "allIn", "bait"),
+  heuristic("harvest", "stop", crowsBefore, doveTheirs, ahead(["top"], 0), "wait", open1, finishIn(4), stall, "one", chase3, "allIn", "bait"),
   past(["hold", "deny", "keep", "fury", "rival"], { chase: chase3, finish: finishIn(4), doves: doveTheirs }),
   past(["deny", "keep", "fury", "rival"], { chase: chase3, finish: finishIn(4), doves: doveTheirs }),
   past(["deny", "keep", "fury", "rival"], { chase: chase3, doves: doveTheirs }),
   past(["keep", "fury", "rival"], { chase: chase3, doves: doveTheirs }),
   past(["keep", "fury", "rival"], { chase: chase3 }),
   past(["rival"], { chase: chase3 }),
-  heuristic(...steps.filter((s) => s !== "rival").flatMap((s) => (s === "chase" ? [chase3] : s === "wait" ? ["wait" as const, open1] : [s]))),
-  heuristic(...steps.flatMap((s) => (s === "chase" ? [chase3] : s === "wait" ? ["wait" as const, open1] : [s]))),
-  insert(open1, "finish")(),
+  heuristic(...withStall(steps.filter((s) => s !== "rival").flatMap((s) => (s === "chase" ? [chase3] : s === "wait" ? ["wait" as const, open1] : [s])))),
+  heuristic(...withStall(steps.flatMap((s) => (s === "chase" ? [chase3] : s === "wait" ? ["wait" as const, open1] : [s])))),
+  heuristic(...withStall(steps.flatMap((s) => (s === "finish" ? [open1, s] : [s])))),
+  heuristic(...withStall(steps)),
   defaultPolicy,
 ];
 

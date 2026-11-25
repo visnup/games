@@ -201,12 +201,16 @@ Other players' hands aren't hidden from their browsers; it's for friends.
 
 ## Interpretations
 
+The user confirmed the first, second, fourth and fifth readings on 2026-11-24. Condottiere, the
+game Hilt reworks, agrees on the fifth. Its one-page rules are in `rules/condottiere.pdf`, not
+committed.
+
 - Bait needs a force card in your row to take back; without one it can't be played.
 - Fate cards played to your row (Fury, Legend, Crows, Doves) count as cards played for the
   tie-break; Bait and Winter don't stay in a row and don't. The Favor isn't a card played.
 - "Highest single value card" is the printed value (Legend 10), not Winter's 1.
 - A Favor holder with no cards still has the Favor's 1 strength (`Rules.emptyFavor`).
-- A battle that leaves nobody with cards also ends the round.
+- A battle that leaves nobody with cards also ends the round, with a full reshuffle and redeal.
 - A player with no cards is out of a battle from its start and never asked to move. Before
   2026-11-19 the first turn went left of the Favor holder regardless, so bots passed with
   nothing and people were asked to; default games came out the same, and `replay()` skips those

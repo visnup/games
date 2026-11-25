@@ -1,9 +1,9 @@
 import { type Card, COLORS, DECK, type Fate } from "./cards.ts";
 import { type Forest, flatten, scoreFast, unpack } from "kit/trees.ts";
-import { chaseWithin, crowsBefore, decisive, defaultPolicy, doveTheirs, finishIn, type Game, heuristic, type Move, moves, needed, openWith, others, type Player, type Policy } from "./game.ts";
+import { chaseWithin, crowsBefore, decisive, defaultPolicy, doveTheirs, finishIn, type Game, heuristic, type Move, moves, needed, openWith, others, type Player, type Policy, stall } from "./game.ts";
 
 /** The default every model so far was trained on, from before `hold` (2026-11-20): its pick is one of a move's numbers. */
-export const hint = heuristic("harvest", "stop", crowsBefore, doveTheirs, "press", "wait", openWith(1), finishIn(4), "stall", "one", chaseWithin(3), "allIn", "bait");
+export const hint = heuristic("harvest", "stop", crowsBefore, doveTheirs, "press", "wait", openWith(1), finishIn(4), stall, "one", chaseWithin(3), "allIn", "bait");
 
 const KINDS: (Fate | number)[] = [1, 2, 3, 4, 5, 6, 10, "bait", "fury", "legend", "winter", "crows", "doves"];
 const kindOf = (c: Card) => (c.kind === "force" ? c.value : c.kind);

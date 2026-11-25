@@ -333,6 +333,17 @@ export const crowsBefore: Step = (game, p) => {
   return c && p.row.length && game.leader() === p.seat ? { card: c } : undefined;
 };
 
+/**
+ * Behind with others still in, Bait back a 1: every default's before 2026-11-25, before `one`.
+ * Dropping it won +1.3, +1.7, +1.1 and +0.8 points at 3–6 players against the default (40,000
+ * games), and tied against every default so far and the learned player.
+ */
+export const stall: Step = (game, p) => {
+  const bait = p.hand.find((c) => c.kind === "bait");
+  const take = p.row.find((c) => c.kind === "force" && c.value === 1);
+  return bait && take && game.leader() !== p.seat && others(game, p).some((q) => !q.passed) ? { card: bait, take } : undefined;
+};
+
 export const STEPS = {
   /** Once everyone else has passed, Bait back the biggest force card that still leaves the lead: +2 to +4 points. */
   harvest(game, p) {
@@ -460,15 +471,10 @@ export const STEPS = {
    */
   finish: finishIn(10),
   /**
-   * Behind with others still in, Bait back a 1: it stays in the battle without spending
-   * anything. +4.5 to +7 points against the default, +3.5 to +6 against every default so far.
+   * Behind, a 1 before anything that would take the lead: +3.5 to +7.5 points against every
+   * default so far. Against today's default, dropping it ties at 3 players and wins +0.7 to +1.6
+   * at 4–6 (40,000 games). It ties the learned player.
    */
-  stall(game, p) {
-    const bait = p.hand.find((c) => c.kind === "bait");
-    const take = p.row.find((c) => c.kind === "force" && c.value === 1);
-    return bait && take && game.leader() !== p.seat && others(game, p).some((q) => !q.passed) ? { card: bait, take } : undefined;
-  },
-  /** Behind, a 1 before anything that would take the lead: +3.5 to +7.5 points against the default, +2.5 to +5.5 against every default so far. */
   one: oneWithin(Infinity),
   /**
    * Behind, take the lead with the cheapest card that does it, however much the battle has cost.

@@ -10,7 +10,7 @@ L=dataset/r${ROUND:?}
 mkdir -p "$L"
 exec > >(tee -a "$L/log.txt") 2>&1
 
-STRONG="the default|Crows while leading|deny every|with nobody else in, only|press with the strongest|no 1 once|no Bait back of a 1|Crows whenever|open with a 1 or Fury with nobody|pass when ahead with an empty|no Bait back after|pass only at|open with a 1 or Fury before|pass when ahead with something|open battles|the first default"
+STRONG="the default|Crows while leading|deny every|with nobody else in, only|press with the strongest|no 1 once|behind with others in, Bait back a 1|Crows whenever|open with a 1 or Fury with nobody|pass when ahead with an empty|no Bait back after|pass only at|open with a 1 or Fury before|pass when ahead with something|open battles|the first default"
 DENY="deny every winning chip (previous)"
 OPEN="open battles (previous)"
 DEAL="deal: the next player denies"

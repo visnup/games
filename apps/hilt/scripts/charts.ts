@@ -50,7 +50,7 @@ function lollipop(name: string, data: { label: string; players: string; over: nu
     ...options,
     x: { label: options.xLabel, grid: true, tickFormat: signed, insetLeft: 40, insetRight: 40 },
     y: { label: null, domain: order },
-    fx: { label: null },
+    fx: { label: null, domain: [...new Set(data.map((d) => d.players))] },
     color: change,
     marks: [
       Plot.ruleX([0], dashed),
@@ -90,6 +90,19 @@ save("seats", {
     Plot.text(seats, Plot.selectLast({ x: "seat", y: "over", z: "players", text: "players", textAnchor: "start", dx: 8, ...halo })),
   ],
 });
+
+// The cheat sheet: what breaking each rule costs at each kind of table, averaged over 3–6 players.
+const fields = ["against Medium", "against the league", "against Hard"];
+lollipop(
+  "rules",
+  table("rule").flatMap((r) =>
+    fields.map((f) => {
+      const v = r[f].split(" / ").map(num);
+      return { label: r.rule, players: f, over: v.reduce((a, b) => a + b) / v.length };
+    }),
+  ),
+  { marginLeft: 280, xLabel: "Points lost without the rule, averaged over 3–6 players" },
+);
 
 // Against strong players: what dropping each rule does with playouts in every other seat.
 const strongRows = table("without the rule");

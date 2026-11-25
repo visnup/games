@@ -96,6 +96,11 @@
 - [ ] Why an outsider gains at a deal table: it isn't the battles deal players abandon (only
       holding off opening plays the same). Then a deal outsiders can't exploit, or punishment of
       whoever skipped their turn to deny.
+- [ ] Other kinds of deals. So far only "you stop this one" (the next player, or the one furthest
+      from winning, denies a winning chip). Try others: taking turns to fight battles, splitting
+      colors so two players don't race for the same chip, ganging up on the leader until they
+      drop back, and promises to stay out of a battle in exchange for staying out of the next.
+      Measure each at a table that makes it, for a player outside it and for one who breaks it.
 - [x] What Doves is for (2026-11-21, README "Playing the fate cards", `scripts/fates.ts`): a
       second chance at your own winning chip (+5.4 a chance), keeping the Favor (+4.2), and
       wiping out a battle the others have spent on (+2.7 to +3.4). Rule 2 now plays it for your
@@ -142,8 +147,23 @@
       against the league: the cycle, so both stay. `hint` had followed `STEPS` since `rival` and
       the chase limit's removal, so Hard read a pick it wasn't trained on. It's frozen now: 0 of
       369,587 decisions differ from the default the models were trained on.
-- [ ] Rerun the README's tables for the default without `open` (`scripts/tables.sh`, about 3.5
-      hours).
+- [x] Reran the README's tables for the default without `open` (2026-11-25, 302 minutes, in
+      `dataset/rt3/`).
+- [x] Dropped `stall` (2026-11-25). The cycle reading above was wrong for `stall`: I had only
+      measured it together with `one`. Alone, dropping it wins +1.3, +1.7, +1.1 and +0.8 points
+      at 3–6 players against the default (40,000 games). It ties the league and Hard (10,000).
+      Dropping `one` loses 3.5 to 7.6 points against the league, so `one` stays.
+- [x] `one` is a bet on weak players (2026-11-25). Without `stall`, dropping it wins 0.6 to 1.7
+      at 4–6 players against the default and 2.3 at 3 against Hard, and loses 2.9 to 5.5
+      against the league (40,000 and 10,000 games). Both effects are one on one: a 1 only with
+      2+ others in plays like no `one` at all, and a 1 only with 1 other in like the default.
+      Limits on cards played (0, 1 or 2) tie or lose (4,000 games).
+- [x] Reran the README's tables for the default without `stall` (2026-11-25, 299 minutes, in
+      `dataset/rt4/`, rule worths in `rules.md`).
+- [ ] Card counting (v2 features) gains a little. On the same data (`dataset/data-c1`), v2
+      beats v1 by +1.2, +0.6, +0.3 and +0.1 at 3–6 players (20,000 games). Both c1 models win
+      40% at 3 players against today's Hard, likely because c1 learned from today's default
+      (hypothesis, untested). Next: a round on v2 features with today's default.
 
 ## Analysis
 

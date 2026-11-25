@@ -53,7 +53,6 @@ const WHY: Record<keyof typeof STEPS, string> = {
   rival: "The leader wins the game with this chip, and few are left to stop them. Take the lead with the cheapest card that does it.",
   wait: "Two or more others are still in. Pass and let them spend their cards.",
   finish: "Nobody else is in, and your hand can overtake. Play your strongest card.",
-  stall: "Bait back your 1. You stay in the battle without spending anything.",
   one: "Play a 1 before anything that would take the lead.",
   chase: "Take the lead with the cheapest card that does it.",
   allIn: "This chip wins you the game. Play your strongest card.",
