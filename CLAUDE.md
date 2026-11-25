@@ -4,7 +4,7 @@ A pnpm workspace of game simulators, each with its own `CLAUDE.md`, `README.md` 
 `apps/monopoly-deal`, `apps/hilt`, `apps/fives` and `apps/battleship`. Node 26 (`.node-version`,
 linked into each app for fnm, and each Vercel project's Node setting) runs the TypeScript
 directly. pnpm is the root `packageManager`, which Vercel reads too. Install once at the root
-with `fnm exec --using=26 pnpm install`, and run an app's scripts from its own directory.
+with `pnpm install`, and run an app's scripts from its own directory.
 
 - The toolchain lives at the root, once: its `devDependencies` (TypeScript, ESLint, Prettier,
   Playwright, Tailwind, concurrently, jsdom, vercel), `eslint.config.mjs`, `.prettierrc.json`,

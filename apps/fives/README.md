@@ -64,8 +64,8 @@ The cheat sheet:
    highest card. Within 5 of 25, lead your lowest card. Flip it too if it's over 5.
 2. **Otherwise, play the biggest card that loses the trick.** Play it face down if you're allowed to
    flip it. Don't try to win tricks: they'll come to you.
-3. **If every card you have would win, play the biggest that doesn't bust you.** If they all bust,
-   play the smallest.
+3. **If every card you have would win, play the biggest that leaves you 5 to go.** If none does,
+   play the biggest that doesn't bust you. If they all bust, play the smallest.
 
 One player breaking a rule at a table of Medium bots (40,000 games each):
 
@@ -73,19 +73,19 @@ One player breaking a rule at a table of Medium bots (40,000 games each):
 
 | without this rule | 3 players | 4 players |
 | --- | --- | --- |
-| nothing missing (the default) | 33.1% | 24.7% |
-| never flip a card (Easy) | 8.9% | 3.7% |
-| lead your lowest card face up | 21.0% | 11.1% |
-| play to win tricks, not to lose them | 18.5% | 9.5% |
-| within 5 of 25, lead a card over 5 face up | 32.7% | 23.2% |
-| take every trick you're sure to win | 27.9% | 20.8% |
+| nothing missing (the default) | 32.9% | 24.8% |
+| never flip a card (Easy) | 8.9% | 2.8% |
+| lead your lowest card face up | 20.6% | 9.0% |
+| play to win tricks, not to lose them | 16.8% | 9.4% |
+| within 5 of 25, lead a card over 5 face up | 32.5% | 23.2% |
+| take every trick you're sure to win | 28.0% | 20.2% |
 
-A player who never flips wins about a quarter of a fair share at 3 players and a seventh at 4. The
-obvious lead is your lowest card face up. Leading that way costs 12 and 14 points. Playing to win
-tricks with your biggest card that doesn't bust costs 15 at both counts. Flipping a lead over 5 near
-25 is worth less: 1.5 points at 4 players. At 3 players it's within the noise. The last row is the
+A player who never flips wins about a quarter of a fair share at 3 players and a ninth at 4. The
+obvious lead is your lowest card face up. Leading that way costs 12 and 16 points. Playing to win
+tricks with your biggest card that doesn't bust costs 16 and 15. Flipping a lead over 5 near 25 is
+worth less: 1.6 points at 4 players. At 3 players it's within the noise. The last row is the
 surprise. Medium used to play this way: take a trick whenever nobody can beat your card and it
-doesn't bust you. That costs 5.2 points at 3 players and 3.9 at 4. A trick you didn't have to take only adds to your total.
+doesn't bust you. That costs 4.9 points at 3 players and 4.6 at 4. A trick you didn't have to take only adds to your total.
 You'll be handed plenty of tricks anyway.
 
 ### What a hand looks like
@@ -160,7 +160,7 @@ Their chips go to the closest player.
 
 A card played face down counts 5 if it wins, whatever it is face up. So flipping is the cheapest way
 to shed a 12 or 13 that would otherwise win a trick and blow your total. A player who never flips
-wins 8.9% at 3 players and 3.7% at 4.
+wins 8.9% at 3 players and 2.8% at 4.
 
 How often Hard flips when it's allowed to and has a choice (8,000 games):
 
@@ -192,7 +192,7 @@ Hard's habits made a better rule for Medium (40,000 games each):
 When you lead with 5 or more to go, flip a card. If you hold magenta and none of it is under 5,
 flip your highest magenta. Otherwise flip your highest silver. With neither, flip your highest
 card. Leading face down is the most valuable rule in the game: a player who leads their lowest card
-face up instead wins 21.0% and 11.1%.
+face up instead wins 20.6% and 9.0%.
 
 Why silver? A high silver is the card most likely to win a trick you didn't want. A silver that
 wins adds its whole value to your total. Led face down, a silver counts 5 at most. Preferring
@@ -225,11 +225,22 @@ taking it didn't bust. A trick that made exactly 25 came first. At 3 players, dr
 gained nothing against Medium or Hard. Taking a sure 25 on purpose was worth nothing at either
 count: the cards that make 25 find you without it.
 
-Ducking does mean busting more at 3 players. Medium now busts 28% of hands at 3 players and 35% at
-4. When Medium took sure tricks, it busted 25% and 38%. Medium now hits 25 in 5% and 6% of hands.
-Medium used to hit 25 in 9% and 6% (100,000 games). Flipping a lone high magenta first cut Medium's
-busts by 5 and 6 points. Medium wins more anyway: a bust costs only one chip. Keeping your high cards out
+Ducking does mean busting more at 3 players. Medium now busts 28% of hands at 3 players and 32% at
+4. When Medium took sure tricks, it busted 25% and 38%. Medium now hits 25 in 5% and 6.5% of hands.
+Medium used to hit 25 in 9% and 6% (100,000 games). The two rules from playing the bots, flipping a
+lone high magenta first and leaving 5 when forced to take, cut Medium's busts from 33% and 41%. Medium wins more anyway: a bust costs only one chip. Keeping your high cards out
 of tricks pays more often than that.
+
+### When you must take, leave room
+
+Sometimes every card you're allowed to play wins the trick. Then take with the biggest card that
+still leaves you 5 to go. Only if none does, take with the biggest that doesn't bust you. A player
+who ducks every trick still gets handed tricks, and those come late in the hand. Every silver and
+every top card of a color you hold is a trick you may be forced to win. Room you keep now pays for
+them. This rule came from playing the bots: twice in one game, a Medium bot took with its biggest
+card to 21 or 22, then busted on the next forced take. Leaving 5 gained 2.8 points at 4 players
+against Medium (40,000 games), 6.4 against every earlier Medium and 0.9 against Hard (10,000). At 3
+players it gains nothing beyond the noise. Leaving 3 or 7 gained less.
 
 ### Who leads the first trick
 
@@ -282,7 +293,7 @@ ahead with a hand to go is worth only 3 or 4 points over a tie: a single hand sw
 
 ### What Hard knows that the rules don't
 
-Hard wins 55.4% of games at 3 players and 45.0% at 4 against a table of Medium bots (20,000 games).
+Hard wins 56.0% of games at 3 players and 44.6% at 4 against a table of Medium bots (20,000 games).
 So there's more to good play than three rules. Most of the difference is which card. Against
 Medium as it was when it still took sure tricks, Hard picked a different play in 59% of its
 decisions. In half of those, Hard makes the same kind of play with another card: ducking or
@@ -302,15 +313,15 @@ One player against Medium in every other seat (40,000 games; 20,000 for Hard):
 
 | player | 3 players (fair 33.3%) | 4 players (fair 25.0%) |
 | --- | --- | --- |
-| Hard | 55.4% | 45.0% |
-| the old Medium, which took sure tricks | 22.6% | 18.1% |
-| Easy: never flips | 8.9% | 3.7% |
-| random | 1.0% | 0.4% |
-| greedy: takes the lead whenever it doesn't bust | 0.2% | 0.1% |
+| Hard | 56.0% | 44.6% |
+| the old Medium, which took sure tricks | 22.7% | 16.4% |
+| Easy: never flips | 8.9% | 2.8% |
+| random | 0.9% | 0.4% |
+| greedy: takes the lead whenever it doesn't bust | 0.2% | 0.0% |
 
 The chart shows each as a multiple of a fair share. Hard wins 1.7 times its share at 3 players and
-1.8 at 4. Before Medium flipped a lone high magenta first, Hard won 64.0% and 54.6%: that one rule
-closed about 30% of the gap. Easy wins about a quarter of its share at 3 players and a seventh at 4. Seats don't matter: in games among Medium bots, every seat wins
+1.8 at 4. Before the two rules from playing the bots, Hard won 64.0% and 54.6%. Those rules closed
+about 30% of the gap. Easy wins about a quarter of its share at 3 players and a ninth at 4. Seats don't matter: in games among Medium bots, every seat wins
 within half a point of a fair share (100,000 games).
 
 ## Appendix: how it was built
@@ -354,6 +365,7 @@ can be answered by the next.
 | lead your highest card face down, 5+ from 25 (Medium used to lead its lowest face up) | +31.8, +24.7 | | +6.2, +2.7 |
 | flip your highest silver first | +8.3, +11.3 | +5.8, +6.6 | +1.9, +0.9 |
 | before silver, flip your highest magenta when none is under 5, from playing the bots | +10.7, +5.5 | +3.9, +2.2 | +1.4, −0.2 |
+| when every card wins, take with the biggest that leaves 5 to go, from playing the bots | +0.2, +2.8 | +0.6, +6.4 | +0.2, +0.9 |
 | at 4 players, last to play early, take only within 12 of 25 (since dropped) | +3.5 at 4 players | +4.3 | +0.8 |
 | don't take sure tricks, nor a sure 25, nor dump once busted | +4.2, −0.4 | +4.4, +1.8 | +3.1, 0.0 |
 | within 5 of 25, lead a card over 5 face down, from people's games | +0.2, +0.8 | +0.3, +1.1 | +0.1, +0.1 |
@@ -365,7 +377,8 @@ worth found that taking sure tricks cost points.
 What lost (2,000 games each, or 40,000 where close): leading the lowest card face down, or the
 highest face up; 3, 7 or 10 to go as the cutoff for leading face down; flipping the lowest silver;
 keeping your last silver to trump a late run of magenta 5s; when every card takes the trick,
-avoiding a total of 23 or 24 with more than 3 or 6 cards left;
+avoiding a total of 23 or 24 with more than 3 or 6 cards left; ducking by flipping your highest
+silver; not leading face down once everyone else is out of magenta;
 ducking with your lowest losing card when last early in a hand; taking with your highest card of
 the led color when second to play early; taking sure tricks only within 6 to 16 of 25, or only in
 a hand's last 4 or 8 cards; and six rules from shallow decision trees fit to Hard's choices

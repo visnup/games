@@ -399,9 +399,15 @@ export const STEPS = {
       (x) => !winning(game, x),
     );
   },
-  /** Winning whatever's played: the biggest that doesn't bust if it holds, or else the smallest, the likeliest to be beaten. */
+  /**
+   * Winning whatever's played: the biggest that leaves 5 to go, or else the biggest that doesn't
+   * bust if it holds, or else the smallest, the likeliest to be beaten. Leaving 5, from games
+   * against the bots: +0.2 and +2.8 points against the default at 3 and 4 players (40,000 games),
+   * +0.6 and +6.4 against the league, +0.2 and +0.9 against the learned player (10,000). Leaving 3
+   * or 7 gained less.
+   */
   least(game, p, plays) {
-    return most(plays, value, (x) => value(x) <= room(p)) ?? least(plays, value);
+    return most(plays, value, (x) => value(x) <= room(p) - 5) ?? most(plays, value, (x) => value(x) <= room(p)) ?? least(plays, value);
   },
 } satisfies Record<string, Step>;
 

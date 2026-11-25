@@ -32,7 +32,8 @@ const names = state.setup.bots.map((bot, i) => (bot ? `${LEVELS[bot]} ${i}` : "M
 // the last hand's scores and this hand's plays, without the dealt hands
 const deals = r.lines.flatMap((l, i) => (/^hand \d+:/.test(l) ? [i] : []));
 let lines = r.lines.slice((deals.at(r.result ? -1 : -2) ?? 0) + 1).filter((l) => !/^hand \d+:/.test(l));
-if (!r.result) lines = lines.slice(lines.findLastIndex((l) => l.includes("scores:")));
+const scored = lines.findLastIndex((l) => l.includes("scores:"));
+if (!r.result && scored > 0) lines = lines.slice(scored);
 console.log(lines.join("\n").replace(/\b(\d)(: | plays| wins| and| share)/g, (_, s, v) => `${names[s]}${v}`));
 console.log(`\nhand ${g.hand}${g.pot ? `, ${g.pot} in the pot` : ""}`);
 for (const p of g.players) {

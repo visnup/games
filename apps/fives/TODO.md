@@ -48,6 +48,16 @@
         than 0.1, so it wasn't changed. A second game, a subagent's against three Hard bots, busted
         twice after trumping to 24 with 5 or more cards left. Avoiding 23 or 24 when forced to
         take, with more than 3 or 6 cards left, tied the default (2,000 games).
+  - [x] `least` takes with the biggest that leaves 5 to go, 2026-11-24, from two subagent games
+        against Medium bots: +0.2 and +2.8 points (40,000 games), +0.6 and +6.4 against the
+        league, +0.2 and +0.9 against the learned player (10,000). Leaving 3 or 7 gained less.
+        Ducking by flipping your highest silver tied; not leading face down once everyone else is
+        out of magenta lost 1.4 and 2.0 (2,000 games). Hard told the new pick ties Hard told the
+        old one (33.3% and 25.2%, 10,000 games).
+  - [x] Two patterns a subagent saw in Hard's play, 2026-11-24: leading face down within 4 of 25,
+        and taking to exactly 25 with 2+ cards left when it could duck. Hand playouts among Hard's
+        rollout players (1,000 games a player count) put Hard's pick ahead of its best
+        alternative by 2.8 to 5.8 points of win chance each time. Neither is a flaw.
   - [x] Rerun the playouts rows of the README's players table against the new default,
         2026-11-21 (800 games, 15 minutes): 32-deal hand playouts win 63.1% and 62.3%, level with
         round 9.
