@@ -24,8 +24,8 @@ export const setup = ({ seats, seed, first }: { seats: ({ bot: string } | object
 export type Battle = { battle: number; color: Color; rows: Card[][]; strengths: number[]; winner: number | null; ended: Game["ended"] };
 
 /**
- * Which battle the board shows: the one under way once someone has played in it, or else the last
- * to end, so a battle that Doves or Crows ended stays in view until the next has a card in it.
+ * Which battle the board shows: the one under way once someone has played or passed in it, or else the last
+ * to end, so a battle that Doves or Crows ended stays in view until someone moves in the next.
  * Its log lines, too.
  */
 export function onBoard(game: Game, lines: string[]) {

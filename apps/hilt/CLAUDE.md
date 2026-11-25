@@ -60,6 +60,9 @@ Its last page has the card list and each fate card's rule.
   and jsdom, following magical-athlete's chart rules: magenta to blue through white for a loss
   or gain, magenta shades for player counts. Rerun it after updating a table.
 - `scripts/rules.ts`: default games with each `Rules` flag both ways.
+- `scripts/play.ts`: a game against bots from the command line, one decision a call, replayed
+  from `dataset/play.json` as the site replays. It's for probing the bots by hand or with a
+  subagent. It hides the dealt hands that the log's "round" lines show.
 - `node --test 'src/*.test.ts'` runs the deck, the booklet's rules and `replay.test.ts`.
   `pnpm test` runs those, then Playwright.
 - `TODO.md` is the plan, `README.md` what the simulator has shown so far.

@@ -309,6 +309,17 @@ export const oneWithin =
     return card && p.row.length <= row && game.leader() !== p.seat ? { card } : undefined;
   };
 
+/** Behind, take the lead with the cheapest card that does it, if this battle has cost fewer than `k` cards so far, or without limit when the chip wins or loses the game. */
+export const chaseWithin =
+  (k: number): Step =>
+  (game, p) => {
+    if (game.leader() === p.seat) return undefined;
+    const stakes = decisive(game, p) || others(game, p).some((q) => decisive(game, q));
+    if (!stakes && p.row.length >= k) return undefined;
+    const best = p.hand.filter((c) => c.kind !== "bait" && c.kind !== "doves" && game.playable(p, c) && leadsWith(game, p, c)).sort((a, b) => COST[a.kind](a) - COST[b.kind](b))[0];
+    return best ? { card: best } : undefined;
+  };
+
 /** Doves when someone else leads with the chip that wins them the game: every default's before 2026-11-21, and the first default's (Easy). */
 export const doveTheirs: Step = (game, p) => {
   const c = p.hand.find((c) => c.kind === "doves");
@@ -465,16 +476,13 @@ export const STEPS = {
   /** Behind, a 1 before anything that would take the lead: +3.5 to +7.5 points against the default, +2.5 to +5.5 against every default so far. */
   one: oneWithin(Infinity),
   /**
-   * Behind, take the lead with the cheapest card that does it, if this battle has cost at most 3
-   * cards so far, or without limit when the chip wins or loses the game.
+   * Behind, take the lead with the cheapest card that does it, however much the battle has cost.
+   * Every default before 2026-11-24 gave up after 3 cards unless the chip decided the game, which
+   * a person exploited. No limit: +3.3, +2.6, +1.8 and +1.5 points at 3–6 players against the
+   * default, +1.7, +1.2, +0.9 and +0.6 against every default so far (40,000 games), +0.1 to +1.0
+   * against the learned player and a tie with playouts (4,000).
    */
-  chase(game, p) {
-    if (game.leader() === p.seat) return undefined;
-    const stakes = decisive(game, p) || others(game, p).some((q) => decisive(game, q));
-    if (!stakes && p.row.length >= 3) return undefined;
-    const best = p.hand.filter((c) => c.kind !== "bait" && c.kind !== "doves" && game.playable(p, c) && leadsWith(game, p, c)).sort((a, b) => COST[a.kind](a) - COST[b.kind](b))[0];
-    return best ? { card: best } : undefined;
-  },
+  chase: chaseWithin(Infinity),
   /** Behind with the chip that wins the game and no one card to take the lead, play the strongest anyway: +1 to +2 points. */
   allIn(game, p) {
     if (game.leader() === p.seat || !decisive(game, p)) return undefined;

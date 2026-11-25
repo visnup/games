@@ -1,13 +1,35 @@
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { type Card, COLORS } from "../src/cards.ts";
-import { crowsBefore, decisive, defaultPolicy, doveTheirs, finishIn, type Game, heuristic, mulberry32, needed, oneWithin, openWith, others, type Player, type Policy, STEPS, type Step, waitWhile } from "../src/game.ts";
+import {
+  chaseWithin,
+  crowsBefore,
+  decisive,
+  defaultPolicy,
+  doveTheirs,
+  finishIn,
+  type Game,
+  heuristic,
+  mulberry32,
+  needed,
+  oneWithin,
+  openWith,
+  others,
+  type Player,
+  type Policy,
+  STEPS,
+  type Step,
+  waitWhile,
+} from "../src/game.ts";
 import { parallel } from "kit/parallel.ts";
 import { learned } from "../src/learned.ts";
 import { colorPlayouts, crowsAhead, dumpPlayouts, headToHead, playouts, STRATEGIES } from "../src/strategies.ts";
 import { header } from "kit/table.ts";
 
 const steps = Object.keys(STEPS) as (keyof typeof STEPS)[];
+
+/** `chase` in every default before 2026-11-24. */
+const chase3 = chaseWithin(3);
 
 /** The default's steps with `step` before `before`. */
 const insert = (step: Step, before: keyof typeof STEPS) => (): Policy => {
@@ -266,25 +288,27 @@ const VARIANTS: Record<string, (seed: number) => Policy> = {
     ]),
   ),
   "behind a rival's winning chip, a 1 or a wait before taking the lead (previous)": without("rival"),
+  "chase only while the battle has cost fewer than 3 cards (previous)": replace("chase", chase3),
 };
 
 /** Every default so far, each adopted as the best answer to the one before. */
 export const LEAGUE: Policy[] = [
   STRATEGIES["first default"](0),
-  heuristic("stop", crowsAhead, doveTheirs, waitWhile(2), "chase", "allIn", "bait"),
-  heuristic("stop", crowsAhead, doveTheirs, waitWhile(2, 3), oneWithin(0), "chase", "allIn", "bait"),
-  heuristic("harvest", "stop", crowsAhead, doveTheirs, "press", "open", "wait", "chase", "allIn", "bait"),
-  heuristic("harvest", "stop", crowsAhead, doveTheirs, "press", "wait", "open", "chase", "allIn", "bait"),
-  heuristic("harvest", "stop", crowsBefore, doveTheirs, "press", "wait", "open", "chase", "allIn", "bait"),
-  heuristic("harvest", "stop", crowsBefore, doveTheirs, "press", "wait", "open", finishIn(4), "chase", "allIn", "bait"),
-  heuristic("harvest", "stop", crowsBefore, doveTheirs, ahead(["top"], 0), "wait", "open", finishIn(4), "stall", "one", "chase", "allIn", "bait"),
-  past(["hold", "deny", "keep", "fury", "rival"], { finish: finishIn(4), doves: doveTheirs }),
-  past(["deny", "keep", "fury", "rival"], { finish: finishIn(4), doves: doveTheirs }),
-  past(["deny", "keep", "fury", "rival"], { doves: doveTheirs }),
-  past(["keep", "fury", "rival"], { doves: doveTheirs }),
-  past(["keep", "fury", "rival"], {}),
-  past(["rival"], {}),
-  without("rival")(),
+  heuristic("stop", crowsAhead, doveTheirs, waitWhile(2), chase3, "allIn", "bait"),
+  heuristic("stop", crowsAhead, doveTheirs, waitWhile(2, 3), oneWithin(0), chase3, "allIn", "bait"),
+  heuristic("harvest", "stop", crowsAhead, doveTheirs, "press", "open", "wait", chase3, "allIn", "bait"),
+  heuristic("harvest", "stop", crowsAhead, doveTheirs, "press", "wait", "open", chase3, "allIn", "bait"),
+  heuristic("harvest", "stop", crowsBefore, doveTheirs, "press", "wait", "open", chase3, "allIn", "bait"),
+  heuristic("harvest", "stop", crowsBefore, doveTheirs, "press", "wait", "open", finishIn(4), chase3, "allIn", "bait"),
+  heuristic("harvest", "stop", crowsBefore, doveTheirs, ahead(["top"], 0), "wait", "open", finishIn(4), "stall", "one", chase3, "allIn", "bait"),
+  past(["hold", "deny", "keep", "fury", "rival"], { chase: chase3, finish: finishIn(4), doves: doveTheirs }),
+  past(["deny", "keep", "fury", "rival"], { chase: chase3, finish: finishIn(4), doves: doveTheirs }),
+  past(["deny", "keep", "fury", "rival"], { chase: chase3, doves: doveTheirs }),
+  past(["keep", "fury", "rival"], { chase: chase3, doves: doveTheirs }),
+  past(["keep", "fury", "rival"], { chase: chase3 }),
+  past(["rival"], { chase: chase3 }),
+  heuristic(...steps.filter((s) => s !== "rival").map((s) => (s === "chase" ? chase3 : s))),
+  replace("chase", chase3)(),
   defaultPolicy,
 ];
 
@@ -297,7 +321,10 @@ const FIELDS: Record<string, [string, ((seed: number) => Policy) | undefined]> =
   league: ["a default from every round so far", league],
   playouts: ["playouts on 8 deals", (seed) => playouts(8, seed)],
   learned: ["the learned player", () => learned()],
+  // headToHead asks for the other seats in turn order, so at 4 players every third is Medium
+  hhm: ["Hard, Hard and Medium (4 players only)", () => (hhm++ % 3 === 2 ? defaultPolicy : learned())],
 };
+let hhm = 0;
 
 const fieldOf = (field: string): [string, ((seed: number) => Policy) | undefined] => FIELDS[field] ?? [`"${field}"`, VARIANTS[field]];
 

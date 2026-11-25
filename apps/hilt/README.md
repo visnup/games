@@ -89,8 +89,8 @@ head (`scripts/variants.ts`):
    answer. Rule 1 takes back what wasn't needed.
 8. Behind with others still in, Bait back a 1: it keeps you in the battle for nothing. Or play
    a 1.
-9. Behind, take the lead with the cheapest card that does it while the battle has cost you at
-   most 3 cards. When the chip decides the game, there's no limit.
+9. Behind, take the lead with the cheapest card that does it, however much the battle has cost
+   you.
 10. Behind with the chip that wins you the game, play your strongest card even if it doesn't take
     the lead.
 11. Before giving up a battle, Bait back your biggest force card.
@@ -109,6 +109,13 @@ to 0.4 more at 4–6 (40,000 games). It isn't a bet on weak players. It gains 1.
 against the learned player and 2.5 to 6.3 against playouts (4,000 games). Doing it with 3 or more
 others in loses 0.4 to 3.6 points against the league at 4–6 players. Doing it only with 1 other in
 gains at most a point (4,000 games).
+
+Rule 9 used to give up once a battle had cost you 3 cards. A person exploited that limit. With
+the default one on one, they stayed just ahead until it stopped with 6 cards still in hand. Then
+they Baited back what they'd spent. Without the limit, the default wins 3.3, 2.6, 1.8 and 1.5
+points more at 3–6 players against the previous default. It wins 1.7, 1.2, 0.9 and 0.6 more
+against the league (40,000 games). Against the learned player it gains 0.1 to 1.0, and against
+playouts it ties (4,000 games). A limit of 5 cards does as well as no limit.
 
 Waiting or opening at random doesn't help. A rule that wins as a bet on the table invites a mix:
 wait some of the time and open the rest, so no table can exploit you. Waiting 25%, 50% or 75% of
@@ -687,6 +694,15 @@ against the league at 4 to 6 players. Hard plays it.
 
 Against the default with its Crows check (2026-11-23), Hard wins 65.0%, 53.3%, 46.6% and 42.2% at
 3–6 players. Against the league it wins 68.0%, 56.6%, 51.4% and 45.8% (20,000 games).
+
+Hard leaves a rival's game point for others to stop. In a game against two Hards and Medium, both
+Hards passed with full hands while a person won on game point. Medium was left to stop the person
+alone. Making Hard stop it itself loses, though. Hard plays Medium's `rival` rule first:
+take the lead with the cheapest card when fewer than 3 others are in. That costs 2.1 points at a
+table of two Hards and Medium, and 0.2 to 0.8 against the league. Doing it with any number of
+others in costs 5.6 and up to 8.7 (4,000 games). At those tables, someone else usually does stop
+the rival. Hard's free-riding wins more than it loses: it wins 29.3% at a table of two Hards and
+Medium. Medium wins 13.0% there (20,000 games).
 
 ## Rule readings
 

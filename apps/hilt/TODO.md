@@ -116,6 +116,13 @@
       66 points. Adopted as `rival` (2026-11-24): take the lead from a leader on game point with
       fewer than 3 others in, +1.9 to +3.9 against the default, +0.3 to +1.9 against the league.
 - [ ] Passing on a chip that would have set up a win of our own cost 44 in `onyx`.
+- [x] Played the bots by hand with `scripts/play.ts` (2026-11-24). Medium gave up after 3 cards
+      one on one; `chase` without the limit gains 1.5 to 3.3 against the default and 0.6 to 1.7
+      against the league, adopted. Hard leaves a rival's game point to the others; making it
+      stop the rival itself loses 2.1 at a table of two Hards and Medium, and up to 8.7 against
+      the league.
+- [ ] Hard hoards: against three Hards, one passed four battles at once and won the last two chips
+      with a full hand. Is passing early with a full hand a habit people can punish?
 - [ ] Rerun the README's tables for the `rival` default (`scripts/tables.sh`, about 3.5 hours).
 
 ## Analysis
