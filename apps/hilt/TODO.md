@@ -120,7 +120,8 @@
       one on one; `chase` without the limit gains 1.5 to 3.3 against the default and 0.6 to 1.7
       against the league, adopted. Hard leaves a rival's game point to the others; making it
       stop the rival itself loses 2.1 at a table of two Hards and Medium, and up to 8.7 against
-      the league.
+      the league. Forcing it only when it's the last one in changes nothing: the same win count
+      at every table and player count (52,000 games).
 - [ ] Hard hoards: against three Hards, one passed four battles at once and won the last two chips
       with a full hand. Is passing early with a full hand a habit people can punish?
 - [ ] Rerun the README's tables for the `rival` default (`scripts/tables.sh`, about 3.5 hours).

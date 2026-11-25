@@ -702,7 +702,9 @@ take the lead with the cheapest card when fewer than 3 others are in. That costs
 table of two Hards and Medium, and 0.2 to 0.8 against the league. Doing it with any number of
 others in costs 5.6 and up to 8.7 (4,000 games). At those tables, someone else usually does stop
 the rival. Hard's free-riding wins more than it loses: it wins 29.3% at a table of two Hards and
-Medium. Medium wins 13.0% there (20,000 games).
+Medium. Medium wins 13.0% there (20,000 games). Once nobody else is left in, Hard
+doesn't free-ride. Making it take the lead there instead of passing wins exactly as many games
+as Hard does on its own, at every table and player count (52,000 games).
 
 ## Rule readings
 
