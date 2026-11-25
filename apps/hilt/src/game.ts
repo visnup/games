@@ -448,15 +448,10 @@ export const STEPS = {
    * in. Leaving the denial to the rest when 3 or more are in gains 6 to 16 points at 4–6
    * players; never denying lost 10 at 3. Against every default so far (`variants.ts --league`),
    * waiting before `open` wins 46.7%, 41.4%, 37.6% and 34.5% at 3–6 players, and opening first
-   * 44.8%, 30.1%, 21.1% and 16.4%.
+   * 44.8%, 30.1%, 21.1% and 16.4%. Opening with a 1 or a Fury once fewer are in (`openWith`)
+   * was worth nothing once `chase` lost its limit, and was dropped on 2026-11-24.
    */
   wait: waitWhile(2, 3),
-  /**
-   * Behind with nothing played and someone else still in, a 1 or a Fury, which cost the least:
-   * +9 to +15 points over chasing with the cheapest card that takes the lead. With nobody else
-   * in, `chase` wins the battle outright.
-   */
-  open: openWith(1),
   /**
    * Behind with nobody else in, nobody can answer: play the strongest card if the hand would
    * overtake, and `harvest` takes back what isn't needed. +1.4 to +6 points over only taking the

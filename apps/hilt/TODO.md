@@ -119,7 +119,9 @@
       for your own setup chip loses 3.7 to 6.5 points against the default, and a 10 there loses
       2.4 to 4.6. Denying another's setup chip loses 3.3 to 8.6 (2026-11-24, 4,000 games). `rival`
       for a leader's setup chip too gains 0.7 to 1.2 at 4–6 players and loses 0.9 at 3, within
-      the noise. It's queued at 40,000.
+      the noise. At 4+ players, against the default without `open`, it gains 0.1 to 0.5 (40,000
+      games) and 0.5 to 1.5 against the league, and loses 0.7 to 1.2 against Hard at 4–5 (4,000):
+      a bet on weak players, not adopted.
 - [x] Played the bots by hand with `scripts/play.ts` (2026-11-24). Medium gave up after 3 cards
       one on one; `chase` without the limit gains 1.5 to 3.3 against the default and 0.6 to 1.7
       against the league, adopted. Hard leaves a rival's game point to the others; making it
@@ -134,7 +136,14 @@
       ties or loses up to 0.6 points against Hard, up to 3.3 against the default and up
       to 2.5 against the league. Doves or Winter on
       a big hand's late spend ties everywhere.
-- [ ] Rerun the README's tables for the `rival` default (`scripts/tables.sh`, about 3.5 hours).
+- [x] Dropped each rule for the guide (2026-11-24, 40,000 games). Without `open`, Medium wins 0.4
+      to 1.0 points more against the previous default, ties the league and gains 0.1 to 0.6
+      against Hard: dropped. Without `press` or `stall` it wins against today's default and loses
+      against the league: the cycle, so both stay. `hint` had followed `STEPS` since `rival` and
+      the chase limit's removal, so Hard read a pick it wasn't trained on. It's frozen now: 0 of
+      369,587 decisions differ from the default the models were trained on.
+- [ ] Rerun the README's tables for the default without `open` (`scripts/tables.sh`, about 3.5
+      hours).
 
 ## Analysis
 
