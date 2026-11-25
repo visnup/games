@@ -468,16 +468,19 @@ The labels are what cap Hard. The labels come from playouts on 16 deals. Those p
 9 need 64 deals to edge past round 9 (27.1% at 4 players, against a fair 25%). Those playouts cost
 many times as much as round 9.
 
-Searchers against Medium as it was before this guide, when it still took sure tricks (800 games):
+Searchers against Medium (800 games, `strategies.ts` and `variants.ts`):
 
 | searcher | 3 players (fair 33.3%) | 4 players (fair 25.0%) |
 | --- | --- | --- |
-| hand playouts, 32 deals | 63.1% | 62.3% |
-| Hard (round 9) | 62.2% | 63.2% |
-| full-game playouts, 32 deals | 57.9% | 44.5% |
-| hand playouts, 16 deals | 54.8% | 52.7% |
+| hand playouts, 32 deals | 65.8% | 41.3% |
+| Hard (round 9) | 55.1% | 45.0% |
+| hand playouts, 16 deals | 58.5% | 28.8% |
+| full-game playouts, 32 deals | 56.8% | 27.3% |
 
-Hard plays about as well as hand playouts on 32 deals. Hard costs a tiny fraction as much.
+At 3 players, hand playouts on 32 deals beat Hard by 11 points. At 4 players, Hard beats them by
+4 points. Against the Medium before this guide, hand playouts on 32 deals won 62.3% at 4 players
+and Hard won 63.2%. Today's Medium takes 21 points from the playouts there and 18 from Hard. Hard
+costs a tiny fraction as much as the playouts.
 
 ### Rerunning it
 

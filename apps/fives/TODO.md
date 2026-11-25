@@ -67,6 +67,13 @@
   - [x] Rerun the playouts rows of the README's players table against the new default,
         2026-11-21 (800 games, 15 minutes): 32-deal hand playouts win 63.1% and 62.3%, level with
         round 9.
+  - [x] Rerun the README's searchers table against today's Medium, 2026-11-25 (800 games): 32-deal
+        hand playouts win 65.8% and 41.3%, Hard 55.1% and 45.0%. At 4 players the playouts fell
+        21 points and Hard 18. Does Hard have a blind spot against today's Medium (2,000 games)?
+        No. Hand playouts on 16 deals, simulating their own seat as Hard's rollout model and every
+        other seat as Medium, won 57.2% and 31.6% against Medium, where Hard won 55.6% and 45.0%.
+        The same playouts simulating every seat as Hard won 31.8% and 18.5%. So no training round
+        for the new Medium.
   - [x] Round 10, 2026-11-20, labeled with the new default's flag (`FROM=10`, `HANDS=2`, 1,500
         trees of 127 leaves): lost to round 9 (29.8%, 23.7%). Refit to rounds 7–10
         (`model-r10refit.json`) it ties round 9 (32.8%, 24.8%). Not adopted; rounds have stopped
