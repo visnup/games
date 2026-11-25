@@ -4,43 +4,43 @@
     {
       "name": "monopoly-deal",
       "runtimeExecutable": "env",
-      "runtimeArgs": ["CONVEX_AGENT_MODE=anonymous", "fnm", "exec", "--using=26", "pnpm", "-C", "apps/monopoly-deal", "dev"],
+      "runtimeArgs": ["CONVEX_AGENT_MODE=anonymous", "pnpm", "-C", "apps/monopoly-deal", "dev"],
       "port": 3010
     },
     {
       "name": "monopoly-deal status",
-      "runtimeExecutable": "fnm",
-      "runtimeArgs": ["exec", "--using=26", "pnpm", "-C", "apps/monopoly-deal", "exec", "node", "scripts/status.ts"],
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["-C", "apps/monopoly-deal", "exec", "node", "scripts/status.ts"],
       "port": 3011
     },
     {
       "name": "hilt",
       "runtimeExecutable": "env",
-      "runtimeArgs": ["CONVEX_AGENT_MODE=anonymous", "fnm", "exec", "--using=26", "pnpm", "-C", "apps/hilt", "dev"],
+      "runtimeArgs": ["CONVEX_AGENT_MODE=anonymous", "pnpm", "-C", "apps/hilt", "dev"],
       "port": 3020
     },
     {
       "name": "hilt status",
-      "runtimeExecutable": "fnm",
-      "runtimeArgs": ["exec", "--using=26", "pnpm", "-C", "apps/hilt", "exec", "node", "scripts/status.ts"],
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["-C", "apps/hilt", "exec", "node", "scripts/status.ts"],
       "port": 3021
     },
     {
       "name": "fives",
       "runtimeExecutable": "env",
-      "runtimeArgs": ["CONVEX_AGENT_MODE=anonymous", "fnm", "exec", "--using=26", "pnpm", "-C", "apps/fives", "dev"],
+      "runtimeArgs": ["CONVEX_AGENT_MODE=anonymous", "pnpm", "-C", "apps/fives", "dev"],
       "port": 3030
     },
     {
       "name": "fives status",
-      "runtimeExecutable": "fnm",
-      "runtimeArgs": ["exec", "--using=26", "pnpm", "-C", "apps/fives", "exec", "node", "scripts/status.ts"],
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["-C", "apps/fives", "exec", "node", "scripts/status.ts"],
       "port": 3031
     },
     {
       "name": "battleship",
-      "runtimeExecutable": "fnm",
-      "runtimeArgs": ["exec", "--using=26", "pnpm", "-C", "apps/battleship", "dev", "--port", "8137", "--strictPort"],
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["-C", "apps/battleship", "dev", "--port", "8137", "--strictPort"],
       "port": 8137
     }
   ]
