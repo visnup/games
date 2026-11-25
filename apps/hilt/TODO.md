@@ -130,6 +130,10 @@
       with a full hand. The punishment is being left with cards when a round ends. Among three
       Mediums, Hard is left holding cards in 15.3% of rounds, twice Medium's rate. It throws away
       3.1 cards then, 4.4% of what it's dealt, and still wins 49.7% (2026-11-24, 3,000 games).
+      Two other punishments don't pay (4,000 games). Giving up sooner while a big hand sits out
+      ties or loses up to 0.6 points against Hard, up to 3.3 against the default and up
+      to 2.5 against the league. Doves or Winter on
+      a big hand's late spend ties everywhere.
 - [ ] Rerun the README's tables for the `rival` default (`scripts/tables.sh`, about 3.5 hours).
 
 ## Analysis
