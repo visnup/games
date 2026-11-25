@@ -3,7 +3,7 @@
 Fives is a trick-taking card game for 3 or 4 players. Taiki Shinzawa designed Fives for CMYK's
 Magenta line. You follow the led color if you can. Silver is trump. Whoever wins a trick keeps the card
 they won it with. At the end of the hand, you want those winning cards to add up to 25, or as close
-as you can get without going over. Every card's back is a magenta 5. So any card can be played face
+as you can get without going over. Every card's back is a magenta 5. So you can play any card face
 down as one.
 
 This is a strategy guide written by a simulator. It plays millions of games by the rules and
@@ -13,9 +13,9 @@ when to flip a card to its magenta 5. Every piece of advice below comes with the
 You can play against its bots, or with friends, at [fives.visnup.com](https://fives.visnup.com).
 
 The advice is only as good as the simulation. The simulation follows the How to Play booklet.
-Where the booklet leaves a rule open, the appendix says how the simulator reads it. The simulator
-hasn't been checked against real tables. The simulator and this guide were written with Claude Opus
-5.5 in Claude Code.
+Where the booklet leaves a rule open, the appendix says how the simulator reads it. Nobody has
+checked the simulator against real tables. Claude Opus 5.5 wrote the simulator and this guide in
+Claude Code.
 
 ## The rules in a minute
 
@@ -25,8 +25,8 @@ players the 10s to 13s come out. Everyone gets 12 cards at 3 players and 13 at 4
 - Whoever holds the magenta 0 leads the first trick of each hand, with any card. Whoever wins a
   trick leads the next.
 - Follow the led color if you can. The highest silver wins, or else the highest of the led color.
-- Any card can be played face down as a magenta 5. Only one card a trick can be face down. You can
-  flip only when you lead, when magenta is led (even if you hold magenta), when you can't follow,
+- You can play any card face down as a magenta 5. Only one card a trick can be face down. You can
+  flip only when you lead, when someone leads magenta (even if you hold magenta), when you can't follow,
   or when your last card of the led color is the one you flip.
 - Your total is the sum of the cards you won tricks with. A face-down card counts 5. Closest to 25
   without going over takes 3 chips at 4 players (2 at 3), second 2 (1) and third 1. Exactly 25
@@ -35,8 +35,8 @@ players the 10s to 13s come out. Everyone gets 12 cards at 3 players and 13 at 4
 
 ## Reading the numbers
 
-Almost every number here is a **win rate**: the share of games a player wins, out of thousands
-played from different deals.
+Almost every number here is a **win rate**: the share of games a player wins, out of thousands of
+games from different deals.
 
 - **A fair share** is what you'd win if everyone were equally good: 1 in 3 games (33.3%) at 3
   players and 1 in 4 (25%) at 4. The charts draw it as a dashed line.
@@ -47,7 +47,7 @@ played from different deals.
   smaller than that isn't a finding.
 - **The bots** are the ones you can play online. **Easy** never plays a card face down. **Medium**
   plays only the three rules in the cheat sheet below. **Hard** is a model trained on millions of
-  games. Hard is the strongest player here. The appendix says how Hard was built.
+  games. Hard is the strongest player here. The appendix describes how Hard learned.
 - **What a rule is worth** is how much less than a fair share one player wins by breaking the rule
   at a table of Medium bots.
 
@@ -86,7 +86,7 @@ tricks with your biggest card that doesn't bust costs 16 and 15. Flipping a lead
 worth less: 1.6 points at 4 players. At 3 players it's within the noise. The last row is the
 surprise. Medium used to play this way: take a trick whenever nobody can beat your card and it
 doesn't bust you. That costs 4.9 points at 3 players and 4.6 at 4. A trick you didn't have to take only adds to your total.
-You'll be handed plenty of tricks anyway.
+Plenty of tricks come to you anyway.
 
 ### What a hand looks like
 
@@ -158,7 +158,7 @@ Their chips go to the closest player.
 
 ### Your magenta 5 is how you get rid of high cards
 
-A card played face down counts 5 if it wins, whatever it is face up. So flipping is the cheapest way
+A card you play face down counts 5 if it wins, whatever it is face up. So flipping is the cheapest way
 to shed a 12 or 13 that would otherwise win a trick and blow your total. A player who never flips
 wins 8.9% at 3 players and 2.8% at 4.
 
@@ -185,7 +185,7 @@ Hard's habits made a better rule for Medium (40,000 games each):
 
 - Leading face down only a card over 5 loses 8 points at 3 players.
 - Dumping face up once you've busted changes nothing.
-- Flipping your highest card when magenta is led gains under a point.
+- Flipping your highest card when someone leads magenta gains under a point.
 
 ### Lead face down: a lone high magenta, then silver
 
@@ -195,10 +195,10 @@ card. Leading face down is the most valuable rule in the game: a player who lead
 face up instead wins 20.6% and 9.0%.
 
 Why silver? A high silver is the card most likely to win a trick you didn't want. A silver that
-wins adds its whole value to your total. Led face down, a silver counts 5 at most. Preferring
+wins adds its whole value to your total. Lead a silver face down and it counts 5 at most. Preferring
 silver gained 8 points at 3 players and 11 at 4 over just leading your highest card.
 
-Why a high magenta before that? Everyone leads face down, so magenta is led all the time. A face-down
+Why a high magenta before that? Everyone leads face down. So someone leads magenta all the time. A face-down
 card is a magenta 5, and you must follow it with magenta if you have any. Holding only magenta over
 5, you must take that trick with a 6 to 13. Keep one magenta under 5 and you can duck under every
 magenta 5. Without one, flip your highest magenta while you have the lead. This rule came from
@@ -235,8 +235,8 @@ of tricks pays more often than that.
 
 Sometimes every card you're allowed to play wins the trick. Then take with the biggest card that
 still leaves you 5 to go. Only if none does, take with the biggest that doesn't bust you. A player
-who ducks every trick still gets handed tricks, and those come late in the hand. Every silver and
-every top card of a color you hold is a trick you may be forced to win. Room you keep now pays for
+who ducks every trick still has to take tricks. Those tricks come late in the hand. Every silver and
+every top card of a color you hold is a trick you may have to win. Room you keep now pays for
 them. This rule came from playing the bots: twice in one game, a Medium bot took with its biggest
 card to 21 or 22, then busted on the next forced take. Leaving 5 gained 2.8 points at 4 players
 against Medium (40,000 games), 6.4 against every earlier Medium and 0.9 against Hard (10,000). At 3
@@ -260,7 +260,7 @@ bots (10,000 games each way):
 At 4 players, the lead is what helps: the leader busts 4 points less often, with or without the 0.
 The leader also gains an eighth of a chip more a hand. The 0 is worth only the lead it gives you.
 The 0 as just another value card is worth nothing: in games where someone else leads, holding it
-does no better than not holding it. Leading picks the color. Leading also gets a high card flipped
+does no better than not holding it. Leading picks the color. Leading also lets you flip a high card
 before anyone has won a trick. At 3 players both help a little and add up: either alone cuts busts
 by about 3 points, both by 5.
 
@@ -324,7 +324,7 @@ The chart shows each as a multiple of a fair share. Hard wins 1.7 times its shar
 about 30% of the gap. Easy wins about a quarter of its share at 3 players and a ninth at 4. Seats don't matter: in games among Medium bots, every seat wins
 within half a point of a fair share (100,000 games).
 
-## Appendix: how it was built
+## Appendix: under the hood
 
 ### The engine and how it reads the rules
 
@@ -336,19 +336,19 @@ booklet's rules and its scoring example. Where the booklet leaves a rule open:
   the higher place instead moves no player's wins beyond the noise (`scripts/rules.ts`, 20,000
   games).
 - A bust with no chips gives nothing. When everyone busts, the chips go to a pot for the next
-  hand's closest. A pot no one wins in the last hand is lost.
+  hand's closest. A pot no one wins in the last hand goes to nobody.
 - Chips are unlimited. The box's 42 never run out in practice.
 
 A game among Medium bots takes about 0.1 ms. A game among Hard bots takes 26 ms.
 
 ### The players
 
-- **Medium** (`defaultPolicy`) is a list of named rules, `STEPS` in `src/game.ts`, tried in order:
-  `leadDown`, `duck`, then `least`.
+- **Medium** (`defaultPolicy`) is a list of named rules, `STEPS` in `src/game.ts`. Medium tries
+  them in order: `leadDown`, `duck`, then `least`.
 - **Playouts** try every legal play: copy the game, deal the cards you can't see again at random
   (respecting colors someone has shown they're out of), play on with a fixed player in every seat,
   and make the play that wins most. Playing only to the end of the hand is cheaper and stronger
-  than playing all four hands out. The hand's end is scored by `chance`: the win chance from the
+  than playing all four hands out. Playouts score the hand's end with `chance`: the win chance from the
   chips, a softmax over players fit by `scripts/chance.ts`.
 - **Hard** (`src/learned.ts`) scores each legal play with a learned model and makes the best.
 
@@ -357,8 +357,8 @@ A game among Medium bots takes about 0.1 ms. A game among Hard bots takes 26 ms.
 Each rule started where Hard's choices differ from Medium's (`scripts/overrules.ts`), where
 playouts prefer another play (`scripts/decisions.ts`) or where a person's game showed one. A rule then became a variant in
 `scripts/variants.ts`. Medium kept a rule only if it beat Medium beyond the noise. The rule also had
-to beat a table of every earlier Medium (the league). Rules cycle: the best answer to one Medium
-can be answered by the next.
+to beat a table of every earlier Medium (the league). Rules cycle: a rule that beats one Medium
+can lose to the next.
 
 | rule | against Medium | against earlier Mediums | against Hard |
 | --- | --- | --- | --- |
@@ -403,11 +403,12 @@ chance. Hard makes the play it scores highest.
   of. About 20 more describe the play: its color, face and face-down value, whether it takes the
   trick for now and whether it's sure to, where it leaves the total, how many unseen cards beat it
   and how many players still to play could, and last, whether it's Medium's pick.
-- **Labels.** Every decision of a round's games, each legal play valued by hand playouts on 16
-  deals of the hidden cards, two hands deep, with the last round's small model in every seat and
-  the end scored by `chance`.
+- **Labels.** The labels cover every decision of a round's games. Hand playouts value each legal
+  play on 16 deals of the hidden cards, two hands deep, with the last round's small model in every
+  seat. `chance` scores the end.
 - **Fit** (`scripts/learn.py`): least-squares regression on the playout value, 1,500 trees of 127
-  leaves, a learning rate of 0.1, at least 200 decisions a leaf, stopped early on held-out shards.
+  leaves, a learning rate of 0.1, at least 200 decisions a leaf. The fit stops early on held-out
+  shards.
 - **Rounds** (`scripts/round.sh`, one command a round, after a smoke test of itself): play 4,000
   to 12,000 games a player count with the last round's model, label them, fit a new model to the
   last few rounds' data, compare it against the last three models and Medium, and fit a small
@@ -481,4 +482,4 @@ Hard plays about as well as hand playouts on 32 deals. Hard costs a tiny fractio
 ### Rerunning it
 
 After `pnpm install`, `node scripts/charts.ts` redraws `charts/` from this README's tables. The
-script that made each table is named beside it. `CLAUDE.md` describes the rest.
+README names the script that made each table beside it. `CLAUDE.md` describes the rest.

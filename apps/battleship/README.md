@@ -29,13 +29,13 @@ lie in straight lines, horizontal or vertical. Ships may touch each other. They 
 | Submarine | 3 |
 | Destroyer | 2 |
 
-That's 17 cells of ship in 100. Each shot is answered hit or miss. The shot that finishes a ship
-is answered with the ship's name ("You sank my battleship!").
+That's 17 cells of ship in 100. The opponent answers each shot hit or miss. For the shot that
+finishes a ship, the opponent names the ship ("You sank my battleship!").
 
 ## How to read the numbers
 
 **Shots** is the measure throughout: how many shots it takes to sink the whole fleet. Fewer is
-better for the shooter. More is better for the hider. Every ship cell must be hit. Shots are
+better for the shooter. More is better for the hider. The shooter must hit every ship cell. Shots are
 always 17 plus the misses.
 
 **Most tables come from one big dataset.** The dataset has 50,000 games for every pair of shooter
@@ -148,11 +148,11 @@ From those fleets it can fire for hits or for information:
 **Neither exact odds nor information beats the rule of thumb.** All three are within ±0.55 shots
 of each other. Seeking information can't help much in this game:
 
-- Every ship cell has to be shot anyway. Knowledge pays only when it prevents a later miss.
+- The shooter has to shoot every ship cell anyway. Knowledge pays only when it prevents a later miss.
 - While searching, no cell is more than about 21% likely to hold a ship. Below 50%, the least
   predictable cell is simply the likeliest one. Exact and info fire at the same cells.
 - Exact and info only part ways after a hit. There info prefers a 50/50 cell to a near-sure hit.
-  That mostly reorders shots that have to be taken anyway.
+  That mostly reorders shots the shooter has to take anyway.
 
 ## Hiding
 
@@ -193,7 +193,7 @@ shooter learns to exploit.
 fleets: 73.9. Density assumes neither pattern. Against density, spread and clustered are both
 within half a shot of uniform.
 
-**A uniform fleet can't be exploited much.** Its worst case is 44.7 shots against the shooter
+**A shooter can't exploit a uniform fleet much.** Its worst case is 44.7 shots against the shooter
 tuned for it. That's only 0.1 fewer than plain density. Being uniform buys exactly that: no habit
 to learn.
 

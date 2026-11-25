@@ -1,7 +1,7 @@
 # Hilt
 
-Hilt is a card game for 3 to 6 players from CMYK's Magenta line. Dominique Ehrhard designed
-Hilt. It is a game of battles. Everyone is dealt 10 cards. In each battle you go around the
+Hilt is a card game for 3 to 6 players from CMYK's Magenta line, designed by Dominique Ehrhard.
+It is a game of battles. Everyone gets 10 cards. In each battle you go around the
 table playing cards into a row in front of you or passing until everyone has passed. Whoever has
 the highest total strength wins a chip. Three chips of a color, or one of each color, win the
 game. Nobody draws between battles: cards you spend winning one are gone until the round ends.
@@ -12,10 +12,10 @@ answer the questions that come up at the table: how much the Favor card is worth
 matter, and above all when to fight for a chip and when to let it go.
 
 The answers come from the model. They don't come from real tables. The model follows the How to
-Play booklet. `CLAUDE.md` lists the readings the booklet leaves open. The model hasn't been
-checked against real games.
+Play booklet. `CLAUDE.md` lists the readings the booklet leaves open. Nobody has
+checked the model against real games.
 
-The simulator and this analysis were written with Claude Opus 5.5 in Claude Code.
+Claude Opus 5.5 wrote the simulator and this analysis in Claude Code.
 
 ## A quick refresher
 
@@ -25,7 +25,7 @@ cards that change the battle:
 - **Bait** (15): discard it to take a force card from your row back into your hand.
 - **Fury** (6): your force cards count double. Each player can play one Fury a battle.
 - **Legend** (3): 10 strength that nothing changes.
-- **Winter** (3): every force card in the battle is worth 1. Only one Winter can be played a
+- **Winter** (3): every force card in the battle is worth 1. Players can play only one Winter a
   battle.
 - **Crows** (3): the battle ends at once. Whoever leads wins.
 - **Doves** (3): the battle ends at once with no winner. The chip and the Favor stay where they
@@ -35,7 +35,7 @@ The Favor card goes to whoever won the last battle. Its holder picks which color
 battle is over, has 1 strength in their row before anyone plays, and acts last. Ties go to fewer
 cards played, then the highest card, then clockwise from the Favor holder. Passing is for the
 rest of the battle. When a battle leaves only one player with cards, that player discards them.
-Then everyone is dealt 10 again plus one card per chip they hold.
+Then everyone gets 10 new cards plus one for each chip they hold.
 
 ## Reading the numbers
 
@@ -58,14 +58,13 @@ default players. The tables rotate that player through every seat. That evens ou
 - **The noise** comes from playing a finite number of games. The noise is about ±0.5 points at
   40,000 games, ±0.3 at 100,000, and ±1.5 at 4,000. Differences smaller than that are a tie.
 
-The charts are drawn from this README's own tables. After `pnpm install`, `node scripts/charts.ts`
-redraws `charts/`.
+After `pnpm install`, `node scripts/charts.ts` draws `charts/` from this README's own tables.
 
 ## How the default player plays
 
 Every table here is played by or against `defaultPolicy` in `src/game.ts`. `defaultPolicy` is a
-list of rules tried in order. Each rule was found by playing out every legal move at the
-default's decisions (`scripts/decisions.ts`). A rule was adopted when it beat the default head to
+list of rules it tries in order. We found each rule by playing out every legal move at the
+default's decisions (`scripts/decisions.ts`). We adopted a rule when it beat the default head to
 head (`scripts/variants.ts`):
 
 1. Once everyone else has passed, Bait back the biggest force card that still leaves you ahead.
@@ -86,7 +85,7 @@ head (`scripts/variants.ts`):
    leaves them ahead.
 6. Otherwise open with a 1 or a Fury. Those are the cheapest cards.
 7. With nobody else left in, play your strongest card if your hand would overtake: nobody can
-   answer. Rule 1 takes back what wasn't needed.
+   answer. Rule 1 takes back what you didn't need.
 8. Behind with others still in, Bait back a 1: it keeps you in the battle for nothing. Or play
    a 1.
 9. Behind, take the lead with the cheapest card that does it, however much the battle has cost
@@ -143,9 +142,9 @@ trained on.
 The first default had only rules 2, 9 and 11. Against a field of later defaults, the first
 default wins 12.4% at 3 players and 4.7% at 6. Each rule after that was the best answer to the
 default before it. The rules don't settle. Once everyone waits, opening pays again. Once everyone
-opens, waiting does. So from the fifth round on, rules were also judged against a league. The
+opens, waiting does. So from the fifth round on, we also judged rules against a league. The
 league seats a default from every round in each other seat (`variants.ts --field league`). A
-rule was kept only if it won there too. Bait back a 1 while ahead, for one, gains 4 to 7 points
+rule stayed only if it won there too. Bait back a 1 while ahead, for one, gains 4 to 7 points
 against today's default. Against the league, the same rule loses a point.
 
 ### Against strong players
@@ -223,7 +222,7 @@ still in who's furthest from winning. Both play the same. Against a table that h
 
 The deal keeps itself: once the others are staying out, the named player who doesn't deny hands
 the threat the game. That player loses 4 to 8 points by not denying. So the deal isn't a
-prisoner's dilemma. In a prisoner's dilemma, everyone is tempted to break their word. The deal is
+prisoner's dilemma. In a prisoner's dilemma, everyone gains by breaking their word. The deal is
 a matter of agreeing who goes. Talk can settle exactly that, even in the last battle. But a
 player who never made the deal does better at 3 and 4 players: 3.3 and 1.8 points over a fair
 share. At 5 and 6 players, that player gets about a fair share. Making the deal alone at a table
@@ -295,7 +294,7 @@ in leaves them free to overtake you. So keep adding your weakest card until they
 10s and Legends decide battles. Spend them only when nobody can answer. Take them back with Bait
 when you can.
 
-The table above says what a card is worth to be dealt. This one says what it's worth to play
+The table above says what a card is worth in your opening hand. This one says what it's worth to play
 well: the default against the same player that plays as if the card weren't in its hand
 (`variants.ts`, "never play", 10,000 games), in points:
 
@@ -316,7 +315,7 @@ your weakest card (rule 4). Under Winter it still makes your force cards 2 each.
 playing Fury well is worth more than playing any other card: 13.9 points. At 4 and 5 players,
 Crows is worth more. At 6, Fury and Crows tie.
 
-**Bait** is a poor card to be dealt: worse than a random one. Bait is also an essential card to
+**Bait** is a poor card in an opening hand: worse than a random one. Bait is also an essential card to
 use. Bait can only take back a force card from your own row. So Bait is never a way into a
 battle. Bait is only a way to spend less in one. Bait has four uses. Once everyone else has
 passed, Bait back the biggest card that still leaves you ahead (rule 1, 2 to 4 points). That
@@ -337,20 +336,20 @@ cards, so Crows can hand away a tie you were winning. Before you play it, count 
 still lead. The default used to check only before playing it. Then 27% of its Crows plays lost
 the battle (8,953 of 33,171, in 20,000 games). Checking after gains 2.1, 1.8, 1.3 and 1.2 points
 at 3–6 players against the previous default (40,000 games). Against the league it gains 1.4, 1.3,
-0.9 and 0.7. Against playouts it ties (6,000 games). Crows is worth 3.2 points to be dealt at 3
-players and 4.7 to 5.4 at 4 to 6.
+0.9 and 0.7. Against playouts it ties (6,000 games). Crows in an opening hand is worth 3.2 points
+at 3 players and 4.7 to 5.4 at 4 to 6.
 
 **Winter** turns every force card into a 1 for the rest of the battle. So Winter helps whoever
 has more cards down, or a Legend. The default plays Winter only when Winter takes the lead
 outright. The default counts Winter as cheap as a 3. That's worth a point or two. A Winter in
 hand is worth a little less than a random card.
 
-**Doves** ends the battle with no winner. Everything played in it is gone. The chip is fought
-over again next battle. The Favor stays where it is. Doves is a poor card to be dealt: about 2
-points below a random one. The default used to play Doves whenever someone else led with a chip
+**Doves** ends the battle with no winner. Everything played in it is gone. Everyone fights
+over the chip again next battle. The Favor stays where it is. Doves is a poor card in an opening
+hand: about 2 points below a random one. The default used to play Doves whenever someone else led with a chip
 that would win them the game. That was worth nothing measurable. So what is it for? Here is
 Doves against the move you'd make without it, at every chance to play it on someone else's lead
-in 16,000 default games. Each was played out on 64 deals (`scripts/fates.ts` as of 75b7650):
+in 16,000 default games. Playouts on 64 deals scored each one (`scripts/fates.ts` as of 75b7650):
 
 | when you could play Doves | how often, a game | Doves gains, points | Doves better |
 | --- | --- | --- | --- |
@@ -419,10 +418,10 @@ fraction as much. The learned player isn't just exploiting the default: it holds
 every earlier default and against playouts.
 
 A learned player reaches boards the default never does. So each round after the first trains on
-games the last round's learned player played (`dataset.ts --play`). Those games are labeled the
-same way, with default players inside the playouts. Each round adds them to the earlier rounds'
-data. Each model is then played against the default and against tables of the earlier models'
-players (20,000 games each):
+games the last round's learned player played (`dataset.ts --play`). Playouts label those
+games the same way, with default players inside them. Each round adds them to the earlier
+rounds' data. Then each model plays against the default and against tables of the earlier
+models' players (20,000 games each):
 
 | model | against the default, 3 / 4 / 5 / 6 players | against round 0 | against rounds 0–1 |
 | --- | --- | --- | --- |
@@ -458,8 +457,8 @@ Round 4 does it again with round 3's player in the games and the playouts (`data
 | rounds 3 and 4 together | 56.3 / 53.9 / 48.2 / 44.5 | 53.9 / 40.9 / 31.7 / 25.4 | 44.6 / 41.3 / 39.6 / 36.7 |
 
 Rounds 3 and 4 together beat round 3's players by 11 to 20 points. They keep round 3's edge over
-rounds 0–1's. They do better against the default at 4 to 6 players. So from here on, each
-round's model is fit to every round's games from round 3 on. "Round 4" means that model. Round 4
+rounds 0–1's. They do better against the default at 4 to 6 players. So from here on, we fit
+each round's model to every round's games from round 3 on. "Round 4" means that model. Round 4
 holds up elsewhere too:
 
 | round 4 | 3 players | 4 players | 5 players | 6 players |
@@ -516,7 +515,7 @@ either way. So the rounds are levelling off. Against the default, round 9 wins 2
 data and the mixed rounds together (see "Knowing the table").
 
 Round 10 played twice the games (6,000 a player count). Round 10 gains only 0.3 to 0.7 points
-over round 9. That's within the noise. So round 10 wasn't adopted. Against older models, round
+over round 9. That's within the noise. So we didn't adopt round 10. Against older models, round
 10 does less than a point better than round 9 did: a table of round 8 wins it 34.7%, 26.2%, 20.6%
 and 17.4%. More games of the same kind don't restart the gains.
 
@@ -583,8 +582,8 @@ Playouts play out every legal move to the end of the game on deals of the cards 
 The default plays on in those playouts. Playouts make the move that wins most. Against the first
 default, 32 deals won 84% at 3 players and 76% at 6. Each round of rules took some of that away.
 Rule 4 took 3.5 to 5.5 points more. Today, 8-deal playouts win less than a fair share. More
-deals still help a lot. So there's plenty more to how Hilt should be played than the default's
-rules. Rounds 0–1 and 5 were played against the default before rule 4. Spending to win every
+deals still help a lot. So there's plenty more to playing Hilt well than the default's rules.
+Rounds 0–1 and 5 played against the default from before rule 4. Spending to win every
 battle is ruinous. So is never taking a card back with
 Bait. The learned players are in "A learned player". Rounds 0–1 learned to beat default players.
 Round 5 learned to beat learned ones. At a table of each other, round 5 wins. The later rounds
@@ -629,7 +628,7 @@ The rest is knowing who's who (17 to 19). The "actually in each seat" rows are a
 real player has to work out who's who from a few battles' play. The defaults differ most
 in exactly what you can see (who waits, who opens with a 1, who chases every battle). For
 people: watch who passes early and who spends. Answer those players. Don't answer an imagined
-opponent who plays like you. Every learned player so far was trained at tables of itself. So
+opponent who plays like you. Every learned player so far trained at tables of itself. So
 none of them uses this room.
 
 So one round (`o1`) trained at mixed tables instead. Round 9's player sat in one seat. Each other
@@ -651,19 +650,19 @@ league. That's as much as playouts that know who sits where. Against the default
 Those splits are spread thin. The trees play the same without it. Without it, the model already
 wins about as much as the playouts that know who sits where. So the part that knowing who's who
 seemed to add above was the guessing playouts' weakness. That part wasn't room to read players.
-Learning what the table is made of is enough. And the gain is all against the kinds `o1` trained
+Learning what kinds of players sit at the table is enough. And the gain is all against the kinds `o1` trained
 on: at a table of round 9's players, `o1` wins 7 to 20%. Round 9 wins a fair share there. `o1`
 saw round 9's players only a third of the time. What a model learns is how to beat the players
 it practiced against. A model learns nothing about players it didn't.
 
-A second mixed round (`o2`) put round 9's player in half the other seats instead of a third. The
-model was fit to `o1` and `o2` together. It barely moved: 23.5 / 13.3 / 9.8 / 8.4 at a table of
+A second mixed round (`o2`) put round 9's player in half the other seats instead of a third. We fit
+its model to `o1` and `o2` together. That model barely moved: 23.5 / 13.3 / 9.8 / 8.4 at a table of
 round 9's players, 72.0 / 65.7 / 59.4 / 53.0 against the league. So the mix of seats wasn't what
 was missing. What was missing was labels from tables of round 9's players. Rounds 3 to 9 have
 those labels: 1.6 million decisions at learned tables. `o1` and `o2` are 0.6 million.
 
 Fitting them together means pooling them. Every move from every round goes into one training
-set. Each move is labeled with its playout win rate, and the trees learn to predict it. Nothing
+set. Each move's label is its playout win rate. The trees learn to predict it. Nothing
 weights one round over another. The two kinds of label can disagree about the same board and
 move. A round 9 label assumes the others play like round 9. A mixed label assumes they're league
 defaults. Where the board can't tell those tables apart, the trees land between the two labels,
@@ -696,8 +695,8 @@ Against the default with its Crows check (2026-11-23), Hard wins 65.0%, 53.3%, 4
 3–6 players. Against the league it wins 68.0%, 56.6%, 51.4% and 45.8% (20,000 games).
 
 Hard leaves a rival's game point for others to stop. In a game against two Hards and Medium, both
-Hards passed with full hands while a person won on game point. Medium was left to stop the person
-alone. Making Hard stop it itself loses, though. Hard plays Medium's `rival` rule first:
+Hards passed with full hands while a person won on game point. That left Medium
+to stop the person alone. Making Hard stop it itself loses, though. Hard plays Medium's `rival` rule first:
 take the lead with the cheapest card when fewer than 3 others are in. That costs 2.1 points at a
 table of two Hards and Medium, and 0.2 to 0.8 against the league. Doing it with any number of
 others in costs 5.6 and up to 8.7 (4,000 games). At those tables, someone else usually does stop
