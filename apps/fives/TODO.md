@@ -38,6 +38,16 @@
         the league, +0.1 and +0.1 against the learned player. Only over 5: leading any lowest card
         face down lost (2026-11-21, above). The playouts rows weren't rerun. Their noise at 2,000
         games is bigger than the effect.
+  - [x] `leadDown` flips the highest magenta first when none is under 5, 2026-11-24, from a game
+        against the bots (`scripts/play.ts`): a lone magenta 13 had to take a led magenta 5.
+        +10.7 and +5.5 points (40,000 games), +3.9 and +2.2 against the league, +1.4 and −0.2
+        against the learned player (10,000). Keeping your last silver when leading face down, to
+        trump a late run of magenta 5s, did nothing (2,000 games). Hard reads the default's pick;
+        told the new one, it ties Hard told the old one (33.5% and 25.3%, 10,000 games), so the
+        README's tables of Hard's games weren't rerun. Refitting `chance` moved no weight by more
+        than 0.1, so it wasn't changed. A second game, a subagent's against three Hard bots, busted
+        twice after trumping to 24 with 5 or more cards left. Avoiding 23 or 24 when forced to
+        take, with more than 3 or 6 cards left, tied the default (2,000 games).
   - [x] Rerun the playouts rows of the README's players table against the new default,
         2026-11-21 (800 games, 15 minutes): 32-deal hand playouts win 63.1% and 62.3%, level with
         round 9.

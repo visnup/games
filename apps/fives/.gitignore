@@ -1,3 +1,4 @@
 dataset/data*
 dataset/model*.json
 dataset/distill.csv
+dataset/play.json

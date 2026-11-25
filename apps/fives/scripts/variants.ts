@@ -23,11 +23,21 @@ const without =
 /** The default's steps with `step` in place of `old`. */
 const replace = (old: keyof typeof STEPS, step: Step) => (): Policy => heuristic(...steps.map((s) => (s === old ? step : s)));
 
+/** `leadDown` before it flipped a high magenta first: the highest trump face down, else the highest card. */
+const trumpDown: Step = (game, p, plays) => {
+  if (game.trick.length || TARGET - total(p) < 5) return undefined;
+  let best: Play | undefined;
+  for (const x of plays) if (x.down && x.card.color === TRUMP && (!best || x.card.value >= best.card.value)) best = x;
+  if (best) return best;
+  for (const x of plays) if (x.down && (!best || x.card.value >= best.card.value)) best = x;
+  return best;
+};
+
 /** `duck` before it led a card over 5 face down within 5 of 25: the lowest card face up. */
 const duckUp: Step = (game, p, plays) => (game.trick.length ? STEPS.duck(game, p, plays) : plays.reduce<Play | undefined>((b, x) => (!x.down && (!b || x.card.value < b.card.value) ? x : b), undefined));
 
 /** The default before `duck` led face down within 5 of 25. */
-const faceUp = heuristic("leadDown", duckUp, "least");
+const faceUp = heuristic(trumpDown, duckUp, "least");
 
 /** Once busted, dump the biggest card. */
 const busted: Step = (game, p, plays) => (TARGET - total(p) < 0 ? plays.reduce((b, x) => (x.card.value >= b.card.value ? x : b)) : undefined);
@@ -39,7 +49,7 @@ const exact: Step = (game, p, plays) => plays.find((x) => face(x).value === TARG
 const take: Step = (game, p, plays) => (game.players.length === 4 && game.trick.length === 3 && p.hand.length > 8 && TARGET - total(p) > 12 ? undefined : takeWithin(0)(game, p, plays));
 
 /** The default before it stopped taking sure wins. */
-const taking = heuristic(busted, "leadDown", exact, take, duckUp, "least");
+const taking = heuristic(busted, trumpDown, exact, take, duckUp, "least");
 
 /** The default before `leadDown`. */
 const previous = heuristic(busted, exact, takeWithin(0), duckUp, "least");
@@ -54,12 +64,17 @@ const leadDown =
 const highest = heuristic(busted, leadDown(5), exact, takeWithin(0), duckUp, "least");
 
 /** The default before `take` waited when last early at 4 players. */
-const eager = heuristic(busted, "leadDown", exact, takeWithin(0), duckUp, "least");
+const eager = heuristic(busted, trumpDown, exact, takeWithin(0), duckUp, "least");
+
+/** The default before `leadDown` flipped a high magenta first when none is under 5. */
+const trumpFirst = heuristic(trumpDown, "duck", "least");
 
 const VARIANTS: Record<string, (seed: number) => Policy> = {
   "the default": () => defaultPolicy,
   "face up only": STRATEGIES["face up"],
   ...Object.fromEntries(steps.filter((s) => s !== "least").map((s) => [`without ${s}`, without(s)])),
+  "without duck's face-down lead within 5 of 25": () => heuristic("leadDown", duckUp, "least"),
+  "taking every sure win that doesn't bust": insert(takeWithin(0), "duck"),
   "take sure wins, dump once busted (previous)": () => taking,
   "never lead face down (previous)": () => previous,
   ...Object.fromEntries([3, 7, 10].map((k) => [`lead the highest card face down with ${k}+ to go`, replace("leadDown", leadDown(k))])),
@@ -68,6 +83,7 @@ const VARIANTS: Record<string, (seed: number) => Policy> = {
     if (game.trick.length || TARGET - total(p) < 5) return undefined;
     return plays.filter((x) => x.down && x.card.color === TRUMP).sort((a, b) => a.card.value - b.card.value)[0] ?? leadDown(5)(game, p, plays);
   }),
+  "lead face down your highest silver first, before a high magenta (previous)": () => trumpFirst,
   "take every sure win that doesn't bust (previous)": () => eager,
   ...Object.fromEntries(
     [6, 12].map((k) => [
@@ -89,7 +105,7 @@ const VARIANTS: Record<string, (seed: number) => Policy> = {
   ),
   "within 5 of 25, lead the lowest card face up (previous)": () => faceUp,
   "the learned player": () => learned(),
-  "the learned player, told the previous default's pick": () => learned(undefined, taking),
+  "the learned player, told the previous default's pick": () => learned(undefined, trumpFirst),
   "hand playouts among learned players": (seed) => playouts(16, seed, learned("dataset/model-r6-rollout.json"), 1),
   "hand playouts among round 9's rollout players": (seed) => playouts(16, seed, learned("dataset/model-r9-rollout.json"), 1),
   ...Object.fromEntries([2, 4].map((k) => [`hand playouts on ${k} deals among round 9's full players`, (seed: number) => playouts(k, seed, learned("dataset/model-r9.json"), 1)])),
@@ -105,7 +121,7 @@ const VARIANTS: Record<string, (seed: number) => Policy> = {
 };
 
 /** Every default so far, each adopted as the best answer to the one before. */
-const LEAGUE: Policy[] = [previous, highest, eager, taking, faceUp, defaultPolicy];
+const LEAGUE: Policy[] = [previous, highest, eager, taking, faceUp, trumpFirst, defaultPolicy];
 
 /** Each other seat a default from `LEAGUE` at random, so a rule that only beats the latest one doesn't look good. */
 const league = (seed: number) => LEAGUE[Math.floor(mulberry32(seed)() * LEAGUE.length)];

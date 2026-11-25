@@ -710,7 +710,9 @@ function reason(game: Game, p: Player): { play: Play; why: string } {
     if (!play) continue;
     const why =
       name === "leadDown"
-        ? `You're 5 or more from 25, so lead your highest ${play.card.color === TRUMP ? "silver" : "card"} face down. It counts 5 at most.`
+        ? play.card.color === "magenta" && play.card.value > 5 && !p.hand.some((c) => c.color === "magenta" && c.value < 5)
+          ? "You're 5 or more from 25, so lead face down. You have no magenta under 5, so flip your highest magenta: a magenta 5 led would force you to take with it."
+          : `You're 5 or more from 25, so lead your highest ${play.card.color === TRUMP ? "silver" : "card"} face down. It counts 5 at most.`
         : name === "duck"
           ? !game.trick.length
             ? room < 0

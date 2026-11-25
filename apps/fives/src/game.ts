@@ -349,10 +349,23 @@ export const STEPS = {
    * the default. The highest card: +31.8 and +24.7 points against the default at 3 and 4 players
    * (40,000 games), and 2.6% to 8.8%, 1.2% to 3.9% against the learned player. Trump first: +8.3
    * and +11.3 more, +5.8 and +6.6 against the league, +1.9 and +0.9 against the learned player.
+   * Before trump, the highest magenta when none is under 5, which a magenta 5 led would force to
+   * take: +10.7 and +5.5, +3.9 and +2.2 against the league, +1.4 and −0.2 against the learned
+   * player (10,000). From a game against the bots.
    */
   leadDown(game, p, plays) {
     if (game.trick.length || room(p) < 5) return undefined;
+    let high = false;
+    let low = false;
+    for (const c of p.hand) if (c.color === "magenta") [high, low] = c.value > 5 ? [true, low] : [high, true];
     return (
+      (high && !low
+        ? most(
+            plays,
+            (x) => x.card.value,
+            (x) => x.down && x.card.color === "magenta",
+          )
+        : undefined) ??
       most(
         plays,
         (x) => x.card.value,

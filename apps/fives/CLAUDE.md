@@ -57,6 +57,9 @@ last page has the components and a summary.
   `if (import.meta.main)`.
 - `scripts/sim.ts`: quick Monte Carlo, wins by seat, busts and 25s. `--log` prints every play.
 - `scripts/strategies.ts`: one player of each strategy against the default in every other seat.
+- `scripts/play.ts`: a game against bots from the command line, one play a call, replayed from
+  `dataset/play.json` (or `$PLAY`) as the site replays. It's for probing the bots by hand or with
+  a subagent. It hides the dealt hands that the log's "hand N:" lines show.
 - `node --test 'src/*.test.ts'` runs the booklet's rules, scoring examples, replays and reviews.
   `pnpm test` runs those, then Playwright.
 - `TODO.md` is the plan, `README.md` what the simulator has shown so far.
@@ -86,6 +89,9 @@ The steps:
      (`scripts/overrules.ts`). It found `leadDown` and `take`'s wait (since dropped).
    - `scripts/decisions.ts`: where playouts clearly prefer another play.
    - A person's game: a review that shows a costly play (`TODO.md` has some).
+   - A game against the bots with `scripts/play.ts`. It found flipping a lone high magenta first.
+   - Hard reads Medium's pick as a feature, so changing `STEPS` changes Hard too. Check Hard told
+     the new pick against Hard told the old one.
 2. **Write it as a variant** in `scripts/variants.ts`, with a few alternatives (cheapest card or
    biggest, every situation or only near 25). Screen at 2,000 games, then run the best at 40,000.
 3. **Adopt it in `STEPS`** if it beats the default beyond the noise (±0.5 points at 40,000 games)
