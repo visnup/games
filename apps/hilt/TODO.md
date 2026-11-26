@@ -160,10 +160,19 @@
       Limits on cards played (0, 1 or 2) tie or lose (4,000 games).
 - [x] Reran the README's tables for the default without `stall` (2026-11-25, 299 minutes, in
       `dataset/rt4/`, rule worths in `rules.md`).
-- [ ] Card counting (v2 features) gains a little. On the same data (`dataset/data-c1`), v2
-      beats v1 by +1.2, +0.6, +0.3 and +0.1 at 3–6 players (20,000 games). Both c1 models win
-      40% at 3 players against today's Hard, likely because c1 learned from today's default
-      (hypothesis, untested). Next: a round on v2 features with today's default.
+- [x] Card counting (v2 features). On the same data (`dataset/data-c1`), v2 beats v1 by +1.2,
+      +0.6, +0.3 and +0.1 at 3–6 players (20,000 games). Both c1 models win 40% at 3 players
+      against the previous Hard. c1 is Hard's own games, labeled among Hard's players.
+- [x] Round 11, adopted as Hard (2026-11-25, 46 minutes): a mixed round on v2 rows (`data-o4`,
+      6,000 games a player count), fit with rounds 3–9, `o1` to `o3` and c1
+      (`model-r3456789o1234c`). learn.py fills v1 rows' card counts as missing. At a table of the
+      previous Hard it wins 40.6%, 27.7%, 22.7% and 18.6% at 3–6 players. Against the default it
+      gains 6.7, 3.2, 3.7 and 5.3 points over the previous Hard. Against the league it gains 5.3
+      at 3 players and ties at 4–6 (20,000 games). The same fit without card counting
+      (`V1=1`, `model-v1r3456789o1234c`) wins 31.2%, 24.3%, 19.7% and 16.4% at a table of round
+      11, and 36.7%, 26.0%, 21.4% and 17.9% at a table of the previous Hard. So card counting is
+      about half the gain at 3 players and a third or less at 4–6. Against the league the
+      version without it does 0.4 to 1.2 points better at 4–6 players.
 
 ## Analysis
 

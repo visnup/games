@@ -23,6 +23,8 @@ data = dirs[-1]
 version = 1
 # version 2's rows fit as version 1, without card counting: its 13 unseen counts and 1 move number
 as_v1 = os.environ.get("V1") == "1"
+# version 1's rows fit beside version 2's, with the card counts missing
+pad = not as_v1 and any(json.loads(f.open().readline()).get("v", 1) == 2 for d in dirs for f in d.glob("*.jsonl"))
 
 
 def read(files):
@@ -35,6 +37,8 @@ def read(files):
             board, moves = r["board"], r["moves"]
             if as_v1 and version == 2:
                 version, board, moves = 1, board[:-13], [m[:-2] + m[-1:] for m in moves]
+            if pad and version == 1:
+                version, board, moves = 2, board + [np.nan] * 13, [m[:-1] + [np.nan] + m[-1:] for m in moves]
             groups.append(len(moves))
             for m, v in zip(moves, r["values"]):
                 X.append(board + m)

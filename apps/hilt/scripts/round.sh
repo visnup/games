@@ -25,11 +25,11 @@ games=${GAMES:-3000}
 trees=${TREES:-1000}
 # rounds 3 to $1 as a model's name: r345678s
 name() { echo "r$(seq -s '' 3 "$1" | tr -d '\n')s"; }
-prev=$(name $((round - 1)))
+prev=${PREV:-$(name $((round - 1)))}
 next=${NAME:-$(name "$round")}
 dirs=${DIRS:-$(for r in $(seq 3 "$round"); do echo $D/data-r${r}s; done)}
 data=$D/data-${DATA:-r${round}s}
-fields=$(for r in $(seq $((round - 1)) -1 $((round > 6 ? round - 4 : 3))); do name "$r"; done)
+fields=${FIELDS:-$(for r in $(seq $((round - 1)) -1 $((round > 6 ? round - 4 : 3))); do name "$r"; done)}
 
 . ../../packages/kit/lock.sh
 lock "hilt round $round"
@@ -63,7 +63,7 @@ timeout $((${HOURS:-3} * 3600)) node scripts/dataset.ts --games $games --deals $
 end
 
 begin train
-timeout 3600 uv run scripts/learn.py $trees $D/model-$next.json $dirs >$L/trees.txt 2>&1
+timeout 10800 uv run scripts/learn.py $trees $D/model-$next.json $dirs >$L/trees.txt 2>&1
 grep -A5 '^held out' $L/trees.txt
 end
 
@@ -77,6 +77,6 @@ end
 
 # after comparing, since --only "learned $next" would match it too
 begin "train 200"
-timeout 3600 uv run scripts/learn.py 200 $D/model-$next-200.json $dirs >$L/trees-200.txt 2>&1
+timeout 10800 uv run scripts/learn.py 200 $D/model-$next-200.json $dirs >$L/trees-200.txt 2>&1
 end
 echo "$(date) round $id: done"

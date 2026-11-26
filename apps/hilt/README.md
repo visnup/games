@@ -117,46 +117,46 @@ against Hard):
 
 | rule | against Medium | against the league | against Hard |
 | --- | --- | --- | --- |
-| behind, take the lead with the cheapest card | 18.8 / 18.7 / 15.2 / 12.2 | 26.4 / 18.0 / 14.1 / 10.9 | 6.8 / 5.4 / 4.3 / 3.4 |
-| ahead, keep playing | 12.9 / 3.6 / −0.6 / −2.9 | 23.6 / 10.2 / 6.9 / 3.6 | 8.6 / 7.5 / 5.7 / 5.0 |
-| let the others spend first | 7.5 / 12.4 / 12.2 / 10.4 | 4.1 / 6.5 / 4.2 / 2.9 | 1.4 / 4.1 / 6.1 / 6.6 |
-| take back what you don't need | 7.3 / 5.4 / 5.3 / 4.3 | 11.7 / 7.9 / 7.1 / 6.1 | 1.4 / 2.8 / 2.2 / 2.0 |
-| Crows only when you'd still lead | 4.7 / 4.6 / 4.3 / 3.4 | 7.1 / 5.6 / 4.6 / 3.9 | 5.8 / 3.8 / 2.9 / 2.2 |
-| stop a chip that wins someone the game | 0.6 / 0.4 / 0.5 / 0.5 | 3.4 / 0.7 / 0.7 / 0.5 | 1.7 / 1.5 / 1.2 / 1.2 |
-| Doves for your own winning chip | 3.2 / 0.6 / 0.5 / 0.2 | 2.3 / 0.4 / 0.0 / −0.1 | 0.9 / 0.7 / 0.3 / 0.3 |
-| alone, finish it | 1.9 / 0.9 / 0.6 / 0.3 | 1.8 / 1.3 / 0.6 / 0.2 | 1.5 / 0.5 / −0.1 / −0.2 |
-| stay in cheaply | 0.4 / −1.7 / −0.6 / −0.8 | 5.5 / 3.8 / 3.3 / 2.9 | −2.3 / −0.7 / −0.8 / 0.0 |
+| behind, take the lead with the cheapest card | 18.8 / 18.7 / 15.2 / 12.2 | 26.4 / 18.0 / 14.1 / 10.9 | 6.6 / 4.2 / 3.3 / 2.9 |
+| ahead, keep playing | 12.9 / 3.6 / −0.6 / −2.9 | 23.6 / 10.2 / 6.9 / 3.6 | 8.1 / 6.4 / 4.7 / 4.5 |
+| let the others spend first | 7.5 / 12.4 / 12.2 / 10.4 | 4.1 / 6.5 / 4.2 / 2.9 | 2.0 / 3.8 / 3.9 / 4.6 |
+| take back what you don't need | 7.3 / 5.4 / 5.3 / 4.3 | 11.7 / 7.9 / 7.1 / 6.1 | 1.5 / 2.2 / 2.1 / 1.8 |
+| Crows only when you'd still lead | 4.7 / 4.6 / 4.3 / 3.4 | 7.1 / 5.6 / 4.6 / 3.9 | 6.2 / 3.5 / 2.6 / 2.0 |
+| stop a chip that wins someone the game | 0.6 / 0.4 / 0.5 / 0.5 | 3.4 / 0.7 / 0.7 / 0.5 | 1.6 / 1.3 / 0.9 / 1.0 |
+| Doves for your own winning chip | 3.2 / 0.6 / 0.5 / 0.2 | 2.3 / 0.4 / 0.0 / −0.1 | 0.9 / 0.6 / 0.5 / 0.3 |
+| alone, finish it | 1.9 / 0.9 / 0.6 / 0.3 | 1.8 / 1.3 / 0.6 / 0.2 | 1.1 / 0.1 / −0.1 / 0.0 |
+| stay in cheaply | 0.4 / −1.7 / −0.6 / −0.8 | 5.5 / 3.8 / 3.3 / 2.9 | −1.2 / −0.3 / −0.6 / −0.3 |
 
-Against Hard, a Medium bot wins 13.3%, 11.1%, 10.2% and 9.4% at 3–6 players. So the same points
+Against Hard, a Medium bot wins 11.4%, 9.4%, 7.7% and 7.2% at 3–6 players. So the same points
 are a bigger share of what it wins there.
 
 Two rules are bets on the table. "Ahead, keep playing" costs 0.6 points at a 5-player table of
 Medium bots and 2.9 at a 6-player one. At every other table it pays, by up to 24 points. "Stay in cheaply" pays only against
-the league. Against Medium and Hard it costs up to 2.3 points. The sections below say why.
+the league. Against Medium and Hard it costs up to 1.7 points. The sections below say why.
 
 ### What a battle looks like
 
-Most battles aren't worth fighting. Among Hard bots, 61% of the players sit a battle out without
-playing a card at 6 players. At 3 players, 16% do. Battles get cheaper as the table grows. At 3
-players, everyone together plays about 10 cards a battle. At 6, they play about 6. The winner
-needs less, too: 19.6 strength at 3 players and 10.9 at 6. 4,000 games among Hard bots
+Most battles aren't worth fighting. Among Hard bots, 63% of the players sit a battle out without
+playing a card at 6 players. At 3 players, 24% do. Battles get cheaper as the table grows. At 3
+players, everyone together plays about 11 cards a battle. At 6, they play about 6. The winner
+needs less, too: 21.3 strength at 3 players and 11.1 at 6. 4,000 games among Hard bots
 (`scripts/battles.ts`):
 
 | among Hard bots | 3 players | 4 players | 5 players | 6 players |
 | --- | --- | --- | --- | --- |
-| battles a game | 7.9 | 8.1 | 9.1 | 9.8 |
-| rounds a game | 2.7 | 1.5 | 1.4 | 1.2 |
-| games won with three of a color | 83% | 74% | 70% | 70% |
-| games won with one of each | 17% | 26% | 30% | 30% |
-| cards played a battle, everyone together | 9.9 | 6.6 | 6.1 | 5.8 |
-| players who sit a battle out without playing | 16% | 44% | 54% | 61% |
-| the winner's strength | 19.6 | 12.8 | 11.5 | 10.9 |
-| cards in the winner's row | 4.0 | 2.8 | 2.6 | 2.5 |
-| battles the Favor holder wins | 24% | 31% | 28% | 26% |
-| battles Crows ends | 24% | 18% | 17% | 17% |
-| battles Doves ends | 25% | 18% | 17% | 17% |
+| battles a game | 7.7 | 8.0 | 8.7 | 9.5 |
+| rounds a game | 3.1 | 1.5 | 1.3 | 1.2 |
+| games won with three of a color | 81% | 72% | 69% | 70% |
+| games won with one of each | 19% | 28% | 31% | 30% |
+| cards played a battle, everyone together | 10.8 | 6.4 | 5.9 | 5.6 |
+| players who sit a battle out without playing | 24% | 46% | 56% | 63% |
+| the winner's strength | 21.3 | 12.7 | 11.6 | 11.1 |
+| cards in the winner's row | 4.5 | 2.8 | 2.5 | 2.4 |
+| battles the Favor holder wins | 28% | 29% | 28% | 25% |
+| battles Crows ends | 26% | 17% | 16% | 16% |
+| battles Doves ends | 24% | 17% | 17% | 17% |
 
-At 3 players, a game lasts almost three rounds. At 4 to 6, most games end in the first round. So at
+At 3 players, a game lasts about three rounds. At 4 to 6, most games end in the first round. So at
 a big table, the 10 cards you're dealt are usually all you get. Crows or Doves ends half of all
 battles at 3 players. At 4 to 6, they end about a third.
 
@@ -194,7 +194,7 @@ strongest card does a little worse.
 
 At a 6-player table of today's Medium bots, this rule costs 2.9 points. Those bots chase every
 lead. Perhaps a lead held against 5 of them draws cards out of all 5 (hypothesis, untested). Against
-the league it's worth 3.6 to 24 points. Against Hard it's worth 5 to 8.6. Keep playing.
+the league it's worth 3.6 to 24 points. Against Hard it's worth 4.5 to 8.1. Keep playing.
 
 ### Let the others spend first
 
@@ -202,8 +202,8 @@ Behind with nothing down and 2 or more others still in, pass. Let them spend the
 each other. The exceptions are a chip that would win you the game and a chip that would win
 someone else the game (the next section).
 
-Waiting is worth 7.5 to 12.4 points against Medium and 1.4 to 6.6 against Hard. The bigger the
-table, the more it's worth against Hard. At 6 players, it's worth 6.6 points there. The first
+Waiting is worth 7.5 to 12.4 points against Medium and 2.0 to 4.6 against Hard. The bigger the
+table, the more it's worth against Hard. At 6 players, it's worth 4.6 points there. The first
 Medium fought every battle. Against that Medium, a waiting player won 58.8% at 3 players and 70 to
 72% at 4–6 (40,000 games).
 
@@ -273,7 +273,7 @@ a card in your row. Ties go to fewer cards. So Crows can hand away a tie you wer
 you play Crows, count it and check that you still lead.
 
 Playing Crows this way is worth 3.4 to 4.7 points against Medium, 3.9 to 7.1 against the league and
-2.2 to 5.8 against Hard. Playing Crows only with a card down came first. It gained 2 to 5 points
+2.0 to 6.2 against Hard. Playing Crows only with a card down came first. It gained 2 to 5 points
 over Crows whenever ahead. Medium then checked the lead only before playing Crows. 27% of its
 Crows plays lost the battle (8,953 of 33,171, in 20,000 games). Counting Crows in the row gains
 2.2, 1.6, 1.2 and 0.8 points at 3–6 players against that Medium. It gains 1.9, 2.3, 1.6 and 1.1
@@ -290,7 +290,7 @@ is a way to spend less in one. Bait has three uses:
 - Before you give up a battle, take back your biggest force card.
 
 Together these are worth 4.3 to 7.3 points against Medium and 6.1 to 11.7 against the league.
-Against Hard they're worth 1.4 to 2.8.
+Against Hard they're worth 1.5 to 2.2.
 
 Medium used to Bait back a 1 while behind with others still in. That kept it in the battle for
 nothing. Dropping that use won 1.3, 1.7, 1.1 and 0.8 points at 3–6 players against Medium (40,000
@@ -301,7 +301,7 @@ games). It tied the league and Hard. So we dropped it.
 With nobody else left in, nobody can answer. If your hand would overtake the leader, play your
 strongest card. Then play the next strongest until you lead. Rule 1 then takes back what you
 didn't need. This is worth 0.3 to 1.9 points against Medium and the league. Against Hard it's worth
-1.5 points at 3 players and nothing at 4 to 6.
+1.1 points at 3 players and nothing at 4 to 6.
 
 ### Doves for your own winning chip
 
@@ -338,7 +338,7 @@ can overtake with nobody to answer.
 
 Behind, play a 1 before anything that would take the lead. A 1 keeps you in the battle for almost
 nothing. This rule is a bet on weak players. Against the league it's worth 2.9 to 5.5 points.
-Against Medium it costs up to 1.7 points at 4 to 6 players. Against Hard it costs 2.3 points at
+Against Medium it costs up to 1.7 points at 4 to 6 players. Against Hard it costs 1.2 points at
 3 players.
 
 The bet is all one on one. Playing a 1 only with 2 or more others in plays the same as never
@@ -504,7 +504,7 @@ games; playouts 4,000):
 | strategy | 3 players | 4 players | 5 players | 6 players |
 | --- | --- | --- | --- | --- |
 | default | 33.6% | 24.9% | 20.3% | 16.6% |
-| learned, Hard | 61.2% | 47.7% | 41.5% | 35.3% |
+| learned, Hard | 67.9% | 50.5% | 45.2% | 40.0% |
 | playouts, 128 deals | 66.5% | 59.3% | 51.4% | 47.2% |
 | playouts, 32 deals | 52.6% | 43.4% | 34.8% | 32.5% |
 | playouts, 8 deals | 25.7% | 19.1% | 16.6% | 16.4% |
@@ -514,12 +514,12 @@ games; playouts 4,000):
 | random | 1.0% | 0.6% | 0.4% | 0.3% |
 | passive: never play | 0.0% | 0.0% | 0.0% | 0.0% |
 
-"Default" is Medium. Hard wins 1.8 to 2.1 fair shares against Medium. Against the league, Hard wins
-65.0%, 54.4%, 48.8% and 43.3% at 3–6 players (20,000 games). Easy wins a tenth of a fair share or
+"Default" is Medium. Hard wins 2.0 to 2.4 fair shares against Medium. Against the league, Hard wins
+70.3%, 54.9%, 48.4% and 42.4% at 3–6 players (20,000 games). Easy wins a tenth of a fair share or
 less at 4 to 6 players. Spending to win every battle is ruinous. So is never taking a card back
 with Bait.
 
-Playouts on 128 deals win more against Medium than Hard does. Playouts cost thousands of games a decision, though. Playouts can
+At 4 to 6 players, playouts on 128 deals win more against Medium than Hard does. Playouts cost thousands of games a decision, though. Playouts can
 also race. Racing plays the moves out 8 deals at a time on the same deals. It drops a move once
 that move is 2 standard errors behind the leader. That spends the deals on the moves still in
 contention. Playouts can also play out only the 3 moves Hard ranks highest. Against Medium (4,000
@@ -610,7 +610,9 @@ of games a decision. So Hard learned to predict what playouts would say.
 - **Data.** `scripts/dataset.ts` plays games. At every decision of one player, it plays every legal
   move out to the end on 32 shared deals (16 in later rounds). Each move's label is its playout win
   rate.
-- **Features.** Hard sees 40 numbers about the board and 19 about the move. One of the move's
+- **Features.** Hard sees 53 numbers about the board and 20 about the move. Since round 11 those
+  include card counting: how many of each kind of card Hard hasn't seen yet, and how many unseen
+  cards beat the card a move plays. One of the move's
   numbers is whether Medium would pick it. That Medium is frozen at the version every model so far
   trained on (`hint` in `src/learned.ts`).
 - **Trees.** `scripts/learn.py` fits gradient-boosted trees (LightGBM, 1,000 trees) to predict each
@@ -643,6 +645,7 @@ round's model at a table of the model before it (20,000 games each):
 | 8 | round 7 | 34.4% | 26.7% | 21.3% | 17.7% |
 | 9 | round 8 | 33.4% | 25.9% | 20.5% | 17.3% |
 | 10 | round 9 | 34.0% | 25.3% | 20.5% | 17.0% |
+| 11 | rounds 3–9 and `o1` to `o3` | 40.6% | 27.7% | 22.7% | 18.6% |
 
 And each against the Medium of its day:
 
@@ -656,6 +659,7 @@ And each against the Medium of its day:
 | 8 | 38.7% | 44.5% | 37.9% | 33.0% |
 | 9 | 41.1% | 43.3% | 37.1% | 32.0% |
 | 10 | 43.0% | 43.3% | 36.8% | 31.6% |
+| 11 | 67.8% | 50.8% | 45.5% | 40.8% |
 
 Every round beat the one before by less. Round 9 gained 0.5 to 0.9 points over round 8. Round 10
 played twice the games and gained only 0.3 to 0.7, within the noise. We didn't adopt round 10. More
@@ -668,15 +672,14 @@ plays (`round.sh` with `MIXED=1`). `o1` gained 19 to 29 points against the leagu
 as playouts that know who sits where. But at a table of round 9's players, `o1` won 7 to 20%. What
 a model learns is how to beat the players it practiced against. Two more mixed rounds (`o2`, `o3`)
 followed. Fit to every round together, the model gives up 0.4 to 2.8 points at a table of round 9's
-players. It gains 12 to 24 against the league. Hard plays that model: rounds 3 to 9 with `o1` to
-`o3`.
+players. It gains 12 to 24 against the league. That model was Hard until round 11.
 
 Fitting rounds together pools them. Every move from every round goes into one training set. The
 two kinds of label can disagree about the same board and move. A round 9 label assumes the others
 play like round 9. A mixed label assumes they're league Medium bots. Where the board can't tell
 those tables apart, the trees land between the two labels. The more common label pulls harder.
 
-**Free riding.** Hard leaves a rival's game point for others to stop. In one game against two Hards
+**Free riding.** We measured this and the next finding with the Hard before round 11. Hard leaves a rival's game point for others to stop. In one game against two Hards
 and Medium, both Hards passed with full hands while a person won on game point. Making Hard stop it
 itself loses, though. Hard playing Medium's rule first costs 2.1 points at a table of two Hards and
 Medium (4,000 games). At those tables, someone else usually does stop the rival. Once nobody else
@@ -688,7 +691,11 @@ ends 15.3% of rounds holding cards, twice Medium's rate. It throws away 3.1 card
 wins 49.7% (3,000 games). Giving up sooner while a big hand sits out doesn't punish it. Neither does
 Doves or Winter on a big hand's late spend (4,000 games).
 
-**What's next.** Hard doesn't count cards. A version that sees how many of each card it hasn't
-seen yet beats the same model without that by 1.2 points at 3 players and 0.1 at 6 (20,000 games).
-Both versions trained on today's Medium's games. Both win 40% at 3 players at a table of today's
-Hard. So a new round on today's Medium should pay (hypothesis, untested).
+**Round 11: card counting.** Hard now counts cards. Round 11 is a fourth mixed round (`o4`, 6,000
+games a player count) with the card-counting numbers. Hard's own games went in too (c1, 3,000 games
+a player count). We fit them with every round before. The older rounds lack the card counts. The
+trees see those counts as missing. At a table of the previous Hard, round 11 wins 40.6%, 27.7%, 22.7% and
+18.6% at 3–6 players. Against Medium it gains 3.2 to 6.7 points over the previous Hard. Against the
+league it gains 5.3 at 3 players and ties at 4–6 (20,000 games). The same fit without card counting
+wins 2.1 points less at 3 players at a table of round 11, and 0.3 to 0.7 less at 4–6. So card
+counting is about half the gain at 3 players. The extra games are the rest.
