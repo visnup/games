@@ -74,6 +74,12 @@
         other seat as Medium, won 57.2% and 31.6% against Medium, where Hard won 55.6% and 45.0%.
         The same playouts simulating every seat as Hard won 31.8% and 18.5%. So no training round
         for the new Medium.
+  - [x] Rules from `decisions.ts`'s features, 2026-11-25 (40,000 games). In the last hand, taking
+        every sure win, taking sure wins that leave 5, taking a sure 25 and never leading face down
+        all lost 0.2 to 5.9 points, whether gated on being behind or ahead on chips. Trumping with
+        the lowest silver when you can't follow lost 1.3 to 5.2 at 3 players. At 4 players only,
+        leaving 8, it gained 3.4 against Medium but lost 0.9 against the league (leaving 3, 5 or
+        12 lost 0.9 to 2.3). None adopted.
   - [x] Round 10, 2026-11-20, labeled with the new default's flag (`FROM=10`, `HANDS=2`, 1,500
         trees of 127 leaves): lost to round 9 (29.8%, 23.7%). Refit to rounds 7–10
         (`model-r10refit.json`) it ties round 9 (32.8%, 24.8%). Not adopted; rounds have stopped
@@ -124,6 +130,5 @@
 - [x] The Hard bot on the learned model, and in the review, 2026-11-21: round 9 (`hard.ts`, the
       review's Hard bots on its rollout version) ties 32-deal hand playouts.
 - [x] Deploy, 2026-11-20: fives.visnup.com, from `main`.
-- [ ] The pot on the table. Chips carried over from a tied hand show only as "N in the pot" under
-      the header, where they're easy to miss. Put them in the middle of the table while they
-      last, since they change who wants 25.
+- [x] The pot on the table, 2026-11-25: a chip and its count in the trick's bottom-left corner,
+      the one cell no trick card uses at 3 or 4 players, in place of the header's "N in the pot".

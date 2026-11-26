@@ -190,7 +190,6 @@ export function Board({ game, me }: Props) {
         <div className="flex w-[7em] shrink-0 flex-col items-center gap-[0.2em] pt-[0.2rem] text-center">
           <span className="label">Hand {scored?.hand ?? g.hand} of 4</span>
           <span className="text-sm">{view.result ? "Game over" : scored ? "Scores" : `Trick ${Math.min(n === 3 ? 12 : 13, g.players.reduce((s, p) => s + p.won.length, 0) + 1)}`}</span>
-          {g.pot > 0 && <span className="text-xs opacity-70">{g.pot} in the pot</span>}
         </div>
         <div className="h-[5rem] flex-1 overflow-y-auto text-sm max-sm:h-[3.4rem]" ref={log}>
           {entries(logged, who).map(({ heading, line: first, lines }, i) => (
@@ -241,6 +240,12 @@ export function Board({ game, me }: Props) {
               </div>
             );
           })}
+          {g.pot > 0 && (
+            <span key={g.pot} className="col-start-1 row-start-3 flex animate-pop flex-col items-center text-xs whitespace-nowrap" title="The pot: chips from a tied hand, for the next hand's closest player">
+              <Chips n={g.pot} />
+              <span className="opacity-60">in the pot</span>
+            </span>
+          )}
           {view.result && !scored && (
             <span className="col-start-2 row-start-2 animate-rise text-center font-bold">
               {view.result.winners.length > 1 ? `${view.result.winners.map(who).join(" and ")} share the win` : `${who(view.result.winners[0])} won`}
@@ -319,7 +324,7 @@ function HandScores({ scored, who, chips, done }: { scored: Scored; who: (n: num
             </li>
           ))}
         </ul>
-        {scored.pot > 0 && <p className="m-0 mt-[0.2em] text-xs opacity-70">{scored.pot} chips carried over to the next hand&apos;s closest player.</p>}
+        {scored.pot > 0 && <p className="m-0 mt-[0.2em] text-xs opacity-70">{scored.pot} chip{scored.pot === 1 ? "" : "s"} carried over to the next hand&apos;s closest player.</p>}
       </div>
       <button className="primary shrink-0" onClick={done}>
         Continue
