@@ -324,7 +324,11 @@ function HandScores({ scored, who, chips, done }: { scored: Scored; who: (n: num
             </li>
           ))}
         </ul>
-        {scored.pot > 0 && <p className="m-0 mt-[0.2em] text-xs opacity-70">{scored.pot} chip{scored.pot === 1 ? "" : "s"} carried over to the next hand&apos;s closest player.</p>}
+        {scored.pot > 0 && (
+          <p className="m-0 mt-[0.2em] text-xs opacity-70">
+            {scored.pot === 1 ? "1 chip in the pot goes" : `${scored.pot} chips in the pot go`} {scored.hand < 4 ? "to the next hand's closest player" : "to no one"}.
+          </p>
+        )}
       </div>
       <button className="primary shrink-0" onClick={done}>
         Continue

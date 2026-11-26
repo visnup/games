@@ -31,7 +31,10 @@ players the 10s to 13s come out. Everyone gets 12 cards at 3 players and 13 at 4
 - Your total is the sum of the cards you won tricks with. A face-down card counts 5. Closest to 25
   without going over takes 3 chips at 4 players (2 at 3), second 2 (1) and third 1. Exactly 25
   earns one more. A player who goes over, or busts, gives one of their chips to the closest player.
-- Everyone starts with 5 chips. After 4 hands, the most chips wins.
+  When two or more players tie for closest, the bust's chip goes to a pot instead. The next hand's
+  closest player takes the pot. A pot left after the 4th hand goes to no one.
+- Everyone starts with 5 chips. After 4 hands, the most chips wins. On a tie, the player closest
+  to 25 in the last hand wins. If that's tied too, they share the win.
 
 ## Reading the numbers
 

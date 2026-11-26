@@ -215,7 +215,7 @@ export class Game {
     }
     for (const p of this.players) p.chips += gained[p.seat];
     this.pot = this.hand === HANDS ? 0 : pot;
-    this.scores.push({ hand: this.hand, totals, gained, pot: this.pot });
+    this.scores.push({ hand: this.hand, totals, gained, pot });
     this.log?.(`hand ${this.hand} scores: ${totals.map((t, i) => `${i}: ${t} ${gained[i] >= 0 ? "+" : ""}${gained[i]}`).join(", ")}${this.pot ? `; ${this.pot} in the pot` : ""}`);
     if (this.hand < HANDS) return this.deal();
     // most chips, then closest to 25 in the last hand, then shared
