@@ -19,6 +19,7 @@ function Reveal({ puzzle, answer, next, hide }: { puzzle: Puzzle; answer: Answer
   const mine = puzzle.options.find((o) => o.label === answer.mine)!;
   const lost = Math.round(100 * (best.win - mine.win));
   const options = [...puzzle.options].sort((a, b) => b.win - a.win);
+  const lead = Math.round(100 * (options[0].win - options[1].win));
   return (
     <div className="panel fixed inset-x-2 bottom-2 z-30 mx-auto max-w-xl animate-rise p-4 text-white">
       <p className="m-0 text-lg font-bold">
@@ -40,7 +41,11 @@ function Reveal({ puzzle, answer, next, hide }: { puzzle: Puzzle; answer: Answer
           </li>
         ))}
       </ul>
-      <p className="m-0 text-sm opacity-80">Chances of winning the game, with everyone playing on as Hard. Medium&apos;s rule: {answer.why}</p>
+      <p className="m-0 text-sm opacity-80">
+        Chances of winning the game on 1,000 deals of the cards you can&apos;t see, with everyone playing on as Hard.
+        {puzzle.se !== undefined && ` The best leads the next by ${lead} ± ${Math.max(1, Math.round(100 * puzzle.se))} points.`}
+      </p>
+      <p className="mt-1 mb-0 text-sm opacity-80">Medium&apos;s rule: {answer.why}</p>
       <div className="mt-3 flex justify-end gap-2">
         <button className="quiet" onClick={hide}>
           See the table

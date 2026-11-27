@@ -8,7 +8,7 @@ import { sample } from "./strategies.ts";
 export type Reviewed = { n: number; battle: number; kind: Choice["kind"]; chose: string; hint: string; options: { label: string; win: number }[] };
 
 /** A decision from a game among Hard bots, with each option's chance of winning when everyone plays on as Hard (`scripts/puzzles.ts`). `step` is the one Medium's pick came from. */
-export type Puzzle = { setup: Setup; log: Choice[]; seat: number; kind: "move" | "color"; options: { label: string; win: number }[]; hard: string; medium: string; step?: string };
+export type Puzzle = { setup: Setup; log: Choice[]; seat: number; kind: "move" | "color"; options: { label: string; win: number }[]; hard: string; medium: string; step?: string; se?: number };
 
 /** A puzzle's best option. */
 export const top = (p: Puzzle) => p.options.reduce((a, b) => (b.win > a.win ? b : a));
