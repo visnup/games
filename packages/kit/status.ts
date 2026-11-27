@@ -229,7 +229,7 @@ export function serve({ port, counts: COUNTS, minutes: MINUTES, progress, colors
   // The charts are drawn in the page by Observable Plot, from the round's start to its ETA, so the
   // gap right of "now" is what's left: each track from 0 to 100%, with a dashed line on to where it
   // should finish and a dashed rule where each later stage should, then cores used, the load
-  // against the core count (dashed), and the CPU's temperature.
+  // against three times the core count (dashed), and the CPU's temperature.
   const page = (s: ReturnType<typeof status>) => `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width">
 <title>${s.title}</title>
 <style>body{font:15px system-ui;background:${background};color:${ink};max-width:36em;margin:2em auto;padding:0 1em}.row{display:flex;justify-content:space-between;align-items:baseline}.track{display:flex;gap:3px;margin:.3em 0 1.2em}.seg{min-width:0;font-size:12px;line-height:1.3}.seg small{display:block}.bar{background:${bar};border-radius:3px;height:10px;margin-bottom:.35em;overflow:hidden}.bar div{background:${accent};height:100%;border-radius:6px}h1{font-size:1.4em}small{opacity:.7}#chart{margin-bottom:1.2em}#chart svg{display:block}</style>
@@ -272,7 +272,7 @@ const draw = (s) => {
     },
     ...[
       ["cores", accent, [0, s.cores], (u) => u.cores.toFixed(1) + " of " + s.cores + " cores", s.cores],
-      ["load", "${ink}cc", [0, Math.max(2 * s.cores, ...s.usage.map((u) => u.load))], (u) => "load " + u.load.toFixed(1), s.cores],
+      ["load", "${ink}cc", [0, Math.max(4 * s.cores, ...s.usage.map((u) => u.load))], (u) => "load " + u.load.toFixed(1), 3 * s.cores], // hilt's rounds 11 and 12 alone peaked at 1.9× and 2.6× the cores. Round 10, beside another job, had a median of 5.6×
       ["temp", "${temp}", [30, Math.max(100, ...s.usage.map((u) => u.temp ?? 0))], (u) => Math.round(u.temp) + " °C, " + Math.round(u.watts) + " W"],
     ].map(([key, stroke, domain, name, rule]) => {
       const rows = s.usage.filter((u) => u[key] !== undefined);
