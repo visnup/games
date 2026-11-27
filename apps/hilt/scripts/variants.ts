@@ -24,6 +24,7 @@ import {
 } from "../src/game.ts";
 import { parallel } from "kit/parallel.ts";
 import { learned } from "../src/learned.ts";
+import { CHEAT_SHEET } from "../src/read.ts";
 import { colorPlayouts, crowsAhead, dumpPlayouts, headToHead, playouts, STRATEGIES } from "../src/strategies.ts";
 import { header } from "kit/table.ts";
 
@@ -188,18 +189,6 @@ const without =
 const replace = (old: keyof typeof STEPS, step: Step) => (): Policy => heuristic(...steps.map((s) => (s === old ? step : s)));
 
 /** The README's cheat sheet: each rule in a player's words, and the steps it covers. */
-const CHEAT_SHEET: Record<string, (keyof typeof STEPS)[]> = {
-  "ahead, keep playing": ["press", "fury", "hold"],
-  "let the others spend first": ["wait"],
-  "stop a chip that wins someone the game": ["deny", "rival"],
-  "stay in cheaply": ["one"],
-  "behind, take the lead with the cheapest card": ["chase", "allIn"],
-  "alone, finish it": ["finish"],
-  "take back what you don't need": ["harvest", "keep", "bait"],
-  "Crows only when you'd still lead": ["crows"],
-  "Doves for your own winning chip": ["doves"],
-};
-
 const VARIANTS: Record<string, (seed: number) => Policy> = {
   "the default": () => defaultPolicy,
   "the first default (previous)": STRATEGIES["first default"],

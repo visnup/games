@@ -109,6 +109,10 @@ Two choices come outside battles:
   with the one that helps the closest opponent least.
 - **A hand with no force cards.** When you pass holding no force cards, discard your hand.
 
+**Try it:** [practice each rule](https://hilt.visnup.com/learn/rules) on
+[puzzles from Hard's games](https://hilt.visnup.com/learn/puzzles). Find the best move, then see
+every option's chance of winning.
+
 What each rule is worth: one player breaks it, at each kind of table, in points at 3 / 4 / 5 / 6
 players (`variants.ts`, "without this rule", 40,000 games against Medium and the league, 10,000
 against Hard):
@@ -471,6 +475,9 @@ worth about their value: a 10 the most and a 1 the least. A Legend is worth near
 card is worth depends on how people play it. Against the first Medium, a 10 or a Legend was worth
 8 to 12 points. Crows was worth −6.5 to −10 then. Crows was worth 4 to 5 points at 4 to 6 players
 until Medium stopped Baiting back 1s. It's worth about half that now (hypothesis for why, untested).
+
+**Try it:** [guess which card is worth more](https://hilt.visnup.com/learn/cards) at each player
+count.
 
 ### Reading the table
 

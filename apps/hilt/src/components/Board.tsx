@@ -14,7 +14,8 @@ import { type Battle, type Choice, choose, onBoard, type Prompt, replay, setup }
 import { Backs, Card, Chip, label } from "./Card";
 import { Review } from "./Review";
 
-type Props = { game: Doc<"games"> & { log: Choice[]; names: (string | null)[] }; me?: Id<"players"> };
+/** With `onDecide`, the board is a puzzle's: your decisions go to it, not the server. */
+type Props = { game: Doc<"games"> & { log: Choice[]; names: (string | null)[] }; me?: Id<"players">; onDecide?: (c: Choice) => Promise<boolean> };
 
 /** Floats over the table, just above the bottom bar. */
 const floating = "panel absolute -right-[0.8em] bottom-full -left-[0.8em] mb-[1.2em] p-[0.8em] max-sm:right-0 max-sm:left-0 max-sm:mb-[0.4em] max-sm:p-[0.5em]";
@@ -65,7 +66,7 @@ function entries(lines: string[], who: (n: number) => string) {
   return groups;
 }
 
-export function Board({ game, me }: Props) {
+export function Board({ game, me, onDecide }: Props) {
   const decide = useMutation(api.games.decide);
   const [error, setError] = useState<string>();
   const state = useMemo(() => until(game, game.log.length), [game]);
@@ -85,6 +86,7 @@ export function Board({ game, me }: Props) {
   /** Sends a decision; whether it went through. */
   const send = (choice: Choice) => {
     setError(undefined);
+    if (onDecide) return onDecide(choice);
     return decide({ game: game._id, player: me!, choice }).then(
       () => true,
       (e) => {
@@ -99,10 +101,10 @@ export function Board({ game, me }: Props) {
   // while someone else is up, check every so often whether they've left; a bot should never be
   // up for long, since the server plays bots as soon as it's their turn
   useEffect(() => {
-    if (!waiting) return;
+    if (!waiting || onDecide) return;
     const interval = setInterval(() => replaceGone({ game: game._id }), waiting === "bot" ? 3e3 : 10e3);
     return () => clearInterval(interval);
-  }, [waiting, replaceGone, game._id]);
+  }, [waiting, onDecide, replaceGone, game._id]);
   // when it comes to you, say so in the tab's title and chime, since you might be in another tab
   const up = !stepping && !result && prompt?.seat === seat;
   const wasUp = useRef(up);
@@ -147,9 +149,11 @@ export function Board({ game, me }: Props) {
   return (
     // on a phone, the hand's cards run off the screen's bottom edge, clipped here so the page can't scroll to them
     <div className="mx-auto flex min-h-dvh max-w-[90em] flex-col gap-[0.8em] p-[0.8em] max-sm:gap-[0.4em] max-sm:overflow-y-clip">
-      <Head>
-        <title>{up ? "Your move · Hilt" : "Hilt"}</title>
-      </Head>
+      {!onDecide && (
+        <Head>
+          <title>{up ? "Your move · Hilt" : "Hilt"}</title>
+        </Head>
+      )}
       <section className="panel sticky top-[0.8em] z-10 flex items-start gap-[1em] p-[0.8em] max-sm:top-0 max-sm:-mx-[0.8em] max-sm:-mt-[0.8em] max-sm:gap-[0.4em] max-sm:rounded-none max-sm:px-[0.4em] max-sm:py-[0.2em]">
         {/* pushed down to the baseline of the log's sticky heading beside it */}
         <div className="flex w-[9em] shrink-0 flex-col items-center gap-[0.3em] pt-[0.4rem] text-center max-sm:w-[7em] max-sm:gap-[0.1em] max-sm:pt-[0.2rem]">
@@ -206,7 +210,7 @@ export function Board({ game, me }: Props) {
           ))}
         </div>
       </section>
-      {result && seat >= 0 && <Review key={game._id} setup={setup(game)} log={game.log} seat={seat} show={(n) => setPast({ decisions: n, line: until(game, n).lines.length - 1 })} />}
+      {result && seat >= 0 && !onDecide && <Review key={game._id} setup={setup(game)} log={game.log} seat={seat} show={(n) => setPast({ decisions: n, line: until(game, n).lines.length - 1 })} />}
       <div className="mb-[10em] grid flex-1 sm:grid-cols-2 min-[88em]:grid-cols-3 content-start gap-[0.8em] max-sm:mb-[3.5em] max-sm:gap-[0.4em]">
         {(seat >= 0 ? [...others, seat] : others).map((n) => (
           <Seat

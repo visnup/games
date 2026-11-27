@@ -1,25 +1,46 @@
 import { COLORS, name } from "./cards.ts";
 import { defaultPolicy, type Game, type Move, moves, mulberry32, type Policy } from "./game.ts";
+import { CHEAT_SHEET } from "./read.ts";
 import { type Choice, replay, resolve, type Setup } from "./replay.ts";
 import { sample } from "./strategies.ts";
 
 /** A decision a player made, with each option's chance of winning when played out. */
 export type Reviewed = { n: number; battle: number; kind: Choice["kind"]; chose: string; hint: string; options: { label: string; win: number }[] };
 
+/** A decision from a game among Hard bots, with each option's chance of winning when everyone plays on as Hard (`scripts/puzzles.ts`). `step` is the one Medium's pick came from. */
+export type Puzzle = { setup: Setup; log: Choice[]; seat: number; kind: "move" | "color"; options: { label: string; win: number }[]; hard: string; medium: string; step?: string };
+
+/** A puzzle's best option. */
+export const top = (p: Puzzle) => p.options.reduce((a, b) => (b.win > a.win ? b : a));
+
+/** Whether `p` practices `rule`, a cheat sheet rule: Medium's step for it picks the best option. `chip` is picking a chip, and `beyond` is where Medium misses the best. */
+export function practices(p: Puzzle, rule?: string) {
+  if (!rule) return true;
+  if (rule === "chip") return p.kind === "color";
+  if (rule === "beyond") return p.medium !== top(p).label;
+  return p.kind === "move" && p.medium === top(p).label && !!p.step && !!CHEAT_SHEET[rule]?.includes(p.step as never);
+}
+
 /** The deals each option is played out on in a game's review: fewer with Hard bots, which cost 20 times as much a game. */
 export const deals = (setup: Setup) => (setup.bots.includes("learned") ? 200 : 400);
 
-const label = (m: Move) => (m ? (m.take ? `Bait for the ${name(m.take)}` : name(m.card)) : "pass");
+export const label = (m: Move) => (m ? (m.take ? `Bait for the ${name(m.take)}` : name(m.card)) : "pass");
 
 /**
  * Every decision `seat` made in `log`, each option played out to the end on `deals` deals of the
  * cards they couldn't see, the same deals for every option. Each bot plays as its kind in `bots`,
- * or the default player, and everyone else as the default. With `part: [i, k]`, only every `k`th
- * decision from the `i`th, so `k` workers can share the review.
+ * or the default player, and everyone else as the default. `seat` plays on as the default too,
+ * unless `self`, when it plays as its own kind. With `part: [i, k]`, only every `k`th decision
+ * from the `i`th, so `k` workers can share the review.
  */
-export function* review(setup: Setup, log: Choice[], seat: number, { deals = 400, bots = {}, part = [0, 1] }: { deals?: number; bots?: Record<string, Policy>; part?: [number, number] } = {}): Generator<Reviewed> {
+export function* review(
+  setup: Setup,
+  log: Choice[],
+  seat: number,
+  { deals = 400, bots = {}, part = [0, 1], self = false }: { deals?: number; bots?: Record<string, Policy>; part?: [number, number]; self?: boolean } = {},
+): Generator<Reviewed> {
   const people = { ...setup, bots: setup.bots.map(() => false as const) };
-  const policies = setup.bots.map((b, i) => (i !== seat && b && bots[b]) || defaultPolicy);
+  const policies = setup.bots.map((b, i) => ((i !== seat || self) && b && bots[b]) || defaultPolicy);
   let mine = 0;
   for (const [n, choice] of log.entries()) {
     if (choice.seat !== seat || mine++ % part[1] !== part[0]) continue;

@@ -59,11 +59,24 @@ const WHY: Record<keyof typeof STEPS, string> = {
   bait: "Before giving up this battle, Bait back your biggest card.",
 };
 
-/** Medium's move, which is the Hint, and the rule that picks it, in words. */
-export function advice(game: Game, p: Player): { move: Move; why: string } {
+/** Medium's move, which is the Hint, the step that picks it, and that step in words. */
+export function advice(game: Game, p: Player): { move: Move; step?: keyof typeof STEPS; why: string } {
   for (const [name, step] of Object.entries(STEPS) as [keyof typeof STEPS, Step][]) {
     const move = step(game, p);
-    if (move !== undefined) return { move, why: WHY[name] };
+    if (move !== undefined) return { move, step: name, why: WHY[name] };
   }
   return { move: null, why: "Nothing here is worth another card. Pass." };
 }
+
+/** The README's cheat sheet: each rule, as its "rule" table names it, and the steps it's made of. */
+export const CHEAT_SHEET: Record<string, (keyof typeof STEPS)[]> = {
+  "ahead, keep playing": ["press", "fury", "hold"],
+  "let the others spend first": ["wait"],
+  "stop a chip that wins someone the game": ["deny", "rival"],
+  "stay in cheaply": ["one"],
+  "behind, take the lead with the cheapest card": ["chase", "allIn"],
+  "alone, finish it": ["finish"],
+  "take back what you don't need": ["harvest", "keep", "bait"],
+  "Crows only when you'd still lead": ["crows"],
+  "Doves for your own winning chip": ["doves"],
+};
