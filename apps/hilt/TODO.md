@@ -173,6 +173,14 @@
       11, and 36.7%, 26.0%, 21.4% and 17.9% at a table of the previous Hard. So card counting is
       about half the gain at 3 players and a third or less at 4–6. Against the league the
       version without it does 0.4 to 1.2 points better at 4–6 players.
+- [x] Round 12, not adopted (2026-11-26, 49 minutes): another mixed round (`data-o5`, 6,000
+      games a player count, played by round 11), fit with everything round 11 was
+      (`model-r3456789o12345c`). At a table of round 11 it wins 33.0%, 24.2%, 19.4% and 15.8% at
+      3–6 players: a tie at 3, and 0.6 to 0.9 below a fair share at 4–6. Against the default and
+      at a table of the previous Hard it loses 0.4 to 2.3 points to round 11 at 4–6. Against
+      the league it gains 1.0 to 2.1 (20,000 games). More of the same data stopped paying. The
+      next gain needs new features, such as reading opponents' hands from what they've played and
+      passed on.
 
 ## Analysis
 
