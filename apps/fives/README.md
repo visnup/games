@@ -70,7 +70,7 @@ The cheat sheet:
 3. **If every card you have would win, play the biggest that leaves you 5 to go.** If none does,
    play the biggest that doesn't bust you. If they all bust, play the smallest.
 
-**Try it:** [practice each rule](https://fives.visnup.com/learn/rules) on
+**Try it:** [practice each rule](https://fives.visnup.com/learn/cheat-sheet) on
 [puzzles from Hard's games](https://fives.visnup.com/learn/puzzles). Find the best play. Then see
 every option's chance of winning.
 

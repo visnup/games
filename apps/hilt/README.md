@@ -109,7 +109,7 @@ Two choices come outside battles:
   with the one that helps the closest opponent least.
 - **A hand with no force cards.** When you pass holding no force cards, discard your hand.
 
-**Try it:** [practice each rule](https://hilt.visnup.com/learn/rules) on
+**Try it:** [practice each rule](https://hilt.visnup.com/learn/cheat-sheet) on
 [puzzles from Hard's games](https://hilt.visnup.com/learn/puzzles). Find the best move, then see
 every option's chance of winning.
 

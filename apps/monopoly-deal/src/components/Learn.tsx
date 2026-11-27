@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 
 const PAGES = [
   ["/learn", "Guide"],
-  ["/learn/rules", "Rules"],
+  ["/learn/cheat-sheet", "Cheat sheet"],
   ["/learn/cards", "Cards"],
   ["/learn/puzzles", "Puzzles"],
 ] as const;

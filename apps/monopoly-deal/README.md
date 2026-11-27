@@ -286,7 +286,7 @@ laying a property down before charging rent, Debt Collector or Birthday in some 
 spots it finds the default's choice winning: rent first, or ending the turn. No rule that splits
 them beat the default.
 
-**Try it:** [practice each rule](https://monopoly.visnup.com/learn/rules) on
+**Try it:** [practice each rule](https://monopoly.visnup.com/learn/cheat-sheet) on
 [puzzles from Hard's games](https://monopoly.visnup.com/learn/puzzles). Find the best play, then see
 every option's chance of winning.
 
