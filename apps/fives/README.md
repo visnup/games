@@ -70,6 +70,10 @@ The cheat sheet:
 3. **If every card you have would win, play the biggest that leaves you 5 to go.** If none does,
    play the biggest that doesn't bust you. If they all bust, play the smallest.
 
+**Try it:** [practice each rule](https://fives.visnup.com/learn/rules) on
+[puzzles from Hard's games](https://fives.visnup.com/learn/puzzles). Find the best play. Then see
+every option's chance of winning.
+
 One player breaking a rule at a table of Medium bots (40,000 games each):
 
 ![What each rule is worth: one player without it at a table of Medium bots](charts/rules.svg)
@@ -158,6 +162,9 @@ Their chips go to the closest player.
 | 40+ (bust) | 1.7% | −1.00 | 5.9% | −1.00 |
 
 </details>
+
+**Try it:** [guess which total earns more](https://fives.visnup.com/learn/totals) at 3 and 4
+players.
 
 ### Your magenta 5 is how you get rid of high cards
 

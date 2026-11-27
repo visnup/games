@@ -32,6 +32,8 @@
     --bar: white;
     --ink: #2a1022;
     --shadow: 0 4px 16px rgb(60 0 40 / 0.15);
+    /* kit/learn.css's links and call-outs */
+    --accent: #de35a2;
     /* the font size of cards on the table, which sets their size and how they overlap */
     --small: 0.6rem;
     /* the trick's cards, in the middle of the table */

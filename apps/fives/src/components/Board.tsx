@@ -8,12 +8,14 @@ import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import type { bot } from "../../convex/schema";
 import { type Card as CardType, COLORS, deck } from "../cards.ts";
-import { face, type Game, type Play, type Player, type Scored, type Step, STEPS, sure, TARGET, total, type Trick, TRUMP, winning } from "../game.ts";
+import { face, type Game, type Play, type Player, type Scored, sure, TARGET, total, type Trick, winning } from "../game.ts";
+import { reason } from "../read.ts";
 import { type Choice, choose, type Prompt, replay, setup } from "../replay.ts";
 import { Card, Chips, PAINT } from "./Card";
 import { Review } from "./Review";
 
-type Props = { game: Doc<"games"> & { log: Choice[]; names: (string | null)[] }; me?: Id<"players"> };
+/** With `onDecide`, the board is a puzzle's: your decisions go to it, not the server. */
+type Props = { game: Doc<"games"> & { log: Choice[]; names: (string | null)[] }; me?: Id<"players">; onDecide?: (c: Choice) => Promise<boolean> };
 
 /** The game through its first `n` decisions, stopped there even when a bot is next. */
 const until = (game: Props["game"], n: number) => {
@@ -98,7 +100,7 @@ const FROM: Record<number, [number, number][]> = {
   ],
 };
 
-export function Board({ game, me }: Props) {
+export function Board({ game, me, onDecide }: Props) {
   const decide = useMutation(api.games.decide);
   const [error, setError] = useState<string>();
   const state = useMemo(() => until(game, game.log.length), [game]);
@@ -125,6 +127,7 @@ export function Board({ game, me }: Props) {
   /** Sends a decision; whether it went through. */
   const send = (choice: Choice) => {
     setError(undefined);
+    if (onDecide) return onDecide(choice);
     return decide({ game: game._id, player: me!, choice }).then(
       () => true,
       (e) => {
@@ -138,10 +141,10 @@ export function Board({ game, me }: Props) {
   const waiting = !result && prompt && prompt.seat !== seat ? ("bot" in game.seats[prompt.seat] ? "bot" : "person") : undefined;
   // while someone else is up, check every so often whether they've left
   useEffect(() => {
-    if (!waiting) return;
+    if (!waiting || onDecide) return;
     const interval = setInterval(() => replaceGone({ game: game._id }), waiting === "bot" ? 3e3 : 10e3);
     return () => clearInterval(interval);
-  }, [waiting, replaceGone, game._id]);
+  }, [waiting, onDecide, replaceGone, game._id]);
   const up = !stepping && !result && prompt?.seat === seat;
   const wasUp = useRef(up);
   useEffect(() => {
@@ -183,9 +186,11 @@ export function Board({ game, me }: Props) {
   return (
     // on a phone, the hand's cards run off the screen's bottom edge, clipped here so the page can't scroll to them
     <div className="mx-auto flex min-h-dvh max-w-[64em] flex-col gap-[0.8em] p-[0.8em] max-sm:overflow-y-clip">
-      <Head>
-        <title>{up ? "Your play · Fives" : "Fives"}</title>
-      </Head>
+      {!onDecide && (
+        <Head>
+          <title>{up ? "Your play · Fives" : "Fives"}</title>
+        </Head>
+      )}
       <section className="panel sticky top-[0.8em] z-10 flex items-start gap-[1em] px-[0.8em] pt-[0.3em] pb-[0.4em] max-sm:top-0 max-sm:-mx-[0.8em] max-sm:-mt-[0.8em] max-sm:rounded-none max-sm:px-[0.4em] max-sm:pt-[0.2em] max-sm:pb-[0.2em]">
         <div className="flex w-[7em] shrink-0 flex-col items-center gap-[0.2em] pt-[0.2rem] text-center">
           <span className="label">Hand {scored?.hand ?? g.hand} of 4</span>
@@ -213,7 +218,7 @@ export function Board({ game, me }: Props) {
           ))}
         </div>
       </section>
-      {result && seat >= 0 && <Review key={game._id} setup={setup(game)} log={game.log} seat={seat} show={(n) => setPast({ decisions: n, line: until(game, n).lines.length - 1 })} />}
+      {result && seat >= 0 && !onDecide && <Review key={game._id} setup={setup(game)} log={game.log} seat={seat} show={(n) => setPast({ decisions: n, line: until(game, n).lines.length - 1 })} />}
       <div className="grid flex-1 grid-cols-[1fr_auto_1fr] grid-rows-[auto_auto_auto] content-center items-center gap-[0.6em] max-sm:gap-[0.3em]">
         <div className="col-start-2 row-start-2 grid aspect-square w-[min(21em,50vw,36dvh)] grid-cols-3 grid-rows-3 place-items-center rounded-full bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--color-magenta)_9%,transparent),transparent)]">
           {trick.plays.map(({ seat: s, play }) => {
@@ -707,39 +712,6 @@ function Ask({ game, p, send, prompt, deal }: { game: Game; p: Player; send: (c:
       )}
     </div>
   );
-}
-
-/** Medium's play, which is the Hint, and the rule of the README's cheat sheet that picks it, in words. */
-function reason(game: Game, p: Player): { play: Play; why: string } {
-  const plays = game.legal(p);
-  if (plays.length === 1) return { play: plays[0], why: "It's your only play." };
-  const room = TARGET - total(p);
-  for (const [name, step] of Object.entries(STEPS) as [keyof typeof STEPS, Step][]) {
-    const play = step(game, p, plays);
-    if (!play) continue;
-    const why =
-      name === "leadDown"
-        ? play.card.color === "magenta" && play.card.value > 5 && !p.hand.some((c) => c.color === "magenta" && c.value < 5)
-          ? "You're 5 or more from 25, so lead face down. You have no magenta under 5, so flip your highest magenta: a magenta 5 led would force you to take with it."
-          : `You're 5 or more from 25, so lead your highest ${play.card.color === TRUMP ? "silver" : "card"} face down. It counts 5 at most.`
-        : name === "duck"
-          ? !game.trick.length
-            ? room < 0
-              ? "You've busted, so this hand's total no longer matters. Lead your lowest card face up."
-              : play.down
-                ? "You're within 5 of 25, so lead your lowest card. It's over 5, so flip it: it counts 5 at most, and a higher magenta can take it."
-                : "You're within 5 of 25, so lead your lowest card face up."
-            : `Duck: ${play.down ? "flip" : "play"} your biggest card that loses the trick. Tricks will come to you anyway.`
-          : face(play).value <= room - 5
-            ? "Every card you can play takes the trick, so play the biggest that leaves you 5 to go. More tricks will be forced on you."
-            : face(play).value <= room
-              ? "Every card you can play takes the trick, so play the biggest that doesn't bust you."
-              : room < 0
-                ? "You've busted, so play your smallest card."
-                : "Every card you can play takes the trick and busts you, so play the smallest.";
-    return { play, why };
-  }
-  return { play: plays[0], why: "" };
 }
 
 /**

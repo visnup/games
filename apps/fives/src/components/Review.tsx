@@ -15,7 +15,7 @@ function words(label: string) {
 }
 
 /** A play, from its label in a review ("blue 7" or "blue 7 face down"), as a small card. */
-function Played({ label }: { label: string }) {
+export function Played({ label }: { label: string }) {
   const [, color, value, down] = label.match(/^(\w+) (\d+)( face down)?$/)!;
   return <Card card={{ color: color as Color, value: Number(value), id: -1 }} down={!!down} small className="text-[0.4rem]" />;
 }
