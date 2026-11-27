@@ -1,7 +1,8 @@
 User-agent: *
 Allow: /$
-Allow: /learn$
+Allow: /learn
 Allow: /charts/
+Allow: /puzzles.json
 Allow: /_next/
 Allow: /favicon.svg
 Disallow: /

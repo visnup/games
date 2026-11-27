@@ -1,5 +1,6 @@
 import { discards } from "./discarding.ts";
 import { defaultPolicy, type Game, type Move, moves, mulberry32, name, payable, type Player, type Policy, shuffle } from "./game.ts";
+import { CHEAT_SHEET } from "./advice.ts";
 import { label, payments } from "./paying.ts";
 import { type Choice, encode, key, type Prompt, type Ref, ref, replay, resolve, type Setup } from "./replay.ts";
 import { chance, playout } from "./strategies.ts";
@@ -11,6 +12,42 @@ import { chance, playout } from "./strategies.ts";
  * places in the hand (`1,4`), and a Just Say No by `true` or `false`.
  */
 export type Reviewed = { n: number; kind: Choice["kind"]; turn: number; chose: string; hint: string; hard?: string; options: { key: string; win: number }[] };
+
+/**
+ * A decision from a game among Hard bots (`scripts/puzzles.ts`): decision `n` of game `game` in
+ * `puzzles.json`. `wins` is each option's chance of winning when everyone plays on as Hard, in the
+ * order `options` lists them, and `hard` and `medium` are indices into it. `step` names the one of
+ * `STEPS` that Medium's move came from, and `rules` the keys of `CHEAT_SHEET` it practices.
+ */
+export type Puzzle = { game: number; n: number; seat: number; kind: "move" | "sayNo"; wins: number[]; hard: number; medium: number; step?: string; rules: string[] };
+
+/** A choice as `puzzles.json` keeps it: its seat, its kind's first letter and what was chosen. */
+type Packed = [number, string, unknown];
+const FIELD = { move: "move", pay: "paid", sayNo: "no", discard: "cards" } as const;
+export const pack = (c: Choice): Packed => [c.seat, c.kind[0], (c as Record<string, unknown>)[FIELD[c.kind]]];
+export function unpack([seat, k, x]: Packed): Choice {
+  const kind = (Object.keys(FIELD) as Choice["kind"][]).find((n) => n[0] === k)!;
+  return { kind, seat, [FIELD[kind]]: x } as Choice;
+}
+
+/** The games puzzles come from, each as far as its last puzzle, and the puzzles. */
+export type Puzzles = { games: { setup: Setup; log: Packed[] }[]; puzzles: Puzzle[] };
+
+/** The keys of `p`'s options at `prompt`, in the order a review plays them out. */
+export const options = (game: Game, p: Player, prompt: Prompt) => (prompt.kind === "sayNo" ? ["true", "false"] : prompt.kind === "move" ? [null, ...moves(game, p, prompt.left)].map((m) => key(encode(game, p, m))) : []);
+
+/** The index of a puzzle's best option. */
+export const top = (p: Pick<Puzzle, "wins">) => p.wins.indexOf(Math.max(...p.wins));
+
+/** Whether `p` practices `rule`, a key of `CHEAT_SHEET`, or `beyond`, where Medium misses the best. */
+export const practices = (p: Puzzle, rule?: string) => !rule || (rule === "beyond" ? p.medium !== top(p) : p.rules.includes(rule));
+
+/** The keys of `CHEAT_SHEET` a puzzle with these options practices: Medium's pick is the best, by a step of the rule's, or a Just Say No answer. */
+export function practiced(p: Omit<Puzzle, "rules" | "game">, keys: string[]) {
+  if (p.medium !== top(p)) return [];
+  const all = keys.map((k) => (p.kind === "move" ? (JSON.parse(k) as { type: string; target: number | null }) : { type: k, target: null }));
+  return Object.entries(CHEAT_SHEET).flatMap(([rule, r]) => ((p.kind === "sayNo" ? r.sayNo : p.step && r.steps?.includes(p.step) && (!r.test || r.test(all[p.medium], all))) ? [rule] : []));
+}
 
 /** Every legal move and ending the turn, best first, as `ranked()` in `learned.ts` gives them: its first is a play's `hard`. */
 type Rank = (game: Game, p: Player, left: number) => (Move | null)[];
@@ -108,18 +145,27 @@ function later(setup: Setup, log: Choice[], seat: number, answer: Choice, seed: 
  * ending the turn, each played out on `deals` deals of the cards they couldn't see, the same
  * deals for every option, for two rounds, the board then scored by `chance`, as the `playouts`
  * strategy does. Each bot plays as its kind in `bots`, or the default player, and `seat` and any
- * other people as the default. A payment, Just Say No or discard: up to `cap` ways, the same way
+ * other people as the default, or with `self`, `seat` as its own kind. A payment, Just Say No or discard: up to `cap` ways, the same way
  * on a quarter of the deals, each a replay of the game (`later`). With `part: [i, k]`, only
- * every `k`th decision from the `i`th, so `k` workers can share the review.
+ * every `k`th decision from the `i`th, so `k` workers can share the review, and only `kinds`
+ * of decisions.
  */
 export function* review(
   setup: Setup,
   log: Choice[],
   seat: number,
-  { deals = 200, cap = 8, bots = {}, rank, part = [0, 1] }: { deals?: number; cap?: number; bots?: Record<string, Policy>; rank?: Rank; part?: [number, number] } = {},
+  {
+    deals = 200,
+    cap = 8,
+    bots = {},
+    rank,
+    part = [0, 1],
+    self = false,
+    kinds,
+  }: { deals?: number; cap?: number; bots?: Record<string, Policy>; rank?: Rank; part?: [number, number]; self?: boolean; kinds?: Choice["kind"][] } = {},
 ): Generator<Reviewed> {
   const people = { ...setup, bots: setup.bots.map(() => false as const) };
-  const seats = setup.bots.map((b, i) => (i !== seat && b && bots[b]) || defaultPolicy);
+  const seats = setup.bots.map((b, i) => ((i !== seat || self) && b && bots[b]) || defaultPolicy);
   const field: Policy = {
     move: (g, p, left) => seats[p.seat].move(g, p, left),
     pay: (g, p, amount) => seats[p.seat].pay(g, p, amount),
@@ -128,7 +174,7 @@ export function* review(
   };
   let mine = 0;
   for (const [n, choice] of log.entries()) {
-    if (choice.seat !== seat || mine++ % part[1] !== part[0]) continue;
+    if (choice.seat !== seat || mine++ % part[1] !== part[0] || (kinds && !kinds.includes(choice.kind))) continue;
     const { game, prompt } = replay(people, log.slice(0, n));
     if (prompt?.kind !== choice.kind) continue;
     const p = game.players[seat];
@@ -148,7 +194,7 @@ export function* review(
         chose,
         hint,
         hard: rank && k(rank(game, p, prompt.left)[0]),
-        options: all.map((m) => ({ key: k(m), win: playout(game, p, m, seeds, defaultPolicy, turns, field) / deals })),
+        options: all.map((m) => ({ key: k(m), win: playout(game, p, m, seeds, seats[seat], turns, field) / deals })),
       };
     } else {
       const { chose, hint, options } = answers(game, p, prompt, choice, cap);

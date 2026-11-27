@@ -14,6 +14,8 @@
     --card: white;
     --gold: #f2c94c;
     --shadow: 0 4px 16px rgb(0 0 0 / 0.3);
+    /* the links and call-outs of kit/learn.css */
+    --accent: #b8292f;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -23,6 +25,7 @@
       --seat: rgb(0 0 0 / 0.2);
       --card: #d8d4c8;
       --gold: #d9b443;
+      --accent: #ff7a7a;
       color-scheme: dark;
     }
   }

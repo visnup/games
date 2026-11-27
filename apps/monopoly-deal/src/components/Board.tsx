@@ -8,11 +8,12 @@ import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { BIRTHDAY, type Card as CardType, COLORS, DEBT } from "../cards.ts";
 import { banked, COLOR_NAMES, colorsOf, count, defaultPolicy, fullSets, type Game, isAction, moves, type Move, name, payable, type Placed, type Player, rent, size, worth } from "../game.ts";
 import { street } from "../streets.ts";
-import { type Choice, choose, encode, key, type Ref, ref, replay, setup } from "../replay.ts";
+import { type Choice, choose, encode, key, type Prompt, type Ref, ref, replay, setup } from "../replay.ts";
 import { Card, colorName, label, money, PAINT, Slot } from "./Card";
 import { Review } from "./Review";
 
-type Props = { game: Doc<"games"> & { log: Choice[]; names: (string | null)[] }; me?: Id<"players"> };
+/** With `onDecide`, the board is a puzzle's: your decisions go to it, not the server. */
+type Props = { game: Doc<"games"> & { log: Choice[]; names: (string | null)[] }; me?: Id<"players">; onDecide?: (c: Choice) => void };
 
 const id = (r: Ref) => `${r.pile}${r.i}`;
 
@@ -100,7 +101,7 @@ function decisionsTo(game: Props["game"], line: number) {
   return lo;
 }
 
-export function Board({ game, me }: Props) {
+export function Board({ game, me, onDecide }: Props) {
   const decide = useMutation(api.games.decide);
   const [error, setError] = useState<string>();
   const state = useMemo(() => replay(setup(game), game.log), [game]);
@@ -128,6 +129,7 @@ export function Board({ game, me }: Props) {
   const who = (n: number) => (n === seat ? "You" : "bot" in game.seats[n] ? `Bot ${n + 1}` : (game.names[n] ?? `Player ${n + 1}`));
   const send = (choice: Choice) => {
     setError(undefined);
+    if (onDecide) return onDecide(choice);
     decide({ game: game._id, player: me!, choice }).catch((e) => setError(String(e.message ?? e)));
   };
   const { prompt, result } = state;
@@ -135,10 +137,10 @@ export function Board({ game, me }: Props) {
   const waiting = !result && prompt && prompt.seat !== seat && "player" in game.seats[prompt.seat];
   // while someone else is up, check every so often whether they've left
   useEffect(() => {
-    if (!waiting) return;
+    if (!waiting || onDecide) return;
     const interval = setInterval(() => replaceGone({ game: game._id }), 10e3);
     return () => clearInterval(interval);
-  }, [waiting, replaceGone, game._id]);
+  }, [waiting, onDecide, replaceGone, game._id]);
   // when it comes to you, say so in the tab's title and chime, since you might be in another tab
   const up = !stepping && !result && prompt?.seat === seat;
   const wasUp = useRef(up);
@@ -170,22 +172,7 @@ export function Board({ game, me }: Props) {
   /** A move of decision `n`, by its key, in words for the review. */
   const say = (n: number, k: string) => {
     const { game: then, prompt } = until(game, n);
-    const p = then.players[seat];
-    const list = (xs: string[]) => new Intl.ListFormat("en").format(xs);
-    if (prompt?.kind === "sayNo") return k === "true" ? "Just Say No" : "Accept";
-    if (prompt?.kind === "discard") return `Discard ${list(k.split(",").map((i) => label(p.hand[Number(i)])))}`;
-    if (prompt?.kind === "pay") {
-      const paid = k.split(",").flatMap((at) => {
-        const pile = at.match(/^[a-z]+/)?.[0] as Ref["pile"] | undefined;
-        const x = pile && p[pile][Number(at.slice(pile.length))];
-        return x ? ["kind" in x ? label(x) : pile === "built" ? label(x.card) : named(x)] : [];
-      });
-      return paid.length ? `Pay with ${list(paid)}` : "Pay nothing";
-    }
-    const m = prompt?.kind === "move" ? moves(then, p, prompt.left).find((m) => key(encode(then, p, m)) === k) : undefined;
-    if (!m) return "End turn";
-    if (m.type === "bank") return `Bank ${label(m.card)}`;
-    return m.type === "place" && m.card.kind !== "action" ? `Lay down ${label(m.card)}` : describe(then, p, m, who);
+    return saying(then, then.players[seat], prompt, k, who);
   };
   const [steal, setSteal] = useState<Steal>();
   const pick =
@@ -198,9 +185,11 @@ export function Board({ game, me }: Props) {
   const others = Array.from({ length: g.players.length }, (_, i) => (seat < 0 ? i : seat + 1 + i) % g.players.length).filter((n) => n !== seat);
   return (
     <div className="mx-auto flex max-w-[90em] flex-col gap-[0.8em] p-[0.8em]">
-      <Head>
-        <title>{up ? "Your move · Monopoly Deal" : "Monopoly Deal"}</title>
-      </Head>
+      {!onDecide && (
+        <Head>
+          <title>{up ? "Your move · Monopoly Deal" : "Monopoly Deal"}</title>
+        </Head>
+      )}
       <div className="frosted sticky top-[0.8em] z-10">
         <section className="panel flex items-start justify-center gap-[1em] p-[0.8em]">
           <div className={g.draw.length ? `${deck} ${drawn}` : `${deck} ${empty}`}>
@@ -245,7 +234,7 @@ export function Board({ game, me }: Props) {
           </div>
         </section>
       </div>
-      {result && !stepping && seat >= 0 && <Review key={game._id} setup={setup(game)} log={game.log} seat={seat} say={say} show={(n) => visit(until(game, n).game.log?.length ?? 0)} />}
+      {result && !stepping && seat >= 0 && !onDecide && <Review key={game._id} setup={setup(game)} log={game.log} seat={seat} say={say} show={(n) => visit(until(game, n).game.log?.length ?? 0)} />}
       <div className="mb-[9em] grid grid-cols-[repeat(auto-fill,minmax(20em,1fr))] gap-[0.8em]">
         {(seat >= 0 ? [...others, seat] : others).map((n) => (
           <Seat
@@ -311,6 +300,25 @@ export function Board({ game, me }: Props) {
       </section>
     </div>
   );
+}
+
+/** An option of `p`'s at `prompt`, by its key in a review, in words. */
+export function saying(game: Game, p: Player, prompt: Prompt | undefined, k: string, who: (n: number) => string) {
+  const list = (xs: string[]) => new Intl.ListFormat("en").format(xs);
+  if (prompt?.kind === "sayNo") return k === "true" ? "Just Say No" : "Accept";
+  if (prompt?.kind === "discard") return `Discard ${list(k.split(",").map((i) => label(p.hand[Number(i)])))}`;
+  if (prompt?.kind === "pay") {
+    const paid = k.split(",").flatMap((at) => {
+      const pile = at.match(/^[a-z]+/)?.[0] as Ref["pile"] | undefined;
+      const x = pile && p[pile][Number(at.slice(pile.length))];
+      return x ? ["kind" in x ? label(x) : pile === "built" ? label(x.card) : named(x)] : [];
+    });
+    return paid.length ? `Pay with ${list(paid)}` : "Pay nothing";
+  }
+  const m = prompt?.kind === "move" ? moves(game, p, prompt.left).find((m) => key(encode(game, p, m)) === k) : undefined;
+  if (!m) return "End turn";
+  if (m.type === "bank") return `Bank ${label(m.card)}`;
+  return m.type === "place" && m.card.kind !== "action" ? `Lay down ${label(m.card)}` : describe(game, p, m, who);
 }
 
 /** A row of cards or sets that scrolls sideways, fading at either end while there's more that way. */

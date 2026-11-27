@@ -286,6 +286,10 @@ laying a property down before charging rent, Debt Collector or Birthday in some 
 spots it finds the default's choice winning: rent first, or ending the turn. No rule that splits
 them beat the default.
 
+**Try it:** [practice each rule](https://monopoly.visnup.com/learn/rules) on
+[puzzles from Hard's games](https://monopoly.visnup.com/learn/puzzles). Find the best play, then see
+every option's chance of winning.
+
 ### Paying, saying no and discarding
 
 The default handles these with simple rules: pay from the bank first, say no to anything that
@@ -554,6 +558,9 @@ blue, pink and railroad are worth least.
 
 A card worth nothing or less, like a railroad or light blue at 5 players, shows where the
 default player misplays it. Such a value doesn't show that you'd be better off without the card.
+
+**Try it:** [guess which card is worth more](https://monopoly.visnup.com/learn/cards) at each player
+count.
 
 ### Played or banked
 
