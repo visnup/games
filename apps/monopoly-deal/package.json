@@ -3,8 +3,8 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "concurrently \"convex dev\" \"next dev -p 3010\"",
-    "build": "next build",
+    "dev": "cp -R charts public && concurrently \"convex dev\" \"next dev -p 3010\"",
+    "build": "cp -R charts public && next build",
     "start": "next start",
     "lint": "eslint .",
     "test": "node --test 'src/*.test.ts' && playwright test"

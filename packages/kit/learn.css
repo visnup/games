@@ -1,0 +1,128 @@
+/* A README on an app's /learn page, from readme.ts. Each app's _app.tsx imports it. */
+.learn {
+  --page: #fdfcfa;
+  --text: #1f1c18;
+  max-width: 48rem;
+  margin: 2rem auto;
+  padding: 3rem 2.5rem 4rem;
+  border-radius: 12px;
+  background: var(--page);
+  color: var(--text);
+  color-scheme: light;
+  box-shadow: 0 8px 32px rgb(0 0 0 / 0.25);
+  line-height: 1.6;
+  overflow-wrap: break-word;
+
+  @media (prefers-color-scheme: dark) {
+    --page: #1c1a19;
+    --text: #ece8e2;
+    color-scheme: dark;
+  }
+  @media (width < 40rem) {
+    margin: 0;
+    padding: 2rem 1.25rem 3rem;
+    border-radius: 0;
+  }
+
+  & h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+  }
+  & h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 3rem 0 1rem;
+  }
+  & h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 2rem 0 0.75rem;
+  }
+  & h4 {
+    font-weight: 700;
+    margin: 1.5rem 0 0.5rem;
+  }
+  & p,
+  & ul,
+  & ol,
+  & pre,
+  & blockquote {
+    margin: 0 0 1rem;
+  }
+  & ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+  }
+  & ol {
+    list-style: decimal;
+    padding-left: 1.5rem;
+  }
+  & li + li {
+    margin-top: 0.25rem;
+  }
+  & a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  & strong {
+    font-weight: 700;
+  }
+  & code {
+    font-family: ui-monospace, monospace;
+    font-size: 0.88em;
+    padding: 0.1em 0.3em;
+    border-radius: 4px;
+    background: color-mix(in srgb, currentColor 10%, transparent);
+  }
+  & pre {
+    overflow-x: auto;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    background: color-mix(in srgb, currentColor 8%, transparent);
+    & code {
+      padding: 0;
+      background: none;
+    }
+  }
+  & blockquote {
+    padding-left: 1rem;
+    border-left: 3px solid color-mix(in srgb, currentColor 25%, transparent);
+    opacity: 0.85;
+  }
+  & img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem auto;
+    border-radius: 8px;
+  }
+  & table {
+    display: block;
+    overflow-x: auto;
+    margin: 0 0 1.5rem;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+  }
+  & th,
+  & td {
+    padding: 0.35rem 0.75rem;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+    text-align: left;
+    vertical-align: top;
+  }
+  & th,
+  & td + td {
+    white-space: nowrap;
+  }
+  & th {
+    font-weight: 700;
+  }
+  & hr {
+    margin: 2.5rem 0;
+    border-color: color-mix(in srgb, currentColor 20%, transparent);
+  }
+}

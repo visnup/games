@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { DECK } from "../cards.ts";
 import { Card } from "../components/Card";
@@ -28,6 +29,9 @@ export default function Home() {
         <button className="primary w-full py-2 text-lg" onClick={() => router.push(`/${randomWord()}`)}>
           Start a table
         </button>
+        <Link className="mt-4 block text-sm opacity-70" href="/learn">
+          How to play well
+        </Link>
         <p className="mt-6 mb-0 text-xs opacity-50">A fan-made game, not affiliated with or endorsed by CMYK. Fives was designed by Taiki Shinzawa.</p>
       </section>
     </main>

@@ -9,3 +9,4 @@ AGENTS.md
 test-results
 __pycache__
 **/rules/*.pdf
+apps/*/public/charts
