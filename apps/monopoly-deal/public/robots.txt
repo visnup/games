@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /$
+Allow: /learn$
+Allow: /charts/
+Allow: /_next/
+Allow: /favicon.svg
+Disallow: /
+
+Sitemap: https://monopoly.visnup.com/sitemap.xml
